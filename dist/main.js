@@ -1,12 +1,14 @@
 import { app, BrowserWindow } from "electron";
-import path from "path";
 let mainWindow;
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1400,
-        height: 900
+        height: 900,
+        webPreferences: {
+            nodeIntegration: false
+        }
     });
-    mainWindow.loadURL("https://google.com");
+    mainWindow.loadURL("http://localhost:5174");
 }
 app.whenReady().then(createWindow);
 //# sourceMappingURL=main.js.map
