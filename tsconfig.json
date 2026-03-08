@@ -2,7 +2,7 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    "rootDir": "./electron",
+    "rootDir": "./",
     "outDir": "./dist",
 
     // Environment Settings
@@ -22,7 +22,7 @@
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
 
     // Style Options
     // "noImplicitReturns": true,
@@ -41,6 +41,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
-  "include": ["electron/**/*"],
-  "exclude": ["node_modules", "renderer"]
+  "include": ["electron/**/*", "shared/**/*", "prisma.config.ts"],
+  "exclude": ["node_modules", "renderer", "dist"]
 }

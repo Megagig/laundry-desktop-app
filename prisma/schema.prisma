@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Customer {
+  id         Int      @id @default(autoincrement())
+  name       String
+  phone      String
+  address    String?
+  notes      String?
+  created_at DateTime @default(now())
+  
+  orders     Order[]
+
+  @@index([phone])
+  @@map("customers")
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Int
+  description String?
+  category    String?
+  
+  order_items OrderItem[]
+
+  @@map("services")
+}
+
+model Order {
+  id           Int      @id @default(autoincrement())
+  order_number String   @unique
+  customer_id  Int
+  total_amount Int
+  amount_paid  Int      @default(0)
+  balance      Int
+  status       String   @default("RECEIVED")
+  payment_type String
+  pickup_date  String
+  notes        String?
+  created_at   DateTime @default(now())
+  
+  customer     Customer    @relation(fields: [customer_id], references: [id])
+  items        OrderItem[]
+  payments     Payment[]
+
+  @@index([customer_id])
+  @@index([status])
+  @@index([created_at])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         Int @id @default(autoincrement())
+  order_id   Int
+  service_id Int
+  quantity   Int
+  price      Int
+  subtotal   Int
+  
+  order      Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  service    Service @relation(fields: [service_id], references: [id])
+
+  @@index([order_id])
+  @@map("order_items")
+}
+
+model Payment {
+  id         Int      @id @default(autoincrement())
+  order_id   Int
+  amount     Int
+  method     String
+  notes      String?
+  created_at DateTime @default(now())
+  
+  order      Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@map("payments")
+}
+
+model Expense {
+  id         Int      @id @default(autoincrement())
+  title      String
+  amount     Int
+  category   String
+  date       String
+  notes      String?
+  created_at DateTime @default(now())
+
+  @@index([date])
+  @@map("expenses")
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+
+  @@map("settings")
+}
