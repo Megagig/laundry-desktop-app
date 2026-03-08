@@ -9,8 +9,10 @@ export default function Orders() {
   useEffect(() => {
 
     const loadServices = async () => {
-      const data = await window.api.getServices()
-      setServices(data)
+      const result = await window.api.service.getAll()
+      if (result.success) {
+        setServices(result.data)
+      }
     }
 
     loadServices()

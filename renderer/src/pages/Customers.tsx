@@ -8,13 +8,19 @@ export default function Customers() {
   const [customers, setCustomers] = useState<any[]>([])
 
   const loadCustomers = async () => {
-    const data = await window.api.getCustomers()
-    setCustomers(data)
+    const result = await window.api.customer.getAll()
+    if (result.success) {
+      setCustomers(result.data)
+    }
   }
 
   const createCustomer = async () => {
-    await window.api.addCustomer({ name, phone })
-    loadCustomers()
+    const result = await window.api.customer.create({ name, phone })
+    if (result.success) {
+      setName("")
+      setPhone("")
+      loadCustomers()
+    }
   }
 
   useEffect(() => {
