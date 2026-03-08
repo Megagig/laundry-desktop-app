@@ -13,6 +13,16 @@ ipcMain.handle("add-customer", (event, customer) => {
 
   return { success: true }
 })
+
+ipcMain.handle("get-services", () => {
+
+  const stmt = db.prepare(`
+    SELECT * FROM services
+  `)
+
+  return stmt.all()
+
+})
 let mainWindow: BrowserWindow
 
 function createWindow() {

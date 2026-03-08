@@ -3,7 +3,7 @@ import path from "path"
 
 const dbPath = path.join(process.cwd(), "laundry.db")
 
-export const db = new Database(dbPath)
+export const db: Database.Database = new Database(dbPath)
 
 
 db.prepare(`
@@ -31,3 +31,26 @@ CREATE TABLE IF NOT EXISTS order_items (
   price INTEGER
 )
 `).run()
+
+db.prepare(`
+CREATE TABLE IF NOT EXISTS services (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  price INTEGER
+)
+`).run()
+
+const services = db.prepare("SELECT COUNT(*) as count FROM services").get() as { count: number }
+
+if (services.count === 0) {
+
+  const insert = db.prepare(`
+    INSERT INTO services (name, price)
+    VALUES (?, ?)
+  `)
+
+  insert.run("Wash Shirt", 500)
+  insert.run("Wash Trouser", 700)
+  insert.run("Dry Clean Suit", 2500)
+
+}

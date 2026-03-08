@@ -5,6 +5,7 @@ declare global {
     api: {
       addCustomer: (customer: any) => Promise<any>
       getCustomers: () => Promise<any>
+      getServices: () => Promise<any>
     }
   }
 }
