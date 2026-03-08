@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && electron .",
+    "start": "npm run build && electron . --no-sandbox",
+    "dev": "npm run build && electron . --no-sandbox",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
