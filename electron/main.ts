@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from "electron"
+import "./database/sqlite.js"
 
 let mainWindow: BrowserWindow
 
