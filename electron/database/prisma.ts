@@ -10,6 +10,9 @@ const getDatabasePath = () => {
   return path.join(process.cwd(), "prisma", "laundry.db")
 }
 
+// Set DATABASE_URL environment variable for Prisma
+process.env.DATABASE_URL = `file:${getDatabasePath()}`
+
 // Create Prisma Client instance
 export const prisma = new PrismaClient({
   log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"]

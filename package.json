@@ -1,10 +1,10 @@
 {
   "name": "laundry-desktop-app",
   "version": "1.0.0",
-  "main": "dist/main.js",
+  "main": "dist/electron/main.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc -p tsconfig.preload.json && mv dist/electron/preload.js dist/electron/preload.cjs",
     "start": "npm run build && electron . --no-sandbox",
     "dev": "npm run build && electron . --no-sandbox",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,8 +22,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@prisma/client": "^7.4.2",
+    "@prisma/client": "^5.22.0",
     "dotenv": "^17.3.1",
-    "prisma": "^7.4.2"
+    "prisma": "^5.22.0"
   }
 }

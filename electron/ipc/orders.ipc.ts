@@ -1,11 +1,13 @@
 import { ipcMain } from "electron"
 import { orderService } from "../services/order.service.js"
 import type { CreateOrderDTO, OrderStatus } from "../../shared/types/index.js"
+import { serializeForIPC } from "./helpers.js"
 
 export function registerOrderHandlers() {
   ipcMain.handle("order:create", async (_event, data: CreateOrderDTO) => {
     try {
-      return { success: true, data: orderService.createOrder(data) }
+      const result = await orderService.createOrder(data)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -13,7 +15,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:getById", async (_event, id: number) => {
     try {
-      return { success: true, data: orderService.getOrderById(id) }
+      const result = await orderService.getOrderById(id)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -21,7 +24,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:getByNumber", async (_event, orderNumber: string) => {
     try {
-      return { success: true, data: orderService.getOrderByNumber(orderNumber) }
+      const result = await orderService.getOrderByNumber(orderNumber)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -29,7 +33,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:getWithDetails", async (_event, id: number) => {
     try {
-      return { success: true, data: orderService.getOrderWithDetails(id) }
+      const result = await orderService.getOrderWithDetails(id)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -37,7 +42,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:getAll", async (_event, limit?: number, offset?: number) => {
     try {
-      return { success: true, data: orderService.getAllOrders(limit, offset) }
+      const result = await orderService.getAllOrders(limit, offset)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -45,7 +51,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:getByStatus", async (_event, status: OrderStatus) => {
     try {
-      return { success: true, data: orderService.getOrdersByStatus(status) }
+      const result = await orderService.getOrdersByStatus(status)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -53,7 +60,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:getByDateRange", async (_event, startDate: string, endDate: string) => {
     try {
-      return { success: true, data: orderService.getOrdersByDateRange(startDate, endDate) }
+      const result = await orderService.getOrdersByDateRange(startDate, endDate)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -61,7 +69,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:search", async (_event, query: string) => {
     try {
-      return { success: true, data: orderService.searchOrders(query) }
+      const result = await orderService.searchOrders(query)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -69,7 +78,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:updateStatus", async (_event, orderId: number, status: OrderStatus) => {
     try {
-      return { success: true, data: orderService.updateOrderStatus(orderId, status) }
+      const result = await orderService.updateOrderStatus(orderId, status)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -77,7 +87,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:update", async (_event, orderId: number, updates: any) => {
     try {
-      return { success: true, data: orderService.updateOrder(orderId, updates) }
+      const result = await orderService.updateOrder(orderId, updates)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -85,7 +96,8 @@ export function registerOrderHandlers() {
 
   ipcMain.handle("order:delete", async (_event, id: number) => {
     try {
-      return { success: true, data: orderService.deleteOrder(id) }
+      const result = await orderService.deleteOrder(id)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
