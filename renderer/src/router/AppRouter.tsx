@@ -7,6 +7,8 @@ import Orders from "../pages/Orders"
 import CreateOrder from "../pages/CreateOrder"
 import Pickup from "../pages/Pickup"
 import Services from "../pages/Services"
+import Payments from "../pages/Payments"
+import OutstandingPayments from "../pages/OutstandingPayments"
 
 export default function AppRouter() {
   return (
@@ -19,6 +21,8 @@ export default function AppRouter() {
           <Route path="/orders/new" element={<CreateOrder />} />
           <Route path="/pickup" element={<Pickup />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/payments/outstanding" element={<OutstandingPayments />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>
