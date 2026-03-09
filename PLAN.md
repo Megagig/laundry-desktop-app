@@ -27,9 +27,8 @@ Professional POS-style Laundry Management Desktop Application using Electron, Re
 - [x] Build passing with no errors
 
 ### 🔄 In Progress / Needs Enhancement
-- [ ] Receipt printing functionality
-- [ ] Customer Management pages
-- [ ] Order Management pages
+- [ ] Receipt printing functionality (Phase 8)
+- [ ] Payment recording from orders (Phase 10)
 
 ---
 
@@ -216,85 +215,85 @@ Professional POS-style Laundry Management Desktop Application using Electron, Re
 
 ---
 
-## Phase 5: Customer Management (Priority: HIGH)
+## Phase 5: Customer Management (Priority: HIGH) ✅
 
-### Task 5.1: Customer List Page
-- [ ] Implement customer data table
-  - [ ] Columns: Name, Phone, Address, Total Orders, Actions
-  - [ ] Pagination
-  - [ ] Search by name/phone
-  - [ ] Sort functionality
-- [ ] Add "New Customer" button
-- [ ] Implement customer detail modal
-- [ ] Show customer order history
+### Task 5.1: Customer List Page ✅
+- [x] Implement customer data table
+  - [x] Columns: Name, Phone, Address, Total Orders, Actions
+  - [x] Pagination
+  - [x] Search by name/phone
+  - [x] Sort functionality
+- [x] Add "New Customer" button
+- [x] Implement customer detail modal
+- [x] Show customer order history
 
-### Task 5.2: Customer CRUD Operations
-- [ ] Create customer modal/form
-- [ ] Edit customer functionality
-- [ ] Delete customer (with confirmation)
-- [ ] View customer order history
-- [ ] Quick phone search
+### Task 5.2: Customer CRUD Operations ✅
+- [x] Create customer modal/form
+- [x] Edit customer functionality
+- [x] Delete customer (with confirmation)
+- [x] View customer order history
+- [x] Quick phone search
 
 ---
 
-## Phase 6: Order Management (Priority: CRITICAL)
+## Phase 6: Order Management (Priority: CRITICAL) ✅
 
-### Task 6.1: Create Order Page (Complete Redesign)
-- [ ] Customer Selection Section
-  - [ ] Search existing customer by phone
-  - [ ] Quick add new customer inline
-  - [ ] Display selected customer info
-- [ ] Order Items Section
-  - [ ] Service selection dropdown/grid
-  - [ ] Quantity input
-  - [ ] Price display (auto-calculated)
-  - [ ] Add to cart functionality
-  - [ ] Remove from cart
-  - [ ] Edit cart items
-- [ ] Order Summary Section
-  - [ ] Subtotal calculation
-  - [ ] Total amount display
-  - [ ] Payment type selection (Full/Advance/Pay on Collection)
-  - [ ] Amount paid input
-  - [ ] Balance calculation (auto)
-  - [ ] Pickup date selector
-  - [ ] Notes/special instructions
-- [ ] Action Buttons
-  - [ ] Save Order
-  - [ ] Save & Print Receipt
-  - [ ] Clear/Reset form
+### Task 6.1: Create Order Page (Complete Redesign) ✅
+- [x] Customer Selection Section
+  - [x] Search existing customer by phone
+  - [x] Quick add new customer inline
+  - [x] Display selected customer info
+- [x] Order Items Section
+  - [x] Service selection dropdown/grid
+  - [x] Quantity input
+  - [x] Price display (auto-calculated)
+  - [x] Add to cart functionality
+  - [x] Remove from cart
+  - [x] Edit cart items
+- [x] Order Summary Section
+  - [x] Subtotal calculation
+  - [x] Total amount display
+  - [x] Payment type selection (Full/Advance/Pay on Collection)
+  - [x] Amount paid input
+  - [x] Balance calculation (auto)
+  - [x] Pickup date selector
+  - [x] Notes/special instructions
+- [x] Action Buttons
+  - [x] Save Order
+  - [ ] Save & Print Receipt (Phase 8)
+  - [x] Clear/Reset form
 
-### Task 6.2: Orders List Page
-- [ ] Implement orders data table
-  - [ ] Columns: Order#, Customer, Status, Total, Paid, Balance, Pickup Date, Actions
-  - [ ] Status badge with colors
-  - [ ] Pagination
-  - [ ] Search by order number/customer
-  - [ ] Filter by status
-  - [ ] Filter by date range
-  - [ ] Sort functionality
-- [ ] Row actions
-  - [ ] View order details
-  - [ ] Edit order
-  - [ ] Update status
-  - [ ] Print receipt
-  - [ ] Record payment
+### Task 6.2: Orders List Page ✅
+- [x] Implement orders data table
+  - [x] Columns: Order#, Customer, Status, Total, Paid, Balance, Pickup Date, Actions
+  - [x] Status badge with colors
+  - [x] Pagination
+  - [x] Search by order number/customer
+  - [x] Filter by status
+  - [ ] Filter by date range (future enhancement)
+  - [x] Sort functionality
+- [x] Row actions
+  - [x] View order details
+  - [ ] Edit order (future enhancement)
+  - [x] Update status
+  - [ ] Print receipt (Phase 8)
+  - [ ] Record payment (Phase 10)
 
-### Task 6.3: Order Detail Modal
-- [ ] Display complete order information
-- [ ] Show customer details
-- [ ] Show order items list
-- [ ] Show payment history
-- [ ] Status update dropdown
-- [ ] Add payment button
-- [ ] Print receipt button
-- [ ] Edit order button
+### Task 6.3: Order Detail Modal ✅
+- [x] Display complete order information
+- [x] Show customer details
+- [x] Show order items list
+- [ ] Show payment history (Phase 10)
+- [x] Status update dropdown
+- [ ] Add payment button (Phase 10)
+- [ ] Print receipt button (Phase 8)
+- [ ] Edit order button (future enhancement)
 
-### Task 6.4: Order Status Management
-- [ ] Status workflow: RECEIVED → WASHING → DRYING → IRONING → READY → COLLECTED
-- [ ] Status update modal
-- [ ] Status history tracking
-- [ ] Automatic notifications for status changes
+### Task 6.4: Order Status Management ✅
+- [x] Status workflow: RECEIVED → WASHING → DRYING → IRONING → READY → COLLECTED
+- [x] Status update modal
+- [ ] Status history tracking (future enhancement)
+- [ ] Automatic notifications for status changes (future enhancement)
 
 ---
 
@@ -581,13 +580,13 @@ Professional POS-style Laundry Management Desktop Application using Electron, Re
 
 ## Progress Tracking
 
-**Current Phase:** Phase 5 - Customer Management
-**Overall Progress:** ~60% Complete
+**Current Phase:** Phase 7 - Pickup/Collection Screen
+**Overall Progress:** ~70% Complete
 **Next Immediate Tasks:**
-1. Enhance Customer Management pages (Task 5.1) ⭐
-2. Implement Customer CRUD operations (Task 5.2)
-3. Implement Order Management UI (Task 6.1)
-4. Create Order List page (Task 6.2)
+1. Implement Pickup/Collection Interface (Task 7.1) ⭐
+2. Implement Receipt Printing (Phase 8)
+3. Add Payment Recording (Phase 10)
+4. Create Services Management Page (Phase 9)
 
 ---
 

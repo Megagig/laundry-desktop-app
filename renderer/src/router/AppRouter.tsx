@@ -4,6 +4,7 @@ import AppLayout from "../layout/AppLayout"
 import Dashboard from "../pages/Dashboard"
 import Customers from "../pages/Customers"
 import Orders from "../pages/Orders"
+import CreateOrder from "../pages/CreateOrder"
 
 export default function AppRouter() {
   return (
@@ -13,6 +14,7 @@ export default function AppRouter() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/orders/new" element={<CreateOrder />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>
