@@ -1,25 +1,27 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { TextInput, NumberInput, Select, Textarea, Button, Group } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { InlineError } from "../common/ErrorMessage"
 
 interface ExpenseFormProps {
+  expense?: any
   onSuccess?: () => void
   onCancel?: () => void
 }
 
 const EXPENSE_CATEGORIES = [
-  { value: "DETERGENT", label: "Detergent" },
-  { value: "ELECTRICITY", label: "Electricity" },
-  { value: "FUEL", label: "Fuel" },
-  { value: "STAFF_SALARY", label: "Staff Salary" },
-  { value: "MACHINE_REPAIR", label: "Machine Repair" },
-  { value: "RENT", label: "Rent" },
-  { value: "WATER", label: "Water" },
-  { value: "OTHER", label: "Other" }
+  { value: "Detergent", label: "Detergent" },
+  { value: "Electricity", label: "Electricity" },
+  { value: "Fuel", label: "Fuel" },
+  { value: "Staff Salary", label: "Staff Salary" },
+  { value: "Machine Repair", label: "Machine Repair" },
+  { value: "Rent", label: "Rent" },
+  { value: "Water", label: "Water" },
+  { value: "Marketing", label: "Marketing" },
+  { value: "Other", label: "Other" }
 ]
 
-export default function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
+export default function ExpenseForm({ expense, onSuccess, onCancel }: ExpenseFormProps) {
   const [formData, setFormData] = useState({
     title: "",
     amount: 0,
@@ -30,6 +32,26 @@ export default function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (expense) {
+      setFormData({
+        title: expense.title,
+        amount: expense.amount,
+        category: expense.category,
+        date: new Date(expense.date),
+        notes: expense.notes || ""
+      })
+    } else {
+      setFormData({
+        title: "",
+        amount: 0,
+        category: "",
+        date: new Date(),
+        notes: ""
+      })
+    }
+  }, [expense])
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
@@ -62,13 +84,25 @@ export default function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
     setIsLoading(true)
 
     try {
-      const result = await window.api.expense.create({
-        title: formData.title,
-        amount: formData.amount,
-        category: formData.category,
-        date: formData.date.toISOString().split("T")[0],
-        notes: formData.notes || undefined
-      })
+      let result
+      if (expense) {
+        result = await window.api.expense.update({
+          id: expense.id,
+          title: formData.title,
+          amount: formData.amount,
+          category: formData.category,
+          date: formData.date.toISOString().split("T")[0],
+          notes: formData.notes || undefined
+        })
+      } else {
+        result = await window.api.expense.create({
+          title: formData.title,
+          amount: formData.amount,
+          category: formData.category,
+          date: formData.date.toISOString().split("T")[0],
+          notes: formData.notes || undefined
+        })
+      }
 
       if (result.success) {
         // Reset form
@@ -168,7 +202,7 @@ export default function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
           </Button>
         )}
         <Button type="submit" loading={isLoading}>
-          Add Expense
+          {expense ? "Update Expense" : "Add Expense"}
         </Button>
       </Group>
     </form>

@@ -9,6 +9,7 @@ import Pickup from "../pages/Pickup"
 import Services from "../pages/Services"
 import Payments from "../pages/Payments"
 import OutstandingPayments from "../pages/OutstandingPayments"
+import Expenses from "../pages/Expenses"
 
 export default function AppRouter() {
   return (
@@ -23,6 +24,7 @@ export default function AppRouter() {
           <Route path="/services" element={<Services />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/payments/outstanding" element={<OutstandingPayments />} />
+          <Route path="/expenses" element={<Expenses />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>

@@ -8,7 +8,8 @@ import {
   IconSettings,
   IconCash,
   IconTags,
-  IconAlertCircle
+  IconAlertCircle,
+  IconFileInvoice
 } from "@tabler/icons-react"
 
 const navigation = [
@@ -26,6 +27,7 @@ const navigation = [
       { path: "/payments/outstanding", label: "Outstanding", icon: IconAlertCircle }
     ]
   },
+  { path: "/expenses", label: "Expenses", icon: IconFileInvoice },
   { path: "/reports", label: "Reports", icon: IconReportAnalytics },
   { path: "/settings", label: "Settings", icon: IconSettings }
 ]
