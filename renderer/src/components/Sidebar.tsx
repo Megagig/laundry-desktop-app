@@ -6,7 +6,8 @@ import {
   IconReportAnalytics,
   IconReceipt,
   IconSettings,
-  IconCash
+  IconCash,
+  IconTags
 } from "@tabler/icons-react"
 
 const navigation = [
@@ -14,6 +15,7 @@ const navigation = [
   { path: "/orders", label: "Orders", icon: IconShirt },
   { path: "/customers", label: "Customers", icon: IconUsers },
   { path: "/pickup", label: "Pickup", icon: IconReceipt },
+  { path: "/services", label: "Services", icon: IconTags },
   { path: "/payments", label: "Payments", icon: IconCash },
   { path: "/reports", label: "Reports", icon: IconReportAnalytics },
   { path: "/settings", label: "Settings", icon: IconSettings }
