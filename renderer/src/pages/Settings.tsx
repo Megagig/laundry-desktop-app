@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { Button, Text, Card, Tabs, TextInput, Textarea, Select, Table } from "@mantine/core"
 import { IconSettings, IconBuildingStore, IconPrinter, IconReceipt, IconDeviceFloppy, IconDatabase, IconDownload, IconUpload, IconFileExport, IconTrash } from "@tabler/icons-react"
 import { LoadingSpinner } from "../components/common"
+import { showSuccessNotification, showErrorNotification } from "../utils/notifications"
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<string | null>("shop")
@@ -82,10 +83,10 @@ export default function Settings() {
         shop_phone: shopPhone,
         shop_email: shopEmail
       })
-      alert("Shop information saved successfully!")
+      showSuccessNotification("Shop information saved successfully!")
     } catch (error) {
       console.error("Error saving shop settings:", error)
-      alert("Failed to save shop information")
+      showErrorNotification("Failed to save shop information")
     } finally {
       setIsSaving(false)
     }
@@ -100,10 +101,10 @@ export default function Settings() {
       if (defaultPrinter) {
         await window.api.printer.setDefault(defaultPrinter)
       }
-      alert("Printer settings saved successfully!")
+      showSuccessNotification("Printer settings saved successfully!")
     } catch (error) {
       console.error("Error saving printer settings:", error)
-      alert("Failed to save printer settings")
+      showErrorNotification("Failed to save printer settings")
     } finally {
       setIsSaving(false)
     }
@@ -116,10 +117,10 @@ export default function Settings() {
         receipt_footer: receiptFooter,
         receipt_header: receiptHeader
       })
-      alert("Receipt settings saved successfully!")
+      showSuccessNotification("Receipt settings saved successfully!")
     } catch (error) {
       console.error("Error saving receipt settings:", error)
-      alert("Failed to save receipt settings")
+      showErrorNotification("Failed to save receipt settings")
     } finally {
       setIsSaving(false)
     }
@@ -133,10 +134,10 @@ export default function Settings() {
         date_format: dateFormat,
         default_pickup_days: defaultPickupDays
       })
-      alert("General settings saved successfully!")
+      showSuccessNotification("General settings saved successfully!")
     } catch (error) {
       console.error("Error saving general settings:", error)
-      alert("Failed to save general settings")
+      showErrorNotification("Failed to save general settings")
     } finally {
       setIsSaving(false)
     }
@@ -146,12 +147,12 @@ export default function Settings() {
     try {
       const result = await window.api.printer.testPrint(defaultPrinter || undefined)
       if (result.success) {
-        alert("Test print sent successfully!")
+        showSuccessNotification("Test print sent successfully!")
       } else {
-        alert(`Test print failed: ${result.error}`)
+        showErrorNotification(`Test print failed: ${result.error}`)
       }
     } catch (error: any) {
-      alert(`Test print failed: ${error.message}`)
+      showErrorNotification(`Test print failed: ${error.message}`)
     }
   }
 
@@ -182,13 +183,13 @@ export default function Settings() {
     try {
       const result = await window.api.backup.create()
       if (result.success) {
-        alert(`Backup created successfully!\nLocation: ${result.path}`)
+        showSuccessNotification(`Backup created successfully at: ${result.path}`, "Backup Created")
         loadBackups()
       } else {
-        alert(`Backup failed: ${result.error}`)
+        showErrorNotification(`Backup failed: ${result.error}`)
       }
     } catch (error: any) {
-      alert(`Backup failed: ${error.message}`)
+      showErrorNotification(`Backup failed: ${error.message}`)
     } finally {
       setIsSaving(false)
     }
@@ -203,12 +204,12 @@ export default function Settings() {
     try {
       const result = await window.api.backup.restore()
       if (result.success) {
-        alert("Database restored successfully! Please restart the application.")
+        showSuccessNotification("Database restored successfully! Please restart the application.", "Restore Complete")
       } else {
-        alert(`Restore failed: ${result.error}`)
+        showErrorNotification(`Restore failed: ${result.error}`)
       }
     } catch (error: any) {
-      alert(`Restore failed: ${error.message}`)
+      showErrorNotification(`Restore failed: ${error.message}`)
     } finally {
       setIsSaving(false)
     }
@@ -222,13 +223,13 @@ export default function Settings() {
     try {
       const result = await window.api.backup.delete(backupPath)
       if (result.success) {
-        alert("Backup deleted successfully!")
+        showSuccessNotification("Backup deleted successfully!")
         loadBackups()
       } else {
-        alert(`Delete failed: ${result.error}`)
+        showErrorNotification(`Delete failed: ${result.error}`)
       }
     } catch (error: any) {
-      alert(`Delete failed: ${error.message}`)
+      showErrorNotification(`Delete failed: ${error.message}`)
     }
   }
 
@@ -237,12 +238,12 @@ export default function Settings() {
     try {
       const result = await window.api.backup.exportCSV(tableName)
       if (result.success) {
-        alert(`${tableName} exported successfully!`)
+        showSuccessNotification(`${tableName} exported successfully!`, "Export Complete")
       } else {
-        alert(`Export failed: ${result.error}`)
+        showErrorNotification(`Export failed: ${result.error}`)
       }
     } catch (error: any) {
-      alert(`Export failed: ${error.message}`)
+      showErrorNotification(`Export failed: ${error.message}`)
     } finally {
       setIsSaving(false)
     }
