@@ -297,28 +297,28 @@ Professional POS-style Laundry Management Desktop Application using Electron, Re
 
 ---
 
-## Phase 7: Pickup/Collection Screen (Priority: HIGH)
+## Phase 7: Pickup/Collection Screen (Priority: HIGH) ✅
 
-### Task 7.1: Pickup Interface
-- [ ] Create dedicated Pickup page
-- [ ] Search section
-  - [ ] Search by order number
-  - [ ] Search by phone number
-  - [ ] Search by customer name
-- [ ] Order display section
-  - [ ] Show order details
-  - [ ] Show items list
-  - [ ] Show payment status
-  - [ ] Highlight outstanding balance
-- [ ] Payment section
-  - [ ] Display balance due
-  - [ ] Payment amount input
-  - [ ] Payment method selector
-  - [ ] Record payment button
-- [ ] Collection actions
-  - [ ] Mark as collected button
-  - [ ] Print receipt button
-  - [ ] Print payment receipt
+### Task 7.1: Pickup Interface ✅
+- [x] Create dedicated Pickup page
+- [x] Search section
+  - [x] Search by order number
+  - [x] Search by phone number
+  - [x] Search by customer name
+- [x] Order display section
+  - [x] Show order details
+  - [x] Show items list
+  - [x] Show payment status
+  - [x] Highlight outstanding balance
+- [x] Payment section
+  - [x] Display balance due
+  - [x] Payment amount input
+  - [x] Payment method selector
+  - [x] Record payment button
+- [x] Collection actions
+  - [x] Mark as collected button
+  - [ ] Print receipt button (Phase 8)
+  - [ ] Print payment receipt (Phase 8)
 
 ---
 
@@ -580,13 +580,13 @@ Professional POS-style Laundry Management Desktop Application using Electron, Re
 
 ## Progress Tracking
 
-**Current Phase:** Phase 7 - Pickup/Collection Screen
-**Overall Progress:** ~70% Complete
+**Current Phase:** Phase 8 - Receipt Printing
+**Overall Progress:** ~75% Complete
 **Next Immediate Tasks:**
-1. Implement Pickup/Collection Interface (Task 7.1) ⭐
-2. Implement Receipt Printing (Phase 8)
-3. Add Payment Recording (Phase 10)
-4. Create Services Management Page (Phase 9)
+1. Implement Receipt Printing (Phase 8) ⭐
+2. Create Services Management Page (Phase 9)
+3. Implement Expense Tracking (Phase 11)
+4. Create Reports & Analytics (Phase 12)
 
 ---
 
