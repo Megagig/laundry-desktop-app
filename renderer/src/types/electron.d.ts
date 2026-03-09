@@ -62,6 +62,20 @@ declare global {
         getTopCustomers: (limit?: number) => Promise<any>
         getPopularServices: (startDate: string, endDate: string, limit?: number) => Promise<any>
       }
+      printer: {
+        getPrinters: () => Promise<any>
+        setDefault: (printerName: string) => Promise<any>
+        getDefault: () => Promise<any>
+        printOrderReceipt: (orderId: number, options?: any) => Promise<any>
+        printPaymentReceipt: (data: any, options?: any) => Promise<any>
+        testPrint: (printerName?: string) => Promise<any>
+      }
+      settings: {
+        getAll: () => Promise<any>
+        get: (key: string) => Promise<any>
+        upsert: (key: string, value: string) => Promise<any>
+        updateMultiple: (settings: Record<string, string>) => Promise<any>
+      }
     }
   }
 }

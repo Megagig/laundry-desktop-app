@@ -156,7 +156,13 @@ export default function Orders() {
           <ActionIcon
             variant="subtle"
             color="gray"
-            onClick={() => {/* TODO: Print receipt */}}
+            onClick={async () => {
+              try {
+                await window.api.printer.printOrderReceipt(order.id, { preview: false })
+              } catch (error) {
+                console.error("Print error:", error)
+              }
+            }}
           >
             <IconPrinter size={16} />
           </ActionIcon>
@@ -344,7 +350,15 @@ export default function Orders() {
               <Button
                 leftSection={<IconPrinter size={16} />}
                 variant="light"
-                onClick={() => {/* TODO: Print receipt */}}
+                onClick={async () => {
+                  if (selectedOrder) {
+                    try {
+                      await window.api.printer.printOrderReceipt(selectedOrder.id, { preview: false })
+                    } catch (error) {
+                      console.error("Print error:", error)
+                    }
+                  }
+                }}
               >
                 Print Receipt
               </Button>

@@ -149,9 +149,17 @@ export default function Pickup() {
     }
   }
 
-  const handlePrintReceipt = () => {
-    // TODO: Implement in Phase 8
-    alert("Receipt printing will be implemented in Phase 8")
+  const handlePrintReceipt = async () => {
+    if (!order) return
+
+    try {
+      const result = await window.api.printer.printOrderReceipt(order.id, { preview: false })
+      if (!result.success) {
+        setSearchError(result.error || "Failed to print receipt")
+      }
+    } catch (error: any) {
+      setSearchError(error.message || "Failed to print receipt")
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
