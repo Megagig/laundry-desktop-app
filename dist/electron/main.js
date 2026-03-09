@@ -8,6 +8,8 @@ import { registerServiceHandlers } from "./ipc/services.ipc.js";
 import { registerPaymentHandlers } from "./ipc/payments.ipc.js";
 import { registerExpenseHandlers } from "./ipc/expenses.ipc.js";
 import { registerReportHandlers } from "./ipc/reports.ipc.js";
+import "./ipc/printer.ipc.js";
+import "./ipc/settings.ipc.js";
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +22,7 @@ registerServiceHandlers();
 registerPaymentHandlers();
 registerExpenseHandlers();
 registerReportHandlers();
+// Printer and settings handlers are auto-registered via import
 let mainWindow;
 function createWindow() {
     mainWindow = new BrowserWindow({

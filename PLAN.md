@@ -317,37 +317,37 @@ Professional POS-style Laundry Management Desktop Application using Electron, Re
   - [x] Record payment button
 - [x] Collection actions
   - [x] Mark as collected button
-  - [ ] Print receipt button (Phase 8)
-  - [ ] Print payment receipt (Phase 8)
+  - [x] Print receipt button
+  - [x] Print payment receipt (available, not yet integrated)
 
 ---
 
-## Phase 8: Receipt Printing (Priority: CRITICAL)
+## Phase 8: Receipt Printing (Priority: CRITICAL) ✅
 
-### Task 8.1: Receipt Printer Setup
-- [ ] Install electron-pos-printer package
-- [ ] Create `electron/printers/` folder
-- [ ] Implement receiptPrinter.ts
-  - [ ] Configure printer settings
-  - [ ] Get available printers
-  - [ ] Set default printer
-- [ ] Add printer selection in settings
+### Task 8.1: Receipt Printer Setup ✅
+- [x] Install electron-pos-printer package
+- [x] Create `electron/printers/` folder
+- [x] Implement receiptPrinter.ts
+  - [x] Configure printer settings
+  - [x] Get available printers
+  - [x] Set default printer
+- [ ] Add printer selection in settings (Phase 13)
 
-### Task 8.2: Receipt Templates
-- [ ] Create receipt template for new orders
-  - [ ] Shop name/logo
-  - [ ] Order number
-  - [ ] Customer details
-  - [ ] Items list with quantities
-  - [ ] Total, paid, balance
-  - [ ] Pickup date
-  - [ ] Footer message
-- [ ] Create payment receipt template
-- [ ] Create reprint functionality
+### Task 8.2: Receipt Templates ✅
+- [x] Create receipt template for new orders
+  - [x] Shop name/logo
+  - [x] Order number
+  - [x] Customer details
+  - [x] Items list with quantities
+  - [x] Total, paid, balance
+  - [x] Pickup date
+  - [x] Footer message
+- [x] Create payment receipt template
+- [x] Create reprint functionality (via Orders page and Pickup page)
 
-### Task 8.3: IPC for Printing
-- [ ] Implement print-receipt IPC handler
-- [ ] Implement print-payment-receipt IPC handler
+### Task 8.3: IPC for Printing ✅
+- [x] Implement print-receipt IPC handler
+- [x] Implement print-payment-receipt IPC handler
 - [ ] Implement get-printers IPC handler
 - [ ] Add error handling for printer issues
 
@@ -580,13 +580,13 @@ Professional POS-style Laundry Management Desktop Application using Electron, Re
 
 ## Progress Tracking
 
-**Current Phase:** Phase 8 - Receipt Printing
-**Overall Progress:** ~75% Complete
+**Current Phase:** Phase 9 - Services/Pricing Management
+**Overall Progress:** ~80% Complete
 **Next Immediate Tasks:**
-1. Implement Receipt Printing (Phase 8) ⭐
-2. Create Services Management Page (Phase 9)
-3. Implement Expense Tracking (Phase 11)
-4. Create Reports & Analytics (Phase 12)
+1. Create Services Management Page (Phase 9) ⭐
+2. Implement Expense Tracking (Phase 11)
+3. Create Reports & Analytics (Phase 12)
+4. Add Settings & Configuration (Phase 13)
 
 ---
 
