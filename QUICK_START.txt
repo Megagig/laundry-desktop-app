@@ -1,0 +1,45 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LAUNDRY DESKTOP APP - QUICK START                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ STEP 1: Open Terminal 1 (Frontend)                                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+    $ cd renderer
+    $ npm run dev
+
+    ✓ Wait for: "Local: http://localhost:5173/"
+    ✓ KEEP THIS TERMINAL RUNNING!
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ STEP 2: Open Terminal 2 (Electron)                                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+    $ npm run build
+    $ npm run dev
+
+    ✓ Electron window should open
+    ✓ You should see the Dashboard
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ TROUBLESHOOTING                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+    Blank Screen?
+    → Make sure Terminal 1 (Vite) is running
+    → Check it shows: http://localhost:5173/
+
+    Port in use?
+    → Run: lsof -ti:5173 | xargs kill -9
+
+    Prisma errors?
+    → Run: npx prisma generate
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  That's it! The app should now be running.                                   ║
+║  See START_HERE.md for detailed instructions.                                ║
+╚══════════════════════════════════════════════════════════════════════════════╝

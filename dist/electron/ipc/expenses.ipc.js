@@ -1,9 +1,11 @@
 import { ipcMain } from "electron";
 import { expenseService } from "../services/expense.service.js";
+import { serializeForIPC } from "./helpers.js";
 export function registerExpenseHandlers() {
     ipcMain.handle("expense:create", async (_event, data) => {
         try {
-            return { success: true, data: expenseService.createExpense(data) };
+            const result = await expenseService.createExpense(data);
+            return { success: true, data: serializeForIPC(result) };
         }
         catch (error) {
             return { success: false, error: error.message };
@@ -11,7 +13,8 @@ export function registerExpenseHandlers() {
     });
     ipcMain.handle("expense:getAll", async (_event, limit) => {
         try {
-            return { success: true, data: expenseService.getAllExpenses(limit) };
+            const result = await expenseService.getAllExpenses(limit);
+            return { success: true, data: serializeForIPC(result) };
         }
         catch (error) {
             return { success: false, error: error.message };
@@ -19,7 +22,8 @@ export function registerExpenseHandlers() {
     });
     ipcMain.handle("expense:getById", async (_event, id) => {
         try {
-            return { success: true, data: expenseService.getExpenseById(id) };
+            const result = await expenseService.getExpenseById(id);
+            return { success: true, data: serializeForIPC(result) };
         }
         catch (error) {
             return { success: false, error: error.message };
@@ -27,7 +31,8 @@ export function registerExpenseHandlers() {
     });
     ipcMain.handle("expense:getByDateRange", async (_event, startDate, endDate) => {
         try {
-            return { success: true, data: expenseService.getExpensesByDateRange(startDate, endDate) };
+            const result = await expenseService.getExpensesByDateRange(startDate, endDate);
+            return { success: true, data: serializeForIPC(result) };
         }
         catch (error) {
             return { success: false, error: error.message };
@@ -35,7 +40,8 @@ export function registerExpenseHandlers() {
     });
     ipcMain.handle("expense:getByCategory", async (_event, category) => {
         try {
-            return { success: true, data: expenseService.getExpensesByCategory(category) };
+            const result = await expenseService.getExpensesByCategory(category);
+            return { success: true, data: serializeForIPC(result) };
         }
         catch (error) {
             return { success: false, error: error.message };
@@ -43,7 +49,8 @@ export function registerExpenseHandlers() {
     });
     ipcMain.handle("expense:update", async (_event, data) => {
         try {
-            return { success: true, data: expenseService.updateExpense(data) };
+            const result = await expenseService.updateExpense(data);
+            return { success: true, data: serializeForIPC(result) };
         }
         catch (error) {
             return { success: false, error: error.message };
@@ -51,7 +58,8 @@ export function registerExpenseHandlers() {
     });
     ipcMain.handle("expense:delete", async (_event, id) => {
         try {
-            return { success: true, data: expenseService.deleteExpense(id) };
+            const result = await expenseService.deleteExpense(id);
+            return { success: true, data: serializeForIPC(result) };
         }
         catch (error) {
             return { success: false, error: error.message };
@@ -59,7 +67,8 @@ export function registerExpenseHandlers() {
     });
     ipcMain.handle("expense:getGroupedByCategory", async (_event, startDate, endDate) => {
         try {
-            return { success: true, data: expenseService.getExpensesGroupedByCategory(startDate, endDate) };
+            const result = await expenseService.getExpensesGroupedByCategory(startDate, endDate);
+            return { success: true, data: serializeForIPC(result) };
         }
         catch (error) {
             return { success: false, error: error.message };

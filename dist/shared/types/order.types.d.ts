@@ -1,16 +1,18 @@
-export declare enum OrderStatus {
-    RECEIVED = "RECEIVED",
-    WASHING = "WASHING",
-    DRYING = "DRYING",
-    IRONING = "IRONING",
-    READY = "READY",
-    COLLECTED = "COLLECTED"
-}
-export declare enum PaymentType {
-    FULL_PAYMENT = "FULL_PAYMENT",
-    ADVANCE_PAYMENT = "ADVANCE_PAYMENT",
-    PAY_ON_COLLECTION = "PAY_ON_COLLECTION"
-}
+export declare const OrderStatus: {
+    readonly RECEIVED: "RECEIVED";
+    readonly WASHING: "WASHING";
+    readonly DRYING: "DRYING";
+    readonly IRONING: "IRONING";
+    readonly READY: "READY";
+    readonly COLLECTED: "COLLECTED";
+};
+export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+export declare const PaymentType: {
+    readonly FULL_PAYMENT: "FULL_PAYMENT";
+    readonly ADVANCE_PAYMENT: "ADVANCE_PAYMENT";
+    readonly PAY_ON_COLLECTION: "PAY_ON_COLLECTION";
+};
+export type PaymentType = typeof PaymentType[keyof typeof PaymentType];
 export interface Order {
     id: number;
     order_number: string;

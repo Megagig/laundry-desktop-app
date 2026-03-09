@@ -1,16 +1,14 @@
-export var OrderStatus;
-(function (OrderStatus) {
-    OrderStatus["RECEIVED"] = "RECEIVED";
-    OrderStatus["WASHING"] = "WASHING";
-    OrderStatus["DRYING"] = "DRYING";
-    OrderStatus["IRONING"] = "IRONING";
-    OrderStatus["READY"] = "READY";
-    OrderStatus["COLLECTED"] = "COLLECTED";
-})(OrderStatus || (OrderStatus = {}));
-export var PaymentType;
-(function (PaymentType) {
-    PaymentType["FULL_PAYMENT"] = "FULL_PAYMENT";
-    PaymentType["ADVANCE_PAYMENT"] = "ADVANCE_PAYMENT";
-    PaymentType["PAY_ON_COLLECTION"] = "PAY_ON_COLLECTION";
-})(PaymentType || (PaymentType = {}));
+export const OrderStatus = {
+    RECEIVED: "RECEIVED",
+    WASHING: "WASHING",
+    DRYING: "DRYING",
+    IRONING: "IRONING",
+    READY: "READY",
+    COLLECTED: "COLLECTED"
+};
+export const PaymentType = {
+    FULL_PAYMENT: "FULL_PAYMENT",
+    ADVANCE_PAYMENT: "ADVANCE_PAYMENT",
+    PAY_ON_COLLECTION: "PAY_ON_COLLECTION"
+};
 //# sourceMappingURL=order.types.js.map

@@ -1,11 +1,13 @@
 import { ipcMain } from "electron"
 import { customerService } from "../services/customer.service.js"
 import type { CreateCustomerDTO, UpdateCustomerDTO } from "../../shared/types/index.js"
+import { serializeForIPC } from "./helpers.js"
 
 export function registerCustomerHandlers() {
   ipcMain.handle("customer:create", async (_event, data: CreateCustomerDTO) => {
     try {
-      return { success: true, data: customerService.createCustomer(data) }
+      const result = await customerService.createCustomer(data)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -13,7 +15,8 @@ export function registerCustomerHandlers() {
 
   ipcMain.handle("customer:getAll", async () => {
     try {
-      return { success: true, data: customerService.getAllCustomers() }
+      const result = await customerService.getAllCustomers()
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -21,7 +24,8 @@ export function registerCustomerHandlers() {
 
   ipcMain.handle("customer:getById", async (_event, id: number) => {
     try {
-      return { success: true, data: customerService.getCustomerById(id) }
+      const result = await customerService.getCustomerById(id)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -29,7 +33,8 @@ export function registerCustomerHandlers() {
 
   ipcMain.handle("customer:searchByPhone", async (_event, phone: string) => {
     try {
-      return { success: true, data: customerService.searchCustomerByPhone(phone) }
+      const result = await customerService.searchCustomerByPhone(phone)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -37,7 +42,8 @@ export function registerCustomerHandlers() {
 
   ipcMain.handle("customer:searchByName", async (_event, name: string) => {
     try {
-      return { success: true, data: customerService.searchCustomerByName(name) }
+      const result = await customerService.searchCustomerByName(name)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -45,7 +51,8 @@ export function registerCustomerHandlers() {
 
   ipcMain.handle("customer:update", async (_event, data: UpdateCustomerDTO) => {
     try {
-      return { success: true, data: customerService.updateCustomer(data) }
+      const result = await customerService.updateCustomer(data)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -53,7 +60,8 @@ export function registerCustomerHandlers() {
 
   ipcMain.handle("customer:delete", async (_event, id: number) => {
     try {
-      return { success: true, data: customerService.deleteCustomer(id) }
+      const result = await customerService.deleteCustomer(id)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -61,7 +69,8 @@ export function registerCustomerHandlers() {
 
   ipcMain.handle("customer:getWithStats", async (_event, id: number) => {
     try {
-      return { success: true, data: customerService.getCustomerWithStats(id) }
+      const result = await customerService.getCustomerWithStats(id)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
@@ -69,7 +78,8 @@ export function registerCustomerHandlers() {
 
   ipcMain.handle("customer:getOrderHistory", async (_event, customerId: number, limit?: number) => {
     try {
-      return { success: true, data: customerService.getCustomerOrderHistory(customerId, limit) }
+      const result = await customerService.getCustomerOrderHistory(customerId, limit)
+      return { success: true, data: serializeForIPC(result) }
     } catch (error: any) {
       return { success: false, error: error.message }
     }
