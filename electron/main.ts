@@ -10,6 +10,7 @@ import { registerExpenseHandlers } from "./ipc/expenses.ipc.js"
 import { registerReportHandlers } from "./ipc/reports.ipc.js"
 import "./ipc/printer.ipc.js"
 import "./ipc/settings.ipc.js"
+import "./ipc/backup.ipc.js"
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url)

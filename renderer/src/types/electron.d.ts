@@ -76,6 +76,14 @@ declare global {
         upsert: (key: string, value: string) => Promise<any>
         updateMultiple: (settings: Record<string, string>) => Promise<any>
       }
+      backup: {
+        create: (customPath?: string) => Promise<any>
+        restore: () => Promise<any>
+        list: () => Promise<any>
+        delete: (backupPath: string) => Promise<any>
+        exportCSV: (tableName: string) => Promise<any>
+        getStats: () => Promise<any>
+      }
     }
   }
 }

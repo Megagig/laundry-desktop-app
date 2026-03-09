@@ -1,1 +1,1 @@
-{"version":3,"file":"main.d.ts","sourceRoot":"","sources":["../../electron/main.ts"],"names":[],"mappings":"AAUA,OAAO,sBAAsB,CAAA;AAC7B,OAAO,uBAAuB,CAAA"}
+{"version":3,"file":"main.d.ts","sourceRoot":"","sources":["../../electron/main.ts"],"names":[],"mappings":"AAUA,OAAO,sBAAsB,CAAA;AAC7B,OAAO,uBAAuB,CAAA;AAC9B,OAAO,qBAAqB,CAAA"}

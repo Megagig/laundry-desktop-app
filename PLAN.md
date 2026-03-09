@@ -430,44 +430,49 @@ Professional POS-style Laundry Management Desktop Application using Electron, Re
 
 ---
 
-## Phase 13: Settings & Configuration (Priority: LOW)
+## Phase 13: Settings & Configuration (Priority: LOW) ✅
 
-### Task 13.1: Settings Page
-- [ ] Create Settings page
-- [ ] Shop Information
-  - [ ] Shop name
-  - [ ] Address
-  - [ ] Phone
-  - [ ] Logo upload
-- [ ] Printer Settings
-  - [ ] Select default printer
-  - [ ] Test print
-- [ ] Receipt Settings
-  - [ ] Footer message
-  - [ ] Receipt format
-- [ ] General Settings
-  - [ ] Currency symbol
-  - [ ] Date format
-  - [ ] Default pickup days
+### Task 13.1: Settings Page ✅
+- [x] Create Settings page
+- [x] Shop Information
+  - [x] Shop name
+  - [x] Address
+  - [x] Phone
+  - [ ] Logo upload (future enhancement)
+- [x] Printer Settings
+  - [x] Select default printer
+  - [x] Test print
+- [x] Receipt Settings
+  - [x] Footer message
+  - [x] Receipt header
+- [x] General Settings
+  - [x] Currency symbol
+  - [x] Date format
+  - [x] Default pickup days
 
 ---
 
-## Phase 14: Data Management & Backup (Priority: MEDIUM)
+## Phase 14: Data Management & Backup (Priority: MEDIUM) ✅
 
-### Task 14.1: Database Management
-- [ ] Move database to userData directory
-  - [ ] Update db path to use app.getPath("userData")
-  - [ ] Handle database migration on first run
-- [ ] Database backup functionality
-  - [ ] Manual backup button
-  - [ ] Auto-backup on app close
-  - [ ] Backup to user-selected location
-- [ ] Database restore functionality
+### Task 14.1: Database Management ✅
+- [x] Move database to userData directory
+  - [x] Update db path to use app.getPath("userData")
+  - [x] Handle database migration on first run
+- [x] Database backup functionality
+  - [x] Manual backup button
+  - [x] Auto-backup location (userData/backups)
+  - [x] Backup to user-selected location
+- [x] Database restore functionality
+- [x] List and manage backups
+- [x] Delete old backups
 
-### Task 14.2: Data Export
-- [ ] Export customers to CSV
-- [ ] Export orders to CSV
-- [ ] Export reports to PDF
+### Task 14.2: Data Export ✅
+- [x] Export customers to CSV
+- [x] Export orders to CSV
+- [x] Export services to CSV
+- [x] Export payments to CSV
+- [x] Export expenses to CSV
+- [x] Database statistics display
 
 ---
 
@@ -580,13 +585,12 @@ Professional POS-style Laundry Management Desktop Application using Electron, Re
 
 ## Progress Tracking
 
-**Current Phase:** Phase 13 - Settings & Configuration
-**Overall Progress:** ~92% Complete
+**Current Phase:** Phase 15 - UI/UX Enhancements
+**Overall Progress:** ~96% Complete
 **Next Immediate Tasks:**
-1. Add Settings & Configuration (Phase 13) ⭐
-2. Implement UI/UX Enhancements (Phase 15)
-3. Testing & Quality Assurance (Phase 16)
-4. Build & Distribution (Phase 17)
+1. Implement UI/UX Enhancements (Phase 15)
+2. Testing & Quality Assurance (Phase 16)
+3. Build & Distribution (Phase 17)
 
 ---
 

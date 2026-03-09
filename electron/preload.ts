@@ -102,4 +102,14 @@ contextBridge.exposeInMainWorld("api", {
     updateMultiple: (settings: Record<string, string>) => 
       ipcRenderer.invoke("settings:update-multiple", settings),
   },
+
+  // Backup APIs
+  backup: {
+    create: (customPath?: string) => ipcRenderer.invoke("backup:create", customPath),
+    restore: () => ipcRenderer.invoke("backup:restore"),
+    list: () => ipcRenderer.invoke("backup:list"),
+    delete: (backupPath: string) => ipcRenderer.invoke("backup:delete", backupPath),
+    exportCSV: (tableName: string) => ipcRenderer.invoke("backup:export-csv", tableName),
+    getStats: () => ipcRenderer.invoke("backup:get-stats"),
+  },
 })

@@ -11,6 +11,7 @@ import Payments from "../pages/Payments"
 import OutstandingPayments from "../pages/OutstandingPayments"
 import Expenses from "../pages/Expenses"
 import Reports from "../pages/Reports"
+import Settings from "../pages/Settings"
 
 export default function AppRouter() {
   return (
@@ -27,6 +28,7 @@ export default function AppRouter() {
           <Route path="/payments/outstanding" element={<OutstandingPayments />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>
