@@ -2,7 +2,7 @@ import { Badge } from "../ui/badge"
 import { cn } from "../../lib/utils"
 
 interface StatusBadgeProps {
-  status: string
+  status?: string | null
   variant?: "default" | "outline"
   size?: "sm" | "md" | "lg"
 }
@@ -32,6 +32,18 @@ export default function StatusBadge({
   variant = "default",
   size = "md" 
 }: StatusBadgeProps) {
+  // Handle undefined, null, or empty status
+  if (!status || status.trim() === '') {
+    return (
+      <Badge
+        variant="secondary"
+        className="px-2.5 py-0.5 text-xs font-medium capitalize border bg-slate-100 text-slate-800 border-slate-200"
+      >
+        Unknown
+      </Badge>
+    )
+  }
+
   const normalizedStatus = status.toLowerCase().replace(/\s+/g, '_')
   const config = statusConfig[normalizedStatus] || statusConfig.draft
 

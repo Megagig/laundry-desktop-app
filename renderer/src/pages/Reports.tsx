@@ -273,15 +273,15 @@ export default function Reports() {
                 </div>
                 <div className="bg-green-50 rounded-2xl border border-green-100 shadow-md p-8">
                   <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Revenue</Text>
-                  <Text className="text-4xl font-bold text-green-600">₦{revenueData.totalRevenue.toLocaleString()}</Text>
+                  <Text className="text-4xl font-bold text-green-600">₦{(revenueData.totalRevenue || 0).toLocaleString()}</Text>
                 </div>
                 <div className="bg-blue-50 rounded-2xl border border-blue-100 shadow-md p-8">
                   <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Amount Collected</Text>
-                  <Text className="text-4xl font-bold text-blue-600">₦{revenueData.totalPaid.toLocaleString()}</Text>
+                  <Text className="text-4xl font-bold text-blue-600">₦{(revenueData.totalPaid || 0).toLocaleString()}</Text>
                 </div>
                 <div className="bg-red-50 rounded-2xl border border-red-100 shadow-md p-8">
                   <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Pending Balance</Text>
-                  <Text className="text-4xl font-bold text-red-600">₦{revenueData.totalBalance.toLocaleString()}</Text>
+                  <Text className="text-4xl font-bold text-red-600">₦{(revenueData.totalBalance || 0).toLocaleString()}</Text>
                 </div>
               </div>
 
@@ -290,7 +290,7 @@ export default function Reports() {
                 <div className="grid grid-cols-2 gap-8">
                   <div>
                     <Text size="md" className="text-gray-600 font-semibold mb-2">Average Order Value</Text>
-                    <Text className="text-3xl font-bold text-gray-900">₦{Math.round(revenueData.averageOrderValue).toLocaleString()}</Text>
+                    <Text className="text-3xl font-bold text-gray-900">₦{Math.round(revenueData.averageOrderValue || 0).toLocaleString()}</Text>
                   </div>
                   <div>
                     <Text size="md" className="text-gray-600 font-semibold mb-2">Collection Rate</Text>
@@ -321,7 +321,7 @@ export default function Reports() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-red-50 rounded-2xl border border-red-100 shadow-md p-8">
                   <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Expenses</Text>
-                  <Text className="text-4xl font-bold text-red-600">₦{expenseData.totalExpenses.toLocaleString()}</Text>
+                  <Text className="text-4xl font-bold text-red-600">₦{(expenseData.totalExpenses || 0).toLocaleString()}</Text>
                 </div>
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
                   <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Expense Count</Text>
@@ -329,7 +329,7 @@ export default function Reports() {
                 </div>
                 <div className="bg-blue-50 rounded-2xl border border-blue-100 shadow-md p-8">
                   <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Average Expense</Text>
-                  <Text className="text-4xl font-bold text-blue-600">₦{Math.round(expenseData.averageExpense).toLocaleString()}</Text>
+                  <Text className="text-4xl font-bold text-blue-600">₦{Math.round(expenseData.averageExpense || 0).toLocaleString()}</Text>
                 </div>
               </div>
 
@@ -343,7 +343,7 @@ export default function Reports() {
                         <Text size="md" fw={600} className="mb-2">{category}</Text>
                         <Text className="text-2xl font-bold text-gray-900">₦{(amount as number).toLocaleString()}</Text>
                         <Text size="sm" className="text-gray-600 font-medium mt-1">
-                          {((amount as number / expenseData.totalExpenses) * 100).toFixed(1)}%
+                          {expenseData.totalExpenses > 0 ? ((amount as number / expenseData.totalExpenses) * 100).toFixed(1) : '0.0'}%
                         </Text>
                       </div>
                     ))}
@@ -371,12 +371,12 @@ export default function Reports() {
                 <div className="space-y-5">
                   <div className="flex justify-between items-center py-4 border-b border-gray-200">
                     <Text size="lg" fw={700}>Total Revenue</Text>
-                    <Text size="xl" fw={700} className="text-green-600">₦{profitLossData.totalRevenue.toLocaleString()}</Text>
+                    <Text size="xl" fw={700} className="text-green-600">₦{(profitLossData.totalRevenue || 0).toLocaleString()}</Text>
                   </div>
                   
                   <div className="flex justify-between items-center py-4 border-b border-gray-200">
                     <Text size="lg" fw={700}>Total Expenses</Text>
-                    <Text size="xl" fw={700} className="text-red-600">₦{profitLossData.totalExpenses.toLocaleString()}</Text>
+                    <Text size="xl" fw={700} className="text-red-600">₦{(profitLossData.totalExpenses || 0).toLocaleString()}</Text>
                   </div>
                   
                   <div className={`flex justify-between items-center py-6 px-6 rounded-2xl ${profitLossData.netProfit >= 0 ? "bg-green-50 border border-green-100" : "bg-red-50 border border-red-100"}`}>
@@ -385,7 +385,7 @@ export default function Reports() {
                       className="text-4xl font-bold"
                       c={profitLossData.netProfit >= 0 ? "green" : "red"}
                     >
-                      ₦{profitLossData.netProfit.toLocaleString()}
+                      ₦{(profitLossData.netProfit || 0).toLocaleString()}
                     </Text>
                   </div>
 
@@ -418,7 +418,7 @@ export default function Reports() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-red-50 rounded-2xl border border-red-100 shadow-md p-8">
                   <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Outstanding</Text>
-                  <Text className="text-4xl font-bold text-red-600">₦{outstandingData.totalOutstanding.toLocaleString()}</Text>
+                  <Text className="text-4xl font-bold text-red-600">₦{(outstandingData.totalOutstanding || 0).toLocaleString()}</Text>
                 </div>
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
                   <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Orders with Balance</Text>
@@ -426,7 +426,7 @@ export default function Reports() {
                 </div>
                 <div className="bg-orange-50 rounded-2xl border border-orange-100 shadow-md p-8">
                   <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Average Balance</Text>
-                  <Text className="text-4xl font-bold text-orange-600">₦{Math.round(outstandingData.averageBalance).toLocaleString()}</Text>
+                  <Text className="text-4xl font-bold text-orange-600">₦{Math.round(outstandingData.averageBalance || 0).toLocaleString()}</Text>
                 </div>
               </div>
 
@@ -443,7 +443,7 @@ export default function Reports() {
                             <Text size="md" fw={700}>{order.order_number}</Text>
                             <Text size="md" className="text-gray-600">{order.customer_name}</Text>
                           </div>
-                          <Text className="text-2xl font-bold text-red-600">₦{order.balance.toLocaleString()}</Text>
+                          <Text className="text-2xl font-bold text-red-600">₦{(order.balance || 0).toLocaleString()}</Text>
                         </div>
                       ))}
                   </div>

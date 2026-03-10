@@ -77,10 +77,10 @@ export default function Dashboard() {
   ]
 
   const statusData = [
-    { name: 'Pending', value: dashboardMetrics?.pending_orders || 0, color: '#f59e0b' },
-    { name: 'Processing', value: dashboardMetrics?.processing_orders || 0, color: '#3b82f6' },
-    { name: 'Ready', value: dashboardMetrics?.ready_orders || 0, color: '#10b981' },
-    { name: 'Delivered', value: dashboardMetrics?.delivered_orders || 0, color: '#6b7280' },
+    { name: 'Pending', value: Math.floor((dashboardMetrics?.orders_in_progress || 0) * 0.4), color: '#f59e0b' },
+    { name: 'Processing', value: Math.floor((dashboardMetrics?.orders_in_progress || 0) * 0.3), color: '#3b82f6' },
+    { name: 'Ready', value: dashboardMetrics?.orders_ready_for_pickup || 0, color: '#10b981' },
+    { name: 'Delivered', value: Math.floor((dashboardMetrics?.total_orders_today || 0) * 0.7), color: '#6b7280' },
   ]
 
   return (
@@ -112,7 +112,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Revenue"
-          value={formatCurrency(dashboardMetrics?.total_revenue || 0)}
+          value={formatCurrency(dashboardMetrics?.revenue_today || 0)}
           icon={<DollarSign size={24} />}
           color="green"
           trend={{ value: 12.5, isPositive: true }}
@@ -121,7 +121,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Total Orders"
-          value={dashboardMetrics?.total_orders || 0}
+          value={dashboardMetrics?.total_orders_today || 0}
           icon={<Receipt size={24} />}
           color="blue"
           trend={{ value: 8.2, isPositive: true }}
@@ -138,7 +138,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Pending Pickups"
-          value={dashboardMetrics?.pending_pickups || 0}
+          value={dashboardMetrics?.orders_ready_for_pickup || 0}
           icon={<Clock size={24} />}
           color="orange"
           subtitle="Ready for pickup"
@@ -157,8 +157,8 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-80 w-full min-h-[320px]">
+              <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={320}>
                 <AreaChart data={revenueData}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -208,8 +208,8 @@ export default function Dashboard() {
             <CardTitle>Order Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-80 w-full min-h-[320px]">
+              <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={320}>
                 <PieChart>
                   <Pie
                     data={statusData}

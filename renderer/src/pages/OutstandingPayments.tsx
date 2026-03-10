@@ -131,7 +131,7 @@ export default function OutstandingPayments() {
             </Table.Thead>
             <Table.Tbody>
               {orders.map((order) => (
-                <Table.Tr key={order.id}>
+                <Table.Tr key={order.id || order.order_id}>
                   <Table.Td>
                     <Text size="sm" fw={500}>{order.order_number}</Text>
                   </Table.Td>
@@ -140,7 +140,7 @@ export default function OutstandingPayments() {
                     <Text size="xs" c="dimmed">{order.customer_phone}</Text>
                   </Table.Td>
                   <Table.Td>
-                    <StatusBadge status={order.status} />
+                    <StatusBadge status={order.status || 'pending'} />
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm">₦{order.total_amount.toLocaleString()}</Text>

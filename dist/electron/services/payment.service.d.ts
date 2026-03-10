@@ -6,11 +6,13 @@ export declare class PaymentService {
     getAllPayments(limit?: number): Promise<PaymentWithOrder[]>;
     getPaymentsByDateRange(startDate: string, endDate: string): Promise<PaymentWithOrder[]>;
     getOutstandingPayments(): Promise<{
+        id: number;
         order_id: number;
         order_number: string;
         total_amount: number;
         amount_paid: number;
         balance: number;
+        status: string;
         pickup_date: string;
         customer_name: string;
         customer_phone: string;

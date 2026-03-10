@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { 
   Plus, 
   Search, 
@@ -21,6 +22,7 @@ import { formatDate } from "../lib/utils"
 import type { Customer } from "../../../shared/types/customer.types"
 
 export default function Customers() {
+  const navigate = useNavigate()
   const {
     customers,
     isLoading,
@@ -51,8 +53,7 @@ export default function Customers() {
   }
 
   const handleView = (customer: Customer) => {
-    // Handle view customer details
-    console.log('View customer:', customer)
+    navigate(`/customers/${customer.id}`)
   }
 
   const columns = [
