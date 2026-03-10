@@ -9,7 +9,9 @@ export default function AppLayout({ children }: any) {
       <Sidebar />
 
       <main className="flex-1 p-10 bg-gray-50 overflow-auto">
-        {children}
+        <div className="w-full">
+          {children}
+        </div>
       </main>
     </div>
   )

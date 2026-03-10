@@ -55,3 +55,62 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Mantine DateInput Calendar Styling */
+.mantine-DateInput-calendarHeader button {
+  background: transparent !important;
+  border: none !important;
+  color: #1e293b !important;
+  font-size: 1.25rem !important;
+  padding: 0.5rem !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.2s !important;
+}
+
+.mantine-DateInput-calendarHeader button:hover {
+  background: #f1f5f9 !important;
+  color: #3b82f6 !important;
+}
+
+.mantine-DateInput-calendarHeader button svg {
+  width: 20px !important;
+  height: 20px !important;
+  stroke-width: 2.5 !important;
+}
+
+/* Calendar month/year selector */
+.mantine-DateInput-calendarHeaderLevel {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+}
+
+.mantine-DateInput-calendarHeaderLevel:hover {
+  background: #f1f5f9 !important;
+}
+
+/* Calendar day cells */
+.mantine-DateInput-day {
+  font-size: 0.95rem !important;
+  border-radius: 0.5rem !important;
+}
+
+.mantine-DateInput-day:hover {
+  background: #eff6ff !important;
+  color: #3b82f6 !important;
+}
+
+.mantine-DateInput-day[data-selected] {
+  background: #3b82f6 !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+/* Calendar weekday headers */
+.mantine-DateInput-weekday {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+}

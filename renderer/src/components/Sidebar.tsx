@@ -54,8 +54,8 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      {/* Navigation - Spread items evenly across available space */}
+      <nav className="flex-1 px-3 py-8 flex flex-col justify-evenly overflow-y-auto">
         {navigation.map((item) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path
@@ -67,19 +67,19 @@ export default function Sidebar() {
               <Link
                 to={item.path}
                 className={`
-                  flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
+                  flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200
                   ${isActive || isSubItemActive
-                    ? "bg-blue-50 text-blue-600 font-semibold" 
+                    ? "bg-blue-50 text-blue-600 font-semibold shadow-sm" 
                     : "text-gray-700 hover:bg-gray-50 font-medium"
                   }
                 `}
               >
-                <Icon size={20} className={isActive || isSubItemActive ? "text-blue-600" : "text-gray-500"} />
-                <span className="text-sm">{item.label}</span>
+                <Icon size={24} className={isActive || isSubItemActive ? "text-blue-600" : "text-gray-500"} />
+                <span className="text-base">{item.label}</span>
               </Link>
               
               {hasSubItems && (isActive || isSubItemActive) && (
-                <div className="ml-10 mt-1 space-y-1">
+                <div className="ml-12 mt-2 space-y-2">
                   {item.subItems.map((subItem) => {
                     const SubIcon = subItem.icon
                     const isSubActive = location.pathname === subItem.path
@@ -89,14 +89,14 @@ export default function Sidebar() {
                         key={subItem.path}
                         to={subItem.path}
                         className={`
-                          flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 text-sm
+                          flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base
                           ${isSubActive
                             ? "bg-blue-100 text-blue-700 font-semibold" 
                             : "text-gray-600 hover:bg-gray-50"
                           }
                         `}
                       >
-                        {SubIcon && <SubIcon size={16} />}
+                        {SubIcon && <SubIcon size={20} />}
                         <span>{subItem.label}</span>
                       </Link>
                     )
@@ -109,18 +109,18 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-100 space-y-2">
+      <div className="p-5 border-t border-gray-100 space-y-3">
         <button
           onClick={() => setShortcutsOpened(true)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-all duration-200 text-sm font-medium"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-all duration-200 text-base font-medium"
         >
-          <IconKeyboard size={16} />
+          <IconKeyboard size={20} />
           <span>Shortcuts</span>
         </button>
         
-        <div className="text-xs text-gray-500 text-center py-2">
-          <p className="font-semibold text-gray-700 text-sm">CleanWave Laundry</p>
-          <p className="mt-0.5">v1.0.0</p>
+        <div className="text-center py-3">
+          <p className="font-bold text-gray-800 text-base">CleanWave Laundry</p>
+          <p className="text-xs text-gray-500 mt-1">v1.0.0</p>
         </div>
       </div>
 
