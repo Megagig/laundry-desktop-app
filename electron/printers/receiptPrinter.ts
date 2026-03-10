@@ -1,4 +1,7 @@
 import { BrowserWindow } from "electron"
+import { createRequire } from "module"
+
+const require = createRequire(import.meta.url)
 const PosPrinter = require("electron-pos-printer")
 
 interface PrinterOptions {

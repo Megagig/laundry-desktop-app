@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Button, Group, Text, Card, Table, Badge, Select, TextInput } from "@mantine/core"
+import { Button, Text, Table, Badge, Select, TextInput } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { IconSearch, IconRefresh, IconCash } from "@tabler/icons-react"
 import { LoadingSpinner, EmptyState } from "../components/common"
@@ -106,36 +106,39 @@ export default function Payments() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <Group justify="space-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Payment History</h1>
-          <Text size="sm" c="dimmed">View and manage all payment transactions</Text>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Payment History</h1>
+          <Text className="text-lg text-gray-600">View and manage all payment transactions</Text>
         </div>
         <Button
-          leftSection={<IconRefresh size={16} />}
+          size="lg"
+          leftSection={<IconRefresh size={20} />}
           onClick={fetchPayments}
           loading={isLoading}
           variant="light"
         >
           Refresh
         </Button>
-      </Group>
+      </div>
 
       {/* Filters */}
-      <Card withBorder>
-        <Text size="sm" fw={600} className="mb-3">Filters</Text>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+        <Text className="text-xl font-bold text-gray-900 mb-6">Filters</Text>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <TextInput
             placeholder="Search by order or customer"
-            leftSection={<IconSearch size={16} />}
+            size="lg"
+            leftSection={<IconSearch size={20} />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
 
           <Select
             placeholder="Payment Method"
+            size="lg"
             value={methodFilter}
             onChange={(value) => setMethodFilter(value || "ALL")}
             data={[
@@ -149,6 +152,7 @@ export default function Payments() {
 
           <DateInput
             placeholder="Start Date"
+            size="lg"
             value={startDate}
             onChange={(value) => setStartDate(value ? new Date(value) : null)}
             clearable
@@ -156,31 +160,32 @@ export default function Payments() {
 
           <DateInput
             placeholder="End Date"
+            size="lg"
             value={endDate}
             onChange={(value) => setEndDate(value ? new Date(value) : null)}
             clearable
           />
         </div>
-      </Card>
+      </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card withBorder>
-          <Text size="sm" c="dimmed">Total Payments</Text>
-          <Text size="xl" fw={700}>{filteredPayments.length}</Text>
-        </Card>
-        <Card withBorder>
-          <Text size="sm" c="dimmed">Total Amount</Text>
-          <Text size="xl" fw={700} c="green">₦{totalAmount.toLocaleString()}</Text>
-        </Card>
-        <Card withBorder>
-          <Text size="sm" c="dimmed">Average Payment</Text>
-          <Text size="xl" fw={700}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+          <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Payments</Text>
+          <Text className="text-4xl font-bold text-gray-900">{filteredPayments.length}</Text>
+        </div>
+        <div className="bg-green-50 rounded-2xl border border-green-100 shadow-md p-8">
+          <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Amount</Text>
+          <Text className="text-4xl font-bold text-green-600">₦{totalAmount.toLocaleString()}</Text>
+        </div>
+        <div className="bg-blue-50 rounded-2xl border border-blue-100 shadow-md p-8">
+          <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Average Payment</Text>
+          <Text className="text-4xl font-bold text-blue-600">
             ₦{filteredPayments.length > 0 
               ? Math.round(totalAmount / filteredPayments.length).toLocaleString() 
               : 0}
           </Text>
-        </Card>
+        </div>
       </div>
 
       {/* Payments Table */}
@@ -193,47 +198,47 @@ export default function Payments() {
             : "No payment transactions yet"}
         />
       ) : (
-        <Card withBorder>
-          <Table highlightOnHover>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+          <Table highlightOnHover className="text-base">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Date & Time</Table.Th>
-                <Table.Th>Order Number</Table.Th>
-                <Table.Th>Customer</Table.Th>
-                <Table.Th>Amount</Table.Th>
-                <Table.Th>Method</Table.Th>
-                <Table.Th>Notes</Table.Th>
+                <Table.Th className="text-base font-semibold">Date & Time</Table.Th>
+                <Table.Th className="text-base font-semibold">Order Number</Table.Th>
+                <Table.Th className="text-base font-semibold">Customer</Table.Th>
+                <Table.Th className="text-base font-semibold">Amount</Table.Th>
+                <Table.Th className="text-base font-semibold">Method</Table.Th>
+                <Table.Th className="text-base font-semibold">Notes</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {filteredPayments.map((payment) => (
-                <Table.Tr key={payment.id}>
+                <Table.Tr key={payment.id} className="hover:bg-gray-50 transition-colors">
                   <Table.Td>
-                    <Text size="sm">
+                    <Text size="md" fw={500}>
                       {new Date(payment.created_at).toLocaleDateString()}
                     </Text>
-                    <Text size="xs" c="dimmed">
+                    <Text size="sm" className="text-gray-500">
                       {new Date(payment.created_at).toLocaleTimeString()}
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" fw={500}>{payment.order_number}</Text>
+                    <Text size="md" fw={600}>{payment.order_number}</Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm">{payment.customer_name}</Text>
+                    <Text size="md">{payment.customer_name}</Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" fw={600} c="green">
+                    <Text size="md" fw={700} className="text-green-600">
                       ₦{payment.amount.toLocaleString()}
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Badge color={getMethodColor(payment.method)} variant="light">
+                    <Badge color={getMethodColor(payment.method)} variant="light" size="lg">
                       {getMethodLabel(payment.method)}
                     </Badge>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" c="dimmed" lineClamp={1}>
+                    <Text size="md" className="text-gray-600" lineClamp={1}>
                       {payment.notes || "-"}
                     </Text>
                   </Table.Td>
@@ -241,7 +246,7 @@ export default function Payments() {
               ))}
             </Table.Tbody>
           </Table>
-        </Card>
+        </div>
       )}
     </div>
   )

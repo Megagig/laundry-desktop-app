@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Text, Card, Select, Tabs } from "@mantine/core"
+import { Button, Text, Select, Tabs } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { IconRefresh, IconFileAnalytics, IconCash, IconReceipt, IconTrendingUp } from "@tabler/icons-react"
 import { LoadingSpinner } from "../components/common"
@@ -182,19 +182,20 @@ export default function Reports() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Reports & Analytics</h1>
-        <Text size="sm" c="dimmed">Generate and view business reports</Text>
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">Reports & Analytics</h1>
+        <Text className="text-lg text-gray-600">Generate and view business reports</Text>
       </div>
 
       {/* Filters */}
-      <Card withBorder>
-        <Text size="sm" fw={600} className="mb-3">Report Parameters</Text>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+        <Text className="text-xl font-bold text-gray-900 mb-6">Report Parameters</Text>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Select
             label="Period"
+            size="lg"
             value={reportPeriod}
             onChange={(value) => handlePeriodChange(value || "custom")}
             data={[
@@ -208,6 +209,7 @@ export default function Reports() {
 
           <DateInput
             label="Start Date"
+            size="lg"
             value={startDate}
             onChange={(value) => {
               setStartDate(value ? new Date(value) : null)
@@ -218,6 +220,7 @@ export default function Reports() {
 
           <DateInput
             label="End Date"
+            size="lg"
             value={endDate}
             onChange={(value) => {
               setEndDate(value ? new Date(value) : null)
@@ -229,7 +232,8 @@ export default function Reports() {
           <div className="flex items-end">
             <Button
               fullWidth
-              leftSection={<IconRefresh size={16} />}
+              size="lg"
+              leftSection={<IconRefresh size={20} />}
               onClick={handleGenerateReport}
               loading={isLoading}
             >
@@ -237,21 +241,21 @@ export default function Reports() {
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Report Tabs */}
       <Tabs value={activeTab} onChange={setActiveTab}>
-        <Tabs.List>
-          <Tabs.Tab value="revenue" leftSection={<IconCash size={16} />}>
+        <Tabs.List className="mb-6">
+          <Tabs.Tab value="revenue" leftSection={<IconCash size={20} />} className="text-base px-6 py-3">
             Revenue Report
           </Tabs.Tab>
-          <Tabs.Tab value="expenses" leftSection={<IconReceipt size={16} />}>
+          <Tabs.Tab value="expenses" leftSection={<IconReceipt size={20} />} className="text-base px-6 py-3">
             Expense Report
           </Tabs.Tab>
-          <Tabs.Tab value="profitloss" leftSection={<IconTrendingUp size={16} />}>
+          <Tabs.Tab value="profitloss" leftSection={<IconTrendingUp size={20} />} className="text-base px-6 py-3">
             Profit & Loss
           </Tabs.Tab>
-          <Tabs.Tab value="outstanding" leftSection={<IconFileAnalytics size={16} />}>
+          <Tabs.Tab value="outstanding" leftSection={<IconFileAnalytics size={20} />} className="text-base px-6 py-3">
             Outstanding Balances
           </Tabs.Tab>
         </Tabs.List>
@@ -261,50 +265,50 @@ export default function Reports() {
           {isLoading ? (
             <LoadingSpinner />
           ) : revenueData ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card withBorder>
-                  <Text size="sm" c="dimmed">Total Orders</Text>
-                  <Text size="xl" fw={700}>{revenueData.totalOrders}</Text>
-                </Card>
-                <Card withBorder>
-                  <Text size="sm" c="dimmed">Total Revenue</Text>
-                  <Text size="xl" fw={700} c="green">₦{revenueData.totalRevenue.toLocaleString()}</Text>
-                </Card>
-                <Card withBorder>
-                  <Text size="sm" c="dimmed">Amount Collected</Text>
-                  <Text size="xl" fw={700} c="blue">₦{revenueData.totalPaid.toLocaleString()}</Text>
-                </Card>
-                <Card withBorder>
-                  <Text size="sm" c="dimmed">Pending Balance</Text>
-                  <Text size="xl" fw={700} c="red">₦{revenueData.totalBalance.toLocaleString()}</Text>
-                </Card>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Orders</Text>
+                  <Text className="text-4xl font-bold text-gray-900">{revenueData.totalOrders}</Text>
+                </div>
+                <div className="bg-green-50 rounded-2xl border border-green-100 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Revenue</Text>
+                  <Text className="text-4xl font-bold text-green-600">₦{revenueData.totalRevenue.toLocaleString()}</Text>
+                </div>
+                <div className="bg-blue-50 rounded-2xl border border-blue-100 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Amount Collected</Text>
+                  <Text className="text-4xl font-bold text-blue-600">₦{revenueData.totalPaid.toLocaleString()}</Text>
+                </div>
+                <div className="bg-red-50 rounded-2xl border border-red-100 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Pending Balance</Text>
+                  <Text className="text-4xl font-bold text-red-600">₦{revenueData.totalBalance.toLocaleString()}</Text>
+                </div>
               </div>
 
-              <Card withBorder>
-                <Text size="sm" fw={600} className="mb-3">Additional Metrics</Text>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+                <Text className="text-xl font-bold text-gray-900 mb-6">Additional Metrics</Text>
+                <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <Text size="sm" c="dimmed">Average Order Value</Text>
-                    <Text size="lg" fw={600}>₦{Math.round(revenueData.averageOrderValue).toLocaleString()}</Text>
+                    <Text size="md" className="text-gray-600 font-semibold mb-2">Average Order Value</Text>
+                    <Text className="text-3xl font-bold text-gray-900">₦{Math.round(revenueData.averageOrderValue).toLocaleString()}</Text>
                   </div>
                   <div>
-                    <Text size="sm" c="dimmed">Collection Rate</Text>
-                    <Text size="lg" fw={600}>
+                    <Text size="md" className="text-gray-600 font-semibold mb-2">Collection Rate</Text>
+                    <Text className="text-3xl font-bold text-gray-900">
                       {revenueData.totalRevenue > 0 
                         ? ((revenueData.totalPaid / revenueData.totalRevenue) * 100).toFixed(1)
                         : 0}%
                     </Text>
                   </div>
                 </div>
-              </Card>
+              </div>
             </div>
           ) : (
-            <Card withBorder>
-              <Text c="dimmed" ta="center" py="xl">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-12">
+              <Text className="text-gray-500 text-center text-lg">
                 Click "Generate Report" to view revenue data
               </Text>
-            </Card>
+            </div>
           )}
         </Tabs.Panel>
 
@@ -313,45 +317,45 @@ export default function Reports() {
           {isLoading ? (
             <LoadingSpinner />
           ) : expenseData ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card withBorder>
-                  <Text size="sm" c="dimmed">Total Expenses</Text>
-                  <Text size="xl" fw={700} c="red">₦{expenseData.totalExpenses.toLocaleString()}</Text>
-                </Card>
-                <Card withBorder>
-                  <Text size="sm" c="dimmed">Expense Count</Text>
-                  <Text size="xl" fw={700}>{expenseData.expenseCount}</Text>
-                </Card>
-                <Card withBorder>
-                  <Text size="sm" c="dimmed">Average Expense</Text>
-                  <Text size="xl" fw={700}>₦{Math.round(expenseData.averageExpense).toLocaleString()}</Text>
-                </Card>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-red-50 rounded-2xl border border-red-100 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Expenses</Text>
+                  <Text className="text-4xl font-bold text-red-600">₦{expenseData.totalExpenses.toLocaleString()}</Text>
+                </div>
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Expense Count</Text>
+                  <Text className="text-4xl font-bold text-gray-900">{expenseData.expenseCount}</Text>
+                </div>
+                <div className="bg-blue-50 rounded-2xl border border-blue-100 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Average Expense</Text>
+                  <Text className="text-4xl font-bold text-blue-600">₦{Math.round(expenseData.averageExpense).toLocaleString()}</Text>
+                </div>
               </div>
 
-              <Card withBorder>
-                <Text size="sm" fw={600} className="mb-3">Expenses by Category</Text>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+                <Text className="text-xl font-bold text-gray-900 mb-6">Expenses by Category</Text>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
                   {Object.entries(expenseData.byCategory)
                     .sort(([, a], [, b]) => (b as number) - (a as number))
                     .map(([category, amount]) => (
-                      <div key={category} className="p-3 bg-gray-50 rounded">
-                        <Text size="sm" fw={500}>{category}</Text>
-                        <Text size="lg" fw={700}>₦{(amount as number).toLocaleString()}</Text>
-                        <Text size="xs" c="dimmed">
+                      <div key={category} className="p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+                        <Text size="md" fw={600} className="mb-2">{category}</Text>
+                        <Text className="text-2xl font-bold text-gray-900">₦{(amount as number).toLocaleString()}</Text>
+                        <Text size="sm" className="text-gray-600 font-medium mt-1">
                           {((amount as number / expenseData.totalExpenses) * 100).toFixed(1)}%
                         </Text>
                       </div>
                     ))}
                 </div>
-              </Card>
+              </div>
             </div>
           ) : (
-            <Card withBorder>
-              <Text c="dimmed" ta="center" py="xl">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-12">
+              <Text className="text-gray-500 text-center text-lg">
                 Click "Generate Report" to view expense data
               </Text>
-            </Card>
+            </div>
           )}
         </Tabs.Panel>
 
@@ -360,49 +364,48 @@ export default function Reports() {
           {isLoading ? (
             <LoadingSpinner />
           ) : profitLossData ? (
-            <div className="space-y-4">
-              <Card withBorder>
-                <Text size="lg" fw={600} className="mb-4">Profit & Loss Statement</Text>
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+                <Text className="text-2xl font-bold text-gray-900 mb-8">Profit & Loss Statement</Text>
                 
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <Text fw={600}>Total Revenue</Text>
-                    <Text fw={600} c="green">₦{profitLossData.totalRevenue.toLocaleString()}</Text>
+                <div className="space-y-5">
+                  <div className="flex justify-between items-center py-4 border-b border-gray-200">
+                    <Text size="lg" fw={700}>Total Revenue</Text>
+                    <Text size="xl" fw={700} className="text-green-600">₦{profitLossData.totalRevenue.toLocaleString()}</Text>
                   </div>
                   
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <Text fw={600}>Total Expenses</Text>
-                    <Text fw={600} c="red">₦{profitLossData.totalExpenses.toLocaleString()}</Text>
+                  <div className="flex justify-between items-center py-4 border-b border-gray-200">
+                    <Text size="lg" fw={700}>Total Expenses</Text>
+                    <Text size="xl" fw={700} className="text-red-600">₦{profitLossData.totalExpenses.toLocaleString()}</Text>
                   </div>
                   
-                  <div className="flex justify-between items-center py-3 bg-gray-50 px-3 rounded">
-                    <Text size="lg" fw={700}>Net Profit/Loss</Text>
+                  <div className={`flex justify-between items-center py-6 px-6 rounded-2xl ${profitLossData.netProfit >= 0 ? "bg-green-50 border border-green-100" : "bg-red-50 border border-red-100"}`}>
+                    <Text className="text-2xl font-bold text-gray-900">Net Profit/Loss</Text>
                     <Text 
-                      size="xl" 
-                      fw={700}
+                      className="text-4xl font-bold"
                       c={profitLossData.netProfit >= 0 ? "green" : "red"}
                     >
                       ₦{profitLossData.netProfit.toLocaleString()}
                     </Text>
                   </div>
 
-                  <div className="flex justify-between items-center py-2">
-                    <Text c="dimmed">Profit Margin</Text>
-                    <Text fw={600}>
+                  <div className="flex justify-between items-center py-4">
+                    <Text size="lg" className="text-gray-600 font-semibold">Profit Margin</Text>
+                    <Text size="xl" fw={700}>
                       {profitLossData.totalRevenue > 0
                         ? ((profitLossData.netProfit / profitLossData.totalRevenue) * 100).toFixed(1)
                         : 0}%
                     </Text>
                   </div>
                 </div>
-              </Card>
+              </div>
             </div>
           ) : (
-            <Card withBorder>
-              <Text c="dimmed" ta="center" py="xl">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-12">
+              <Text className="text-gray-500 text-center text-lg">
                 Click "Generate Report" to view profit & loss data
               </Text>
-            </Card>
+            </div>
           )}
         </Tabs.Panel>
 
@@ -411,48 +414,48 @@ export default function Reports() {
           {isLoading ? (
             <LoadingSpinner />
           ) : outstandingData ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card withBorder className="bg-red-50">
-                  <Text size="sm" c="dimmed">Total Outstanding</Text>
-                  <Text size="xl" fw={700} c="red">₦{outstandingData.totalOutstanding.toLocaleString()}</Text>
-                </Card>
-                <Card withBorder>
-                  <Text size="sm" c="dimmed">Orders with Balance</Text>
-                  <Text size="xl" fw={700}>{outstandingData.totalOrders}</Text>
-                </Card>
-                <Card withBorder>
-                  <Text size="sm" c="dimmed">Average Balance</Text>
-                  <Text size="xl" fw={700}>₦{Math.round(outstandingData.averageBalance).toLocaleString()}</Text>
-                </Card>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-red-50 rounded-2xl border border-red-100 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Outstanding</Text>
+                  <Text className="text-4xl font-bold text-red-600">₦{outstandingData.totalOutstanding.toLocaleString()}</Text>
+                </div>
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Orders with Balance</Text>
+                  <Text className="text-4xl font-bold text-gray-900">{outstandingData.totalOrders}</Text>
+                </div>
+                <div className="bg-orange-50 rounded-2xl border border-orange-100 shadow-md p-8">
+                  <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Average Balance</Text>
+                  <Text className="text-4xl font-bold text-orange-600">₦{Math.round(outstandingData.averageBalance).toLocaleString()}</Text>
+                </div>
               </div>
 
               {outstandingData.orders.length > 0 && (
-                <Card withBorder>
-                  <Text size="sm" fw={600} className="mb-3">Top Outstanding Orders</Text>
-                  <div className="space-y-2">
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+                  <Text className="text-xl font-bold text-gray-900 mb-6">Top Outstanding Orders</Text>
+                  <div className="space-y-3">
                     {outstandingData.orders
                       .sort((a: any, b: any) => b.balance - a.balance)
                       .slice(0, 10)
                       .map((order: any) => (
-                        <div key={order.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <div key={order.id} className="flex justify-between items-center p-5 bg-gradient-to-br from-red-50 to-orange-50 rounded-xl border border-red-100">
                           <div>
-                            <Text size="sm" fw={500}>{order.order_number}</Text>
-                            <Text size="xs" c="dimmed">{order.customer_name}</Text>
+                            <Text size="md" fw={700}>{order.order_number}</Text>
+                            <Text size="md" className="text-gray-600">{order.customer_name}</Text>
                           </div>
-                          <Text size="sm" fw={700} c="red">₦{order.balance.toLocaleString()}</Text>
+                          <Text className="text-2xl font-bold text-red-600">₦{order.balance.toLocaleString()}</Text>
                         </div>
                       ))}
                   </div>
-                </Card>
+                </div>
               )}
             </div>
           ) : (
-            <Card withBorder>
-              <Text c="dimmed" ta="center" py="xl">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-12">
+              <Text className="text-gray-500 text-center text-lg">
                 Click "Generate Report" to view outstanding balances
               </Text>
-            </Card>
+            </div>
           )}
         </Tabs.Panel>
       </Tabs>

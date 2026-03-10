@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Group, Text, Card, TextInput, Select, NumberInput, Divider } from "@mantine/core"
+import { Button, Group, Text, TextInput, Select, NumberInput, Divider } from "@mantine/core"
 import { 
   IconSearch, 
   IconCash, 
@@ -169,20 +169,21 @@ export default function Pickup() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Pickup / Collection</h1>
-        <Text size="sm" c="dimmed">Search for orders ready for pickup</Text>
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">Pickup / Collection</h1>
+        <Text className="text-lg text-gray-600">Search for orders ready for pickup</Text>
       </div>
 
       {/* Search Section */}
-      <Card withBorder>
-        <Text size="sm" fw={600} className="mb-3">Search Order</Text>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+        <Text className="text-xl font-bold text-gray-900 mb-6">Search Order</Text>
         
         <Group align="flex-end">
           <Select
             label="Search By"
+            size="lg"
             value={searchType}
             onChange={(value) => setSearchType(value || "order_number")}
             data={[
@@ -190,11 +191,12 @@ export default function Pickup() {
               { value: "phone", label: "Phone Number" },
               { value: "name", label: "Customer Name" }
             ]}
-            style={{ width: 180 }}
+            style={{ width: 200 }}
           />
 
           <TextInput
             label="Search"
+            size="lg"
             placeholder={
               searchType === "order_number" ? "Enter order number" :
               searchType === "phone" ? "Enter phone number" :
@@ -207,7 +209,8 @@ export default function Pickup() {
           />
 
           <Button 
-            leftSection={<IconSearch size={16} />}
+            size="lg"
+            leftSection={<IconSearch size={20} />}
             onClick={handleSearch}
             loading={isSearching}
           >
@@ -216,47 +219,47 @@ export default function Pickup() {
         </Group>
 
         {searchError && (
-          <Text size="sm" c="red" className="mt-2">{searchError}</Text>
+          <Text size="md" c="red" className="mt-4 font-medium">{searchError}</Text>
         )}
-      </Card>
+      </div>
 
       {/* Order Display Section */}
       {isSearching ? (
         <LoadingSpinner />
       ) : order ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Details */}
-          <Card withBorder>
-            <Text size="lg" fw={600} className="mb-4">Order Details</Text>
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+            <Text className="text-2xl font-bold text-gray-900 mb-6">Order Details</Text>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Group justify="space-between">
-                <Text size="sm" c="dimmed">Order Number:</Text>
-                <Text size="sm" fw={600}>{order.order_number}</Text>
+                <Text size="md" className="text-gray-600 font-medium">Order Number:</Text>
+                <Text size="md" fw={700}>{order.order_number}</Text>
               </Group>
 
               <Group justify="space-between">
-                <Text size="sm" c="dimmed">Status:</Text>
+                <Text size="md" className="text-gray-600 font-medium">Status:</Text>
                 <StatusBadge status={order.status} />
               </Group>
 
               <Divider />
 
               <div>
-                <Text size="sm" fw={600} className="mb-2">Customer</Text>
-                <Text size="sm">{order.customer_name}</Text>
-                <Text size="sm" c="dimmed">{order.customer_phone}</Text>
+                <Text size="lg" fw={700} className="mb-3">Customer</Text>
+                <Text size="md" className="font-medium">{order.customer_name}</Text>
+                <Text size="md" className="text-gray-600">{order.customer_phone}</Text>
               </div>
 
               <Divider />
 
               <div>
-                <Text size="sm" fw={600} className="mb-2">Items</Text>
-                <div className="space-y-2">
+                <Text size="lg" fw={700} className="mb-3">Items</Text>
+                <div className="space-y-3">
                   {orderDetails?.items?.map((item: any) => (
-                    <div key={item.id} className="flex justify-between text-sm">
+                    <div key={item.id} className="flex justify-between text-md font-medium">
                       <span>{item.service_name} × {item.quantity}</span>
-                      <span>₦{item.subtotal.toLocaleString()}</span>
+                      <span className="font-bold">₦{item.subtotal.toLocaleString()}</span>
                     </div>
                   ))}
                 </div>
@@ -265,60 +268,60 @@ export default function Pickup() {
               <Divider />
 
               <Group justify="space-between">
-                <Text size="sm" c="dimmed">Pickup Date:</Text>
-                <Text size="sm">{new Date(order.pickup_date).toLocaleDateString()}</Text>
+                <Text size="md" className="text-gray-600 font-medium">Pickup Date:</Text>
+                <Text size="md" fw={600}>{new Date(order.pickup_date).toLocaleDateString()}</Text>
               </Group>
 
               {order.notes && (
                 <>
                   <Divider />
                   <div>
-                    <Text size="sm" fw={600} className="mb-1">Notes:</Text>
-                    <Text size="sm" c="dimmed">{order.notes}</Text>
+                    <Text size="lg" fw={700} className="mb-2">Notes:</Text>
+                    <Text size="md" className="text-gray-600">{order.notes}</Text>
                   </div>
                 </>
               )}
             </div>
-          </Card>
+          </div>
 
           {/* Payment & Collection Section */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Payment Summary */}
-            <Card withBorder className={order.balance > 0 ? "bg-red-50" : "bg-green-50"}>
-              <Text size="sm" fw={600} className="mb-3">Payment Summary</Text>
+            <div className={`rounded-2xl border shadow-md p-8 ${order.balance > 0 ? "bg-red-50 border-red-100" : "bg-green-50 border-green-100"}`}>
+              <Text className="text-xl font-bold text-gray-900 mb-6">Payment Summary</Text>
 
-              <Group justify="space-between" className="mb-2">
-                <Text size="sm">Total Amount:</Text>
-                <Text size="sm" fw={600}>₦{order.total_amount.toLocaleString()}</Text>
+              <Group justify="space-between" className="mb-3">
+                <Text size="md" className="font-medium">Total Amount:</Text>
+                <Text size="md" fw={700}>₦{order.total_amount.toLocaleString()}</Text>
               </Group>
 
-              <Group justify="space-between" className="mb-2">
-                <Text size="sm">Amount Paid:</Text>
-                <Text size="sm">₦{order.amount_paid.toLocaleString()}</Text>
+              <Group justify="space-between" className="mb-3">
+                <Text size="md" className="font-medium">Amount Paid:</Text>
+                <Text size="md" fw={600}>₦{order.amount_paid.toLocaleString()}</Text>
               </Group>
 
-              <Divider className="my-3" />
+              <Divider className="my-4" />
 
               <Group justify="space-between">
-                <Text size="lg" fw={700}>Balance Due:</Text>
+                <Text className="text-2xl font-bold">Balance Due:</Text>
                 <Text 
-                  size="xl" 
-                  fw={700}
+                  className="text-3xl font-bold"
                   c={order.balance > 0 ? "red" : "green"}
                 >
                   ₦{order.balance.toLocaleString()}
                 </Text>
               </Group>
-            </Card>
+            </div>
 
             {/* Payment Section */}
             {order.balance > 0 && order.status !== "COLLECTED" && (
-              <Card withBorder>
-                <Text size="sm" fw={600} className="mb-3">Record Payment</Text>
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+                <Text className="text-xl font-bold text-gray-900 mb-6">Record Payment</Text>
 
-                <div className="space-y-3">
+                <div className="space-y-5">
                   <NumberInput
                     label="Payment Amount"
+                    size="lg"
                     value={paymentAmount}
                     onChange={(value) => setPaymentAmount(value as number || 0)}
                     min={0}
@@ -329,6 +332,7 @@ export default function Pickup() {
 
                   <Select
                     label="Payment Method"
+                    size="lg"
                     value={paymentMethod}
                     onChange={(value) => setPaymentMethod(value || "CASH")}
                     data={[
@@ -341,7 +345,8 @@ export default function Pickup() {
 
                   <Button
                     fullWidth
-                    leftSection={<IconCash size={16} />}
+                    size="lg"
+                    leftSection={<IconCash size={20} />}
                     onClick={handleRecordPayment}
                     loading={isProcessingPayment}
                     disabled={paymentAmount <= 0 || paymentAmount > order.balance}
@@ -349,18 +354,19 @@ export default function Pickup() {
                     Record Payment
                   </Button>
                 </div>
-              </Card>
+              </div>
             )}
 
             {/* Collection Actions */}
-            <Card withBorder>
-              <Text size="sm" fw={600} className="mb-3">Collection Actions</Text>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+              <Text className="text-xl font-bold text-gray-900 mb-6">Collection Actions</Text>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {order.status !== "COLLECTED" && (
                   <Button
                     fullWidth
-                    leftSection={<IconCheck size={16} />}
+                    size="lg"
+                    leftSection={<IconCheck size={20} />}
                     color="green"
                     onClick={handleMarkAsCollected}
                     loading={isCollecting}
@@ -372,26 +378,27 @@ export default function Pickup() {
 
                 <Button
                   fullWidth
+                  size="lg"
                   variant="light"
-                  leftSection={<IconPrinter size={16} />}
+                  leftSection={<IconPrinter size={20} />}
                   onClick={handlePrintReceipt}
                 >
                   Print Receipt
                 </Button>
 
                 {order.balance > 0 && (
-                  <Text size="xs" c="orange" className="text-center mt-2">
+                  <Text size="md" c="orange" className="text-center mt-3 font-semibold">
                     ⚠️ Outstanding balance: ₦{order.balance.toLocaleString()}
                   </Text>
                 )}
 
                 {order.status === "COLLECTED" && (
-                  <Text size="sm" c="green" className="text-center mt-2" fw={600}>
+                  <Text size="lg" c="green" className="text-center mt-3" fw={700}>
                     ✓ Order has been collected
                   </Text>
                 )}
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       ) : !searchError ? (

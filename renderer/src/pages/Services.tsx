@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Button, Group, Text, Card, Modal, ActionIcon, Table } from "@mantine/core"
+import { Button, Group, Text, Modal, ActionIcon, Table } from "@mantine/core"
 import { IconPlus, IconEdit, IconTrash } from "@tabler/icons-react"
 import { 
   LoadingSpinner, 
@@ -65,19 +65,20 @@ export default function Services() {
   }
 
   return (
-    <div className="space-y-6">
-      <Group justify="space-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Services & Pricing</h1>
-          <Text size="sm" c="dimmed">Manage your laundry services and pricing</Text>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Services & Pricing</h1>
+          <Text className="text-lg text-gray-600">Manage your laundry services and pricing</Text>
         </div>
         <Button 
-          leftSection={<IconPlus size={16} />}
+          size="lg"
+          leftSection={<IconPlus size={20} />}
           onClick={handleAddNew}
         >
           Add Service
         </Button>
-      </Group>
+      </div>
 
       {services.length === 0 ? (
         <EmptyState
@@ -88,65 +89,69 @@ export default function Services() {
           onAction={handleAddNew}
         />
       ) : (
-        <Card withBorder>
-          <Table highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Service Name</Table.Th>
-                <Table.Th>Category</Table.Th>
-                <Table.Th>Price</Table.Th>
-                <Table.Th>Description</Table.Th>
-                <Table.Th style={{ width: 100 }}>Actions</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {services.map((service) => (
-                <Table.Tr key={service.id}>
-                  <Table.Td>
-                    <Text fw={500}>{service.name}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm" c="dimmed">
-                      {service.category || "General"}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text fw={600}>₦{service.price.toLocaleString()}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm" c="dimmed" lineClamp={1}>
-                      {service.description || "-"}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap="xs">
-                      <ActionIcon
-                        variant="subtle"
-                        color="blue"
-                        onClick={() => handleEdit(service)}
-                      >
-                        <IconEdit size={16} />
-                      </ActionIcon>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        onClick={() => handleDeleteClick(service)}
-                      >
-                        <IconTrash size={16} />
-                      </ActionIcon>
-                    </Group>
-                  </Table.Td>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md">
+          <div className="p-8">
+            <Table highlightOnHover className="text-base">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th className="text-base font-semibold">Service Name</Table.Th>
+                  <Table.Th className="text-base font-semibold">Category</Table.Th>
+                  <Table.Th className="text-base font-semibold">Price</Table.Th>
+                  <Table.Th className="text-base font-semibold">Description</Table.Th>
+                  <Table.Th style={{ width: 120 }} className="text-base font-semibold">Actions</Table.Th>
                 </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+              </Table.Thead>
+              <Table.Tbody>
+                {services.map((service) => (
+                  <Table.Tr key={service.id} className="hover:bg-gray-50 transition-colors">
+                    <Table.Td>
+                      <Text size="md" fw={600}>{service.name}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="md" className="text-gray-600">
+                        {service.category || "General"}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="md" fw={700} className="text-green-600">₦{service.price.toLocaleString()}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="md" className="text-gray-600" lineClamp={1}>
+                        {service.description || "-"}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap="sm">
+                        <ActionIcon
+                          variant="subtle"
+                          color="blue"
+                          size="lg"
+                          onClick={() => handleEdit(service)}
+                        >
+                          <IconEdit size={20} />
+                        </ActionIcon>
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          size="lg"
+                          onClick={() => handleDeleteClick(service)}
+                        >
+                          <IconTrash size={20} />
+                        </ActionIcon>
+                      </Group>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </div>
 
-          <div className="mt-4 p-4 bg-gray-50 rounded">
+          <div className="p-8 bg-gradient-to-br from-blue-50 to-indigo-50 border-t border-gray-200 rounded-b-2xl">
             <Group justify="space-between">
-              <Text size="sm" c="dimmed">
+              <Text size="lg" className="text-gray-700 font-semibold">
                 Total Services: {services.length}
               </Text>
-              <Text size="sm" fw={600}>
+              <Text size="lg" fw={700} className="text-gray-900">
                 Average Price: ₦
                 {services.length > 0
                   ? Math.round(
@@ -156,7 +161,7 @@ export default function Services() {
               </Text>
             </Group>
           </div>
-        </Card>
+        </div>
       )}
 
       <Modal

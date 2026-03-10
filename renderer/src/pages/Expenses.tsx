@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Button, Group, Text, Card, Table, Badge, Modal, Select, TextInput } from "@mantine/core"
+import { Button, Group, Text, Table, Badge, Modal, Select, TextInput } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { IconPlus, IconRefresh, IconEdit, IconTrash, IconReceipt } from "@tabler/icons-react"
 import { LoadingSpinner, EmptyState, ConfirmDialog } from "../components/common"
@@ -159,16 +159,17 @@ export default function Expenses() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <Group justify="space-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Expense Tracking</h1>
-          <Text size="sm" c="dimmed">Track and manage business expenses</Text>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Expense Tracking</h1>
+          <Text className="text-lg text-gray-600">Track and manage business expenses</Text>
         </div>
         <Group>
           <Button
-            leftSection={<IconRefresh size={16} />}
+            size="lg"
+            leftSection={<IconRefresh size={20} />}
             onClick={fetchExpenses}
             loading={isLoading}
             variant="light"
@@ -176,26 +177,29 @@ export default function Expenses() {
             Refresh
           </Button>
           <Button
-            leftSection={<IconPlus size={16} />}
+            size="lg"
+            leftSection={<IconPlus size={20} />}
             onClick={handleAddNew}
           >
             Add Expense
           </Button>
         </Group>
-      </Group>
+      </div>
 
       {/* Filters */}
-      <Card withBorder>
-        <Text size="sm" fw={600} className="mb-3">Filters</Text>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+        <Text className="text-xl font-bold text-gray-900 mb-6">Filters</Text>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <TextInput
             placeholder="Search by title or notes"
+            size="lg"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
 
           <Select
             placeholder="Category"
+            size="lg"
             value={categoryFilter}
             onChange={(value) => setCategoryFilter(value || "ALL")}
             data={[
@@ -206,6 +210,7 @@ export default function Expenses() {
 
           <DateInput
             placeholder="Start Date"
+            size="lg"
             value={startDate}
             onChange={(value) => setStartDate(value ? new Date(value) : null)}
             clearable
@@ -213,57 +218,58 @@ export default function Expenses() {
 
           <DateInput
             placeholder="End Date"
+            size="lg"
             value={endDate}
             onChange={(value) => setEndDate(value ? new Date(value) : null)}
             clearable
           />
         </div>
-      </Card>
+      </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card withBorder>
-          <Text size="sm" c="dimmed">Total Expenses</Text>
-          <Text size="xl" fw={700}>{filteredExpenses.length}</Text>
-        </Card>
-        <Card withBorder>
-          <Text size="sm" c="dimmed">Total Amount</Text>
-          <Text size="xl" fw={700} c="red">₦{totalExpenses.toLocaleString()}</Text>
-        </Card>
-        <Card withBorder>
-          <Text size="sm" c="dimmed">Average Expense</Text>
-          <Text size="xl" fw={700}>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+          <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Expenses</Text>
+          <Text className="text-4xl font-bold text-gray-900">{filteredExpenses.length}</Text>
+        </div>
+        <div className="bg-red-50 rounded-2xl border border-red-100 shadow-md p-8">
+          <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Total Amount</Text>
+          <Text className="text-4xl font-bold text-red-600">₦{totalExpenses.toLocaleString()}</Text>
+        </div>
+        <div className="bg-blue-50 rounded-2xl border border-blue-100 shadow-md p-8">
+          <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Average Expense</Text>
+          <Text className="text-4xl font-bold text-blue-600">
             ₦{filteredExpenses.length > 0 
               ? Math.round(totalExpenses / filteredExpenses.length).toLocaleString() 
               : 0}
           </Text>
-        </Card>
-        <Card withBorder>
-          <Text size="sm" c="dimmed">Categories</Text>
-          <Text size="xl" fw={700}>{Object.keys(expensesByCategory).length}</Text>
-        </Card>
+        </div>
+        <div className="bg-purple-50 rounded-2xl border border-purple-100 shadow-md p-8">
+          <Text className="text-md text-gray-600 font-semibold mb-2 uppercase tracking-wide">Categories</Text>
+          <Text className="text-4xl font-bold text-purple-600">{Object.keys(expensesByCategory).length}</Text>
+        </div>
       </div>
 
       {/* Category Breakdown */}
       {Object.keys(expensesByCategory).length > 0 && (
-        <Card withBorder>
-          <Text size="sm" fw={600} className="mb-3">Expense by Category</Text>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+          <Text className="text-xl font-bold text-gray-900 mb-6">Expense by Category</Text>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
             {Object.entries(expensesByCategory)
               .sort(([, a], [, b]) => (b as number) - (a as number))
               .map(([category, amount]) => (
-                <div key={category} className="p-3 bg-gray-50 rounded">
-                  <Badge color={getCategoryColor(category)} size="sm" className="mb-1">
+                <div key={category} className="p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+                  <Badge color={getCategoryColor(category)} size="lg" className="mb-3">
                     {category}
                   </Badge>
-                  <Text size="lg" fw={700}>₦{(amount as number).toLocaleString()}</Text>
-                  <Text size="xs" c="dimmed">
+                  <Text className="text-2xl font-bold text-gray-900">₦{(amount as number).toLocaleString()}</Text>
+                  <Text size="sm" className="text-gray-600 font-medium mt-1">
                     {(((amount as number) / totalExpenses) * 100).toFixed(1)}%
                   </Text>
                 </div>
               ))}
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Expenses Table */}
@@ -278,61 +284,61 @@ export default function Expenses() {
           onAction={handleAddNew}
         />
       ) : (
-        <Card withBorder>
-          <Table highlightOnHover>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+          <Table highlightOnHover className="text-base">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Date</Table.Th>
-                <Table.Th>Title</Table.Th>
-                <Table.Th>Category</Table.Th>
-                <Table.Th>Amount</Table.Th>
-                <Table.Th>Notes</Table.Th>
-                <Table.Th style={{ width: 100 }}>Actions</Table.Th>
+                <Table.Th className="text-base font-semibold">Date</Table.Th>
+                <Table.Th className="text-base font-semibold">Title</Table.Th>
+                <Table.Th className="text-base font-semibold">Category</Table.Th>
+                <Table.Th className="text-base font-semibold">Amount</Table.Th>
+                <Table.Th className="text-base font-semibold">Notes</Table.Th>
+                <Table.Th style={{ width: 120 }} className="text-base font-semibold">Actions</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {filteredExpenses.map((expense) => (
-                <Table.Tr key={expense.id}>
+                <Table.Tr key={expense.id} className="hover:bg-gray-50 transition-colors">
                   <Table.Td>
-                    <Text size="sm">
+                    <Text size="md" fw={500}>
                       {new Date(expense.date).toLocaleDateString()}
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" fw={500}>{expense.title}</Text>
+                    <Text size="md" fw={600}>{expense.title}</Text>
                   </Table.Td>
                   <Table.Td>
-                    <Badge color={getCategoryColor(expense.category)} variant="light">
+                    <Badge color={getCategoryColor(expense.category)} variant="light" size="lg">
                       {expense.category}
                     </Badge>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" fw={600} c="red">
+                    <Text size="md" fw={700} className="text-red-600">
                       ₦{expense.amount.toLocaleString()}
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" c="dimmed" lineClamp={1}>
+                    <Text size="md" className="text-gray-600" lineClamp={1}>
                       {expense.notes || "-"}
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Group gap="xs">
+                    <Group gap="sm">
                       <Button
-                        size="xs"
+                        size="sm"
                         variant="subtle"
                         color="blue"
                         onClick={() => handleEdit(expense)}
                       >
-                        <IconEdit size={14} />
+                        <IconEdit size={18} />
                       </Button>
                       <Button
-                        size="xs"
+                        size="sm"
                         variant="subtle"
                         color="red"
                         onClick={() => handleDeleteClick(expense)}
                       >
-                        <IconTrash size={14} />
+                        <IconTrash size={18} />
                       </Button>
                     </Group>
                   </Table.Td>
@@ -340,7 +346,7 @@ export default function Expenses() {
               ))}
             </Table.Tbody>
           </Table>
-        </Card>
+        </div>
       )}
 
       {/* Expense Form Modal */}

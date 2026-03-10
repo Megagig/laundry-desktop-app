@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { Button, Group, Text } from "@mantine/core"
+import { Button, Text } from "@mantine/core"
 import { IconArrowLeft } from "@tabler/icons-react"
 import { OrderForm } from "../components/forms"
 
@@ -16,29 +16,31 @@ export default function CreateOrder() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <Group>
+      <div>
         <Button
           variant="subtle"
-          leftSection={<IconArrowLeft size={16} />}
+          size="lg"
+          leftSection={<IconArrowLeft size={20} />}
           onClick={() => navigate("/orders")}
+          className="mb-6"
         >
           Back to Orders
         </Button>
-      </Group>
 
-      <div>
-        <h1 className="text-2xl font-bold">Create New Order</h1>
-        <Text size="sm" c="dimmed">Fill in the details to create a new order</Text>
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">Create New Order</h1>
+        <Text className="text-lg text-gray-600">Fill in the details to create a new order</Text>
       </div>
 
       {/* Order Form */}
-      <div className="max-w-4xl">
-        <OrderForm
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
-        />
+      <div className="max-w-5xl">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8">
+          <OrderForm
+            onSuccess={handleSuccess}
+            onCancel={handleCancel}
+          />
+        </div>
       </div>
     </div>
   )

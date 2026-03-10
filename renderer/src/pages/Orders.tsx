@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Button, Group, Text, Modal, ActionIcon, Select } from "@mantine/core"
+import { Button, Text, Modal, ActionIcon, Select } from "@mantine/core"
 import { 
   IconPlus, 
   IconSearch, 
@@ -85,7 +85,7 @@ export default function Orders() {
       key: "order_number",
       label: "Order #",
       render: (order: any) => (
-        <Text size="sm" fw={600}>{order.order_number}</Text>
+        <Text size="md" fw={600} className="text-gray-900">{order.order_number}</Text>
       )
     },
     {
@@ -93,8 +93,8 @@ export default function Orders() {
       label: "Customer",
       render: (order: any) => (
         <div>
-          <Text size="sm" fw={500}>{order.customer_name || "N/A"}</Text>
-          <Text size="xs" c="dimmed">{order.customer_phone || ""}</Text>
+          <Text size="md" fw={600} className="text-gray-900">{order.customer_name || "N/A"}</Text>
+          <Text size="sm" className="text-gray-600">{order.customer_phone || ""}</Text>
         </div>
       )
     },
@@ -109,7 +109,7 @@ export default function Orders() {
       key: "total_amount",
       label: "Total",
       render: (order: any) => (
-        <Text size="sm" fw={500}>₦{order.total_amount.toLocaleString()}</Text>
+        <Text size="md" fw={600} className="text-gray-900">₦{order.total_amount.toLocaleString()}</Text>
       )
     },
     {
@@ -117,9 +117,9 @@ export default function Orders() {
       label: "Balance",
       render: (order: any) => (
         <Text 
-          size="sm" 
-          fw={500}
-          c={order.balance > 0 ? "red" : "green"}
+          size="md" 
+          fw={600}
+          className={order.balance > 0 ? "text-red-600" : "text-green-600"}
         >
           ₦{order.balance.toLocaleString()}
         </Text>
@@ -129,33 +129,36 @@ export default function Orders() {
       key: "pickup_date",
       label: "Pickup Date",
       render: (order: any) => (
-        <Text size="sm">{new Date(order.pickup_date).toLocaleDateString()}</Text>
+        <Text size="md" className="text-gray-700">{new Date(order.pickup_date).toLocaleDateString()}</Text>
       )
     },
     {
       key: "actions",
       label: "Actions",
       render: (order: any) => (
-        <Group gap="xs">
+        <div className="flex items-center gap-2">
           <ActionIcon
             variant="subtle"
             color="blue"
+            size="lg"
             onClick={() => handleViewOrder(order)}
           >
-            <IconEye size={16} />
+            <IconEye size={20} />
           </ActionIcon>
           {order.balance > 0 && (
             <ActionIcon
               variant="subtle"
               color="green"
+              size="lg"
               onClick={() => {/* TODO: Open payment modal */}}
             >
-              <IconCash size={16} />
+              <IconCash size={20} />
             </ActionIcon>
           )}
           <ActionIcon
             variant="subtle"
             color="gray"
+            size="lg"
             onClick={async () => {
               try {
                 await window.api.printer.printOrderReceipt(order.id, { preview: false })
@@ -164,9 +167,9 @@ export default function Orders() {
               }
             }}
           >
-            <IconPrinter size={16} />
+            <IconPrinter size={20} />
           </ActionIcon>
-        </Group>
+        </div>
       )
     }
   ]
@@ -176,63 +179,76 @@ export default function Orders() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <Group justify="space-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Orders</h1>
-          <Text size="sm" c="dimmed">Manage all customer orders</Text>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Orders</h1>
+          <Text className="text-lg text-gray-600">Manage all customer orders</Text>
         </div>
         <Button 
-          leftSection={<IconPlus size={16} />}
+          size="lg"
+          leftSection={<IconPlus size={20} />}
           onClick={() => navigate("/orders/new")}
+          className="shadow-md"
         >
           New Order
         </Button>
-      </Group>
+      </div>
 
       {/* Filters */}
-      <Group>
-        <SearchInput
-          placeholder="Search by order # or customer..."
-          onSearch={handleSearch}
-        />
-        <Select
-          placeholder="Filter by status"
-          value={statusFilter}
-          onChange={(value) => setStatusFilter(value || "ALL")}
-          data={[
-            { value: "ALL", label: "All Orders" },
-            { value: "RECEIVED", label: "Received" },
-            { value: "WASHING", label: "Washing" },
-            { value: "DRYING", label: "Drying" },
-            { value: "IRONING", label: "Ironing" },
-            { value: "READY", label: "Ready" },
-            { value: "COLLECTED", label: "Collected" }
-          ]}
-          style={{ width: 200 }}
-        />
-      </Group>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-md">
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <SearchInput
+              placeholder="Search by order # or customer..."
+              onSearch={handleSearch}
+            />
+          </div>
+          <Select
+            placeholder="Filter by status"
+            value={statusFilter}
+            onChange={(value) => setStatusFilter(value || "ALL")}
+            data={[
+              { value: "ALL", label: "All Orders" },
+              { value: "RECEIVED", label: "Received" },
+              { value: "WASHING", label: "Washing" },
+              { value: "DRYING", label: "Drying" },
+              { value: "IRONING", label: "Ironing" },
+              { value: "READY", label: "Ready" },
+              { value: "COLLECTED", label: "Collected" }
+            ]}
+            className="w-64"
+            size="md"
+          />
+        </div>
+      </div>
 
       {/* Orders Table */}
-      {isLoading ? (
-        <LoadingSpinner />
-      ) : filteredOrders.length === 0 ? (
-        <EmptyState
-          icon={<IconSearch size={48} />}
-          title={searchQuery || statusFilter !== "ALL" ? "No orders found" : "No orders yet"}
-          message={searchQuery || statusFilter !== "ALL" ? "Try adjusting your filters" : "Create your first order to get started"}
-          actionLabel={searchQuery || statusFilter !== "ALL" ? undefined : "Create Order"}
-          onAction={searchQuery || statusFilter !== "ALL" ? undefined : () => navigate("/orders/new")}
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={filteredOrders}
-          itemsPerPage={15}
-          keyExtractor={(order: any) => order.id}
-        />
-      )}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+        {isLoading ? (
+          <div className="p-12">
+            <LoadingSpinner />
+          </div>
+        ) : filteredOrders.length === 0 ? (
+          <div className="p-12">
+            <EmptyState
+              icon={<IconSearch size={64} />}
+              title={searchQuery || statusFilter !== "ALL" ? "No orders found" : "No orders yet"}
+              message={searchQuery || statusFilter !== "ALL" ? "Try adjusting your filters" : "Create your first order to get started"}
+              actionLabel={searchQuery || statusFilter !== "ALL" ? undefined : "Create Order"}
+              onAction={searchQuery || statusFilter !== "ALL" ? undefined : () => navigate("/orders/new")}
+            />
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={filteredOrders}
+            itemsPerPage={15}
+            keyExtractor={(order: any) => order.id}
+          />
+        )}
+      </div>
 
       {/* Order Detail Modal */}
       <Modal
@@ -242,77 +258,80 @@ export default function Orders() {
           setSelectedOrder(null)
           setOrderDetails(null)
         }}
-        title="Order Details"
-        size="lg"
+        title={
+          <Text className="text-2xl font-bold text-gray-900">Order Details</Text>
+        }
+        size="xl"
+        padding="xl"
       >
         {loadingDetails ? (
           <LoadingSpinner />
         ) : orderDetails ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Order Info */}
-            <div className="bg-gray-50 p-4 rounded">
-              <Group justify="space-between" className="mb-2">
-                <Text size="lg" fw={600}>{orderDetails.order_number}</Text>
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
+              <div className="flex items-center justify-between mb-3">
+                <Text className="text-2xl font-bold text-gray-900">{orderDetails.order_number}</Text>
                 <StatusBadge status={orderDetails.status} />
-              </Group>
-              <Text size="sm" c="dimmed">
-                Created: {new Date(orderDetails.created_at).toLocaleString()}
-              </Text>
-              <Text size="sm" c="dimmed">
-                Pickup: {new Date(orderDetails.pickup_date).toLocaleDateString()}
-              </Text>
+              </div>
+              <div className="space-y-1">
+                <Text className="text-base text-gray-700">
+                  Created: {new Date(orderDetails.created_at).toLocaleString()}
+                </Text>
+                <Text className="text-base text-gray-700">
+                  Pickup: {new Date(orderDetails.pickup_date).toLocaleDateString()}
+                </Text>
+              </div>
             </div>
 
             {/* Customer Info */}
             <div>
-              <Text size="sm" fw={600} className="mb-2">Customer</Text>
-              <div className="bg-gray-50 p-3 rounded">
-                <Text size="sm" fw={500}>{orderDetails.customer_name}</Text>
-                <Text size="sm" c="dimmed">{orderDetails.customer_phone}</Text>
+              <Text className="text-lg font-bold text-gray-900 mb-3">Customer</Text>
+              <div className="bg-gray-50 p-5 rounded-xl">
+                <Text className="text-base font-semibold text-gray-900">{orderDetails.customer_name}</Text>
+                <Text className="text-base text-gray-600 mt-1">{orderDetails.customer_phone}</Text>
               </div>
             </div>
 
             {/* Order Items */}
             <div>
-              <Text size="sm" fw={600} className="mb-2">Items</Text>
-              <div className="space-y-2">
+              <Text className="text-lg font-bold text-gray-900 mb-3">Items</Text>
+              <div className="space-y-3">
                 {orderDetails.items?.map((item: any) => (
-                  <div key={item.id} className="flex justify-between items-center bg-gray-50 p-3 rounded">
+                  <div key={item.id} className="flex justify-between items-center bg-gray-50 p-5 rounded-xl">
                     <div>
-                      <Text size="sm" fw={500}>{item.service_name}</Text>
-                      <Text size="xs" c="dimmed">Qty: {item.quantity} × ₦{item.price.toLocaleString()}</Text>
+                      <Text className="text-base font-semibold text-gray-900">{item.service_name}</Text>
+                      <Text className="text-sm text-gray-600 mt-1">Qty: {item.quantity} × ₦{item.price.toLocaleString()}</Text>
                     </div>
-                    <Text size="sm" fw={600}>₦{item.subtotal.toLocaleString()}</Text>
+                    <Text className="text-lg font-bold text-gray-900">₦{item.subtotal.toLocaleString()}</Text>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Payment Summary */}
-            <div className="bg-blue-50 p-4 rounded">
-              <Group justify="space-between" className="mb-2">
-                <Text size="sm">Total Amount:</Text>
-                <Text size="sm" fw={600}>₦{orderDetails.total_amount.toLocaleString()}</Text>
-              </Group>
-              <Group justify="space-between" className="mb-2">
-                <Text size="sm">Amount Paid:</Text>
-                <Text size="sm">₦{orderDetails.amount_paid.toLocaleString()}</Text>
-              </Group>
-              <Group justify="space-between">
-                <Text size="sm" fw={700}>Balance:</Text>
+            <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
+              <div className="flex items-center justify-between mb-3">
+                <Text className="text-base text-gray-700">Total Amount:</Text>
+                <Text className="text-base font-semibold text-gray-900">₦{orderDetails.total_amount.toLocaleString()}</Text>
+              </div>
+              <div className="flex items-center justify-between mb-3">
+                <Text className="text-base text-gray-700">Amount Paid:</Text>
+                <Text className="text-base text-gray-900">₦{orderDetails.amount_paid.toLocaleString()}</Text>
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-blue-200">
+                <Text className="text-lg font-bold text-gray-900">Balance:</Text>
                 <Text 
-                  size="lg" 
-                  fw={700}
-                  c={orderDetails.balance > 0 ? "red" : "green"}
+                  className={`text-2xl font-bold ${orderDetails.balance > 0 ? "text-red-600" : "text-green-600"}`}
                 >
                   ₦{orderDetails.balance.toLocaleString()}
                 </Text>
-              </Group>
+              </div>
             </div>
 
             {/* Status Update */}
             <div>
-              <Text size="sm" fw={600} className="mb-2">Update Status</Text>
+              <Text className="text-lg font-bold text-gray-900 mb-3">Update Status</Text>
               <Select
                 value={orderDetails.status}
                 onChange={(value) => value && handleStatusChange(orderDetails.id, value)}
@@ -324,22 +343,24 @@ export default function Orders() {
                   { value: "READY", label: "Ready for Pickup" },
                   { value: "COLLECTED", label: "Collected" }
                 ]}
+                size="md"
               />
             </div>
 
             {/* Notes */}
             {orderDetails.notes && (
               <div>
-                <Text size="sm" fw={600} className="mb-2">Notes</Text>
-                <Text size="sm" className="bg-gray-50 p-3 rounded">{orderDetails.notes}</Text>
+                <Text className="text-lg font-bold text-gray-900 mb-3">Notes</Text>
+                <Text className="text-base bg-gray-50 p-5 rounded-xl text-gray-700">{orderDetails.notes}</Text>
               </div>
             )}
 
             {/* Actions */}
-            <Group justify="flex-end">
+            <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
               {orderDetails.balance > 0 && (
                 <Button
-                  leftSection={<IconCash size={16} />}
+                  size="lg"
+                  leftSection={<IconCash size={20} />}
                   variant="light"
                   color="green"
                   onClick={() => {/* TODO: Open payment modal */}}
@@ -348,7 +369,8 @@ export default function Orders() {
                 </Button>
               )}
               <Button
-                leftSection={<IconPrinter size={16} />}
+                size="lg"
+                leftSection={<IconPrinter size={20} />}
                 variant="light"
                 onClick={async () => {
                   if (selectedOrder) {
@@ -362,7 +384,7 @@ export default function Orders() {
               >
                 Print Receipt
               </Button>
-            </Group>
+            </div>
           </div>
         ) : null}
       </Modal>
