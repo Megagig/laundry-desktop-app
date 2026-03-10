@@ -8,8 +8,8 @@ export default function AppLayout({ children }: any) {
     <div className="flex h-screen">
       <Sidebar />
 
-      <main className="flex-1 p-10 bg-gray-50 overflow-auto">
-        <div className="w-full">
+      <main className="flex-1 bg-gray-50 overflow-auto">
+        <div className="w-full h-full px-8 py-6">
           {children}
         </div>
       </main>
