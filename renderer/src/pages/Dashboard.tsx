@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Button, Text, Table, Badge, ActionIcon } from "@mantine/core"
+import { Button, Text, Badge, ActionIcon } from "@mantine/core"
 import { 
   IconRefresh, 
   IconPlus, 
@@ -7,8 +7,7 @@ import {
   IconUsers, 
   IconCash, 
   IconAlertCircle,
-  IconTrendingUp,
-  IconEye
+  IconTrendingUp
 } from "@tabler/icons-react"
 import { useNavigate } from "react-router-dom"
 import { useReportStore, useOrderStore } from "../store"
@@ -60,7 +59,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -88,10 +87,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Primary Metrics */}
+      {/* Primary Metrics - Full Width 4 Columns */}
       <div>
         <Text className="text-sm font-bold text-gray-700 mb-6 uppercase tracking-wider">Today's Overview</Text>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-4 gap-6">
           <StatCard
             title="Orders Today"
             value={dashboardMetrics?.total_orders_today || 0}
@@ -119,10 +118,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Secondary Metrics */}
+      {/* Secondary Metrics - Full Width 2 Columns */}
       <div>
         <Text className="text-sm font-bold text-gray-700 mb-6 uppercase tracking-wider">Business Metrics</Text>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-2 gap-6">
           <StatCard
             title="Total Customers"
             value={dashboardMetrics?.total_customers || 0}
@@ -138,11 +137,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Widgets Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Orders Widget */}
+      {/* Widgets Row - 2 Column Layout (Full Width) */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Recent Orders Widget - Left Column */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md">
-          <div className="flex items-center justify-between p-8 border-b border-gray-100">
+          <div className="flex items-center justify-between p-6 border-b border-gray-100">
             <Text className="text-xl font-bold text-gray-900">Recent Orders</Text>
             <Button 
               variant="subtle" 
@@ -153,144 +152,111 @@ export default function Dashboard() {
             </Button>
           </div>
 
-          <div className="p-8">
+          <div className="p-6">
             {recentOrders.length === 0 ? (
               <EmptyState
-                icon={<IconReceipt size={56} />}
+                icon={<IconReceipt size={48} />}
                 title="No orders yet"
                 message="Create your first order to get started"
                 actionLabel="Create Order"
                 onAction={() => navigate("/orders/new")}
               />
             ) : (
-              <Table className="text-base">
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th className="text-base font-semibold">Order #</Table.Th>
-                    <Table.Th className="text-base font-semibold">Status</Table.Th>
-                    <Table.Th className="text-base font-semibold">Amount</Table.Th>
-                    <Table.Th></Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {recentOrders.map(order => (
-                    <Table.Tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                      <Table.Td>
-                        <Text size="md" fw={600}>{order.order_number}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <StatusBadge status={order.status} />
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="md" className="font-semibold">₦{order.total_amount.toLocaleString()}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <ActionIcon 
-                          variant="subtle" 
-                          size="lg"
-                          onClick={() => navigate(`/orders/${order.id}`)}
-                        >
-                          <IconEye size={20} />
-                        </ActionIcon>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
+              <div className="space-y-3">
+                {recentOrders.map(order => (
+                  <div 
+                    key={order.id} 
+                    className="flex items-center justify-between p-5 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/orders/${order.id}`)}
+                  >
+                    <div className="flex-1">
+                      <Text size="lg" fw={700} className="mb-2">{order.order_number}</Text>
+                      <StatusBadge status={order.status} />
+                    </div>
+                    <Text className="text-xl font-bold text-gray-900">₦{order.total_amount.toLocaleString()}</Text>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
 
-        {/* Pending Pickups Widget */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-md">
-          <div className="flex items-center justify-between p-8 border-b border-gray-100">
-            <Text className="text-xl font-bold text-gray-900">Pending Pickups</Text>
-            <Badge color="orange" variant="light" size="xl" className="text-base px-4 py-2">
-              {pendingPickups.length}
-            </Badge>
-          </div>
+        {/* Right Column - Pending Pickups + Quick Actions */}
+        <div className="space-y-6">
+          {/* Pending Pickups Widget */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-md">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <Text className="text-xl font-bold text-gray-900">Pending Pickups</Text>
+              <Badge color="orange" variant="light" size="lg" className="text-base px-3 py-1">
+                {pendingPickups.length}
+              </Badge>
+            </div>
 
-          <div className="p-8">
-            {pendingPickups.length === 0 ? (
-              <EmptyState
-                icon={<IconUsers size={56} />}
-                title="No pending pickups"
-                message="All orders have been collected"
-              />
-            ) : (
-              <Table className="text-base">
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th className="text-base font-semibold">Order #</Table.Th>
-                    <Table.Th className="text-base font-semibold">Pickup Date</Table.Th>
-                    <Table.Th className="text-base font-semibold">Balance</Table.Th>
-                    <Table.Th></Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {pendingPickups.slice(0, 5).map(order => (
-                    <Table.Tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                      <Table.Td>
-                        <Text size="md" fw={600}>{order.order_number}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="md" className="text-gray-600 font-medium">
-                          {new Date(order.pickup_date).toLocaleDateString()}
-                        </Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text 
-                          size="md" 
-                          className={`font-semibold ${order.balance > 0 ? "text-red-600" : "text-green-600"}`}
-                        >
-                          ₦{order.balance.toLocaleString()}
-                        </Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <ActionIcon 
-                          variant="subtle" 
-                          size="lg"
-                          onClick={() => navigate(`/orders/${order.id}`)}
-                        >
-                          <IconEye size={20} />
-                        </ActionIcon>
-                      </Table.Td>
-                    </Table.Tr>
+            <div className="p-6">
+              {pendingPickups.length === 0 ? (
+                <EmptyState
+                  icon={<IconUsers size={48} />}
+                  title="No pending pickups"
+                  message="All orders collected"
+                />
+              ) : (
+                <div className="space-y-3">
+                  {pendingPickups.slice(0, 3).map(order => (
+                    <div 
+                      key={order.id} 
+                      className="p-5 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => navigate(`/orders/${order.id}`)}
+                    >
+                      <Text size="lg" fw={700} className="mb-2">{order.order_number}</Text>
+                      <Text size="md" className="text-gray-600 mb-2">
+                        {new Date(order.pickup_date).toLocaleDateString()}
+                      </Text>
+                      <Text 
+                        size="lg" 
+                        fw={700}
+                        className={order.balance > 0 ? "text-red-600" : "text-green-600"}
+                      >
+                        ₦{order.balance.toLocaleString()}
+                      </Text>
+                    </div>
                   ))}
-                </Table.Tbody>
-              </Table>
-            )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-8 shadow-md">
-        <Text className="text-xl font-bold text-gray-900 mb-6">Quick Actions</Text>
-        <div className="flex flex-wrap gap-4">
-          <Button 
-            size="lg"
-            leftSection={<IconPlus size={20} />}
-            onClick={() => navigate("/orders/new")}
-          >
-            New Order
-          </Button>
-          <Button 
-            size="lg"
-            variant="light"
-            leftSection={<IconUsers size={20} />}
-            onClick={() => navigate("/customers")}
-          >
-            Manage Customers
-          </Button>
-          <Button 
-            size="lg"
-            variant="light"
-            leftSection={<IconReceipt size={20} />}
-            onClick={() => navigate("/orders")}
-          >
-            View All Orders
-          </Button>
+          {/* Quick Actions Card */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-6 shadow-md">
+            <Text className="text-lg font-bold text-gray-900 mb-4">Quick Actions</Text>
+            <div className="space-y-3">
+              <Button 
+                fullWidth
+                size="lg"
+                leftSection={<IconPlus size={20} />}
+                onClick={() => navigate("/orders/new")}
+              >
+                New Order
+              </Button>
+              <Button 
+                fullWidth
+                size="lg"
+                variant="light"
+                leftSection={<IconUsers size={20} />}
+                onClick={() => navigate("/customers")}
+              >
+                Customers
+              </Button>
+              <Button 
+                fullWidth
+                size="lg"
+                variant="light"
+                leftSection={<IconReceipt size={20} />}
+                onClick={() => navigate("/pickup")}
+              >
+                Pickup
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
