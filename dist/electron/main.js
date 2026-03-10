@@ -27,8 +27,8 @@ registerReportHandlers();
 let mainWindow;
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 1400,
-        height: 900,
+        width: 1920,
+        height: 1080,
         webPreferences: {
             preload: path.join(__dirname, "preload.cjs"),
             contextIsolation: true,
@@ -36,6 +36,8 @@ function createWindow() {
             sandbox: false // Disable sandbox to allow ES modules in preload
         }
     });
+    // Maximize window on startup
+    mainWindow.maximize();
     // Always load from Vite dev server in development
     // Check if running from dist folder (development mode)
     const isDev = !app.isPackaged;
