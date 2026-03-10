@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button, Text, Select, Tabs } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { IconRefresh, IconFileAnalytics, IconCash, IconReceipt, IconTrendingUp } from "@tabler/icons-react"
@@ -20,6 +20,26 @@ export default function Reports() {
   const [expenseData, setExpenseData] = useState<any>(null)
   const [profitLossData, setProfitLossData] = useState<any>(null)
   const [outstandingData, setOutstandingData] = useState<any>(null)
+
+  // Auto-fetch data when component loads or when tab/dates change
+  useEffect(() => {
+    if (startDate && endDate && activeTab) {
+      switch (activeTab) {
+        case "revenue":
+          fetchRevenueReport()
+          break
+        case "expenses":
+          fetchExpenseReport()
+          break
+        case "profitloss":
+          fetchProfitLossReport()
+          break
+        case "outstanding":
+          fetchOutstandingReport()
+          break
+      }
+    }
+  }, [activeTab, startDate, endDate])
 
   const handlePeriodChange = (period: string) => {
     setReportPeriod(period)

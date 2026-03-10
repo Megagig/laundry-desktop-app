@@ -70,6 +70,12 @@ export default function ExpenseForm({ expense, onSuccess, onCancel }: ExpenseFor
 
     if (!formData.date) {
       newErrors.date = "Please select a date"
+    } else {
+      // Validate that date is a valid Date object or can be converted to one
+      const dateValue = formData.date instanceof Date ? formData.date : new Date(formData.date)
+      if (isNaN(dateValue.getTime())) {
+        newErrors.date = "Please select a valid date"
+      }
     }
 
     setErrors(newErrors)
@@ -84,6 +90,10 @@ export default function ExpenseForm({ expense, onSuccess, onCancel }: ExpenseFor
     setIsLoading(true)
 
     try {
+      // Ensure date is a proper Date object and format it correctly
+      const dateValue = formData.date instanceof Date ? formData.date : new Date(formData.date)
+      const formattedDate = dateValue.toISOString().split("T")[0]
+
       let result
       if (expense) {
         result = await window.api.expense.update({
@@ -91,7 +101,7 @@ export default function ExpenseForm({ expense, onSuccess, onCancel }: ExpenseFor
           title: formData.title,
           amount: formData.amount,
           category: formData.category,
-          date: formData.date.toISOString().split("T")[0],
+          date: formattedDate,
           notes: formData.notes || undefined
         })
       } else {
@@ -99,7 +109,7 @@ export default function ExpenseForm({ expense, onSuccess, onCancel }: ExpenseFor
           title: formData.title,
           amount: formData.amount,
           category: formData.category,
-          date: formData.date.toISOString().split("T")[0],
+          date: formattedDate,
           notes: formData.notes || undefined
         })
       }
@@ -126,7 +136,14 @@ export default function ExpenseForm({ expense, onSuccess, onCancel }: ExpenseFor
   }
 
   const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    // Special handling for date field to ensure it's always a Date object
+    if (field === "date") {
+      const dateValue = value ? (value instanceof Date ? value : new Date(value)) : new Date()
+      setFormData(prev => ({ ...prev, [field]: dateValue }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
+    
     // Clear error for this field
     if (errors[field]) {
       setErrors(prev => {
@@ -177,7 +194,7 @@ export default function ExpenseForm({ expense, onSuccess, onCancel }: ExpenseFor
         label="Date"
         placeholder="Select date"
         value={formData.date}
-        onChange={(value) => handleChange("date", value || new Date())}
+        onChange={(value) => handleChange("date", value)}
         error={errors.date}
         required
         disabled={isLoading}

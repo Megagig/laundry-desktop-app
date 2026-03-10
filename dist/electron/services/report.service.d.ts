@@ -7,10 +7,10 @@ export declare class ReportService {
     getOutstandingBalances(): Promise<OutstandingBalance[]>;
     getProfitLossReport(startDate: string, endDate: string): Promise<{
         period: string;
-        total_revenue: number;
-        total_expenses: number;
-        profit: number;
-        profit_margin: number;
+        totalRevenue: number;
+        totalExpenses: number;
+        netProfit: number;
+        profitMargin: number;
     }>;
     getTopCustomers(limit?: number): Promise<{
         id: number;

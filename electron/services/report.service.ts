@@ -200,12 +200,12 @@ export class ReportService {
   }
 
   async getProfitLossReport(startDate: string, endDate: string) {
-    // Get total revenue
+    // Get total revenue for the date range
     const revenue = await prisma.order.aggregate({
       where: {
         created_at: {
           gte: new Date(startDate),
-          lte: new Date(endDate)
+          lte: new Date(endDate + 'T23:59:59.999Z') // Include the entire end date
         }
       },
       _sum: {
@@ -222,10 +222,10 @@ export class ReportService {
 
     return {
       period: `${startDate} to ${endDate}`,
-      total_revenue: totalRevenue,
-      total_expenses: expenses,
-      profit,
-      profit_margin: Math.round(profitMargin * 100) / 100
+      totalRevenue: totalRevenue,
+      totalExpenses: expenses,
+      netProfit: profit,
+      profitMargin: Math.round(profitMargin * 100) / 100
     }
   }
 

@@ -19,13 +19,20 @@ async function initializePrinter() {
     const printers = await receiptPrinter.getAvailablePrinters()
     printerInitialized = true
     printerError = null
-    console.log(`✓ Printer system initialized. Found ${printers.length} printer(s)`)
-    return { success: true, printers }
+    
+    if (printers.length === 0) {
+      console.log(`✓ Printer system initialized with browser fallback (no printers detected)`)
+      return { success: true, printers: [], fallbackMode: true }
+    } else {
+      console.log(`✓ Printer system initialized. Found ${printers.length} printer(s)`)
+      return { success: true, printers }
+    }
   } catch (error: any) {
     printerError = error.message
     printerInitialized = true
-    console.warn(`⚠ Printer system unavailable: ${error.message}`)
-    return { success: false, error: error.message }
+    console.log(`✓ Printer system initialized with browser fallback (${error.message})`)
+    // Don't treat this as an error - browser fallback is available
+    return { success: true, printers: [], fallbackMode: true, warning: error.message }
   }
 }
 
@@ -35,14 +42,23 @@ async function initializePrinter() {
 ipcMain.handle("printer:get-printers", async () => {
   try {
     const initResult = await initializePrinter()
-    if (!initResult.success) {
-      return { success: false, error: initResult.error || "Printer system unavailable" }
-    }
-
+    
+    // Always return success - browser fallback is available
     const printers = await receiptPrinter.getAvailablePrinters()
-    return { success: true, data: printers }
+    return { 
+      success: true, 
+      data: printers,
+      fallbackMode: printers.length === 0,
+      warning: initResult.warning
+    }
   } catch (error: any) {
-    return { success: false, error: error.message }
+    // Even if there's an error, browser fallback is available
+    return { 
+      success: true, 
+      data: [], 
+      fallbackMode: true,
+      warning: `No printers available: ${error.message}. Browser printing will be used.`
+    }
   }
 })
 

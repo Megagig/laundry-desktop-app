@@ -59,6 +59,430 @@ interface PaymentReceiptData {
 
 export class ReceiptPrinter {
   private defaultPrinter: string | null = null
+  /**
+   * Safe print function that handles different PosPrinter module structures
+   */
+  private async safePrint(receiptData: any[], printOptions: any): Promise<void> {
+    // Try different ways to access the print function
+    let printFunction;
+    
+    if (typeof PosPrinter.print === 'function') {
+      printFunction = PosPrinter.print;
+    } else if (PosPrinter.default && typeof PosPrinter.default.print === 'function') {
+      printFunction = PosPrinter.default.print;
+    } else if (PosPrinter.PosPrinter && typeof PosPrinter.PosPrinter.print === 'function') {
+      printFunction = PosPrinter.PosPrinter.print;
+    } else {
+      // If no print function is available, use browser window fallback
+      console.warn("PosPrinter.print function not available, using browser fallback");
+      const result = await this.printWithBrowserFallback(receiptData, printOptions);
+      if (!result.success) {
+        throw new Error(result.error || "Printing failed");
+      }
+      return;
+    }
+
+    try {
+      await printFunction(receiptData, printOptions);
+    } catch (error: any) {
+      console.warn("POS printer failed, falling back to browser printing:", error.message);
+      
+      // If POS printing fails, try browser fallback
+      const result = await this.printWithBrowserFallback(receiptData, printOptions);
+      if (!result.success) {
+        throw new Error(`POS printer failed: ${error.message}. Browser fallback also failed: ${result.error}`);
+      }
+    }
+  }
+
+  /**
+   * Browser fallback for printing when PosPrinter is not available
+   */
+  private async printWithBrowserFallback(
+    receiptData: any[],
+    options: any
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Create HTML content from receipt data
+      let htmlContent = `
+        <html>
+          <head>
+            <title>Receipt</title>
+            <style>
+              body { 
+                font-family: 'Courier New', monospace; 
+                margin: 20px; 
+                background: white;
+                color: black;
+              }
+              .receipt { 
+                max-width: 300px; 
+                margin: 0 auto; 
+                padding: 20px;
+                border: 1px solid #ccc;
+                background: white;
+              }
+              .no-print { 
+                text-align: center; 
+                margin: 20px 0; 
+                padding: 10px; 
+                background: #f0f0f0; 
+                border: 1px solid #ddd;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="no-print">
+              <h3>Receipt Preview</h3>
+              <p>No printer detected. This is a preview of your receipt.</p>
+              <p>You can save this page as PDF using Ctrl+P → Save as PDF</p>
+            </div>
+            <div class="receipt">
+      `;
+
+      receiptData.forEach(item => {
+        if (item.type === 'text') {
+          // Convert style object to CSS string for HTML
+          let cssStyle = '';
+          if (item.style && typeof item.style === 'object') {
+            cssStyle = Object.entries(item.style).map(([key, value]) => {
+              // Convert camelCase to kebab-case
+              const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+              const cssValue = typeof value === 'number' && 
+                (key.includes('font') || key.includes('margin') || key.includes('padding')) 
+                ? `${value}px` : value;
+              return `${cssKey}: ${cssValue}`;
+            }).join('; ');
+          }
+          htmlContent += `<div style="${cssStyle}">${item.value}</div>`;
+        }
+      });
+
+      htmlContent += `
+            </div>
+            <div class="no-print" style="margin-top: 20px;">
+              <button onclick="window.print()" style="padding: 10px 20px; font-size: 14px;">
+                Save as PDF / Print
+              </button>
+              <button onclick="window.close()" style="padding: 10px 20px; font-size: 14px; margin-left: 10px;">
+                Close
+              </button>
+            </div>
+          </body>
+        </html>
+      `;
+
+      // Create a new window for printing
+      const printWindow = new BrowserWindow({
+        width: 500,
+        height: 700,
+        show: true, // Show the window so user can see the receipt
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true
+        },
+        title: 'Receipt Preview'
+      });
+
+      await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+      
+      // Don't auto-print if no printers available, just show the preview
+      // The user can manually print/save as PDF from the window
+      
+      return { success: true };
+    } catch (error: any) {
+      console.error("Browser fallback printing failed:", error);
+      return { 
+        success: false, 
+        error: "Unable to display receipt preview. Please check your system configuration." 
+      };
+    }
+  }
+
+  /**
+   * Browser fallback for order receipts
+   */
+  private async printOrderReceiptWithBrowserFallback(
+    data: ReceiptData,
+    options: PrinterOptions = {}
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const receiptData: any[] = [
+        {
+          type: "text",
+          value: data.shopName,
+          style: { fontWeight: 700, textAlign: 'center', fontSize: 18, marginTop: 10 }
+        },
+        {
+          type: "text",
+          value: data.shopAddress,
+          style: { textAlign: 'center', fontSize: 12 }
+        },
+        {
+          type: "text",
+          value: `Tel: ${data.shopPhone}`,
+          style: { textAlign: 'center', fontSize: 12, marginBottom: 10 }
+        },
+        {
+          type: "text",
+          value: "================================",
+          style: { textAlign: 'center' }
+        },
+        {
+          type: "text",
+          value: "ORDER RECEIPT",
+          style: { fontWeight: 700, textAlign: 'center', fontSize: 16, marginTop: 10, marginBottom: 10 }
+        },
+        {
+          type: "text",
+          value: `Order #: ${data.orderNumber}`,
+          style: { fontWeight: 600, fontSize: 14 }
+        },
+        {
+          type: "text",
+          value: `Date: ${data.orderDate}`,
+          style: { fontSize: 12 }
+        },
+        {
+          type: "text",
+          value: `Pickup Date: ${data.pickupDate}`,
+          style: { fontSize: 12, marginBottom: 10 }
+        },
+        {
+          type: "text",
+          value: "--------------------------------",
+          style: { textAlign: 'center' }
+        },
+        {
+          type: "text",
+          value: "CUSTOMER DETAILS",
+          style: { fontWeight: 600, fontSize: 13, marginTop: 10 }
+        },
+        {
+          type: "text",
+          value: `Name: ${data.customerName}`,
+          style: { fontSize: 12 }
+        },
+        {
+          type: "text",
+          value: `Phone: ${data.customerPhone}`,
+          style: { fontSize: 12, marginBottom: 10 }
+        },
+        {
+          type: "text",
+          value: "--------------------------------",
+          style: { textAlign: 'center' }
+        },
+        {
+          type: "text",
+          value: "ITEMS",
+          style: { fontWeight: 600, fontSize: 13, marginTop: 10, marginBottom: 5 }
+        }
+      ]
+
+      // Add items
+      data.items.forEach((item) => {
+        receiptData.push({
+          type: "text",
+          value: `${item.service_name} x ${item.quantity}`,
+          style: { fontSize: 12 }
+        })
+        receiptData.push({
+          type: "text",
+          value: `  ₦${item.price.toLocaleString()} x ${item.quantity} = ₦${item.subtotal.toLocaleString()}`,
+          style: { fontSize: 11, marginBottom: 5 }
+        })
+      })
+
+      // Add totals
+      receiptData.push(
+        {
+          type: "text",
+          value: "================================",
+          style: { textAlign: 'center', marginTop: 10 }
+        },
+        {
+          type: "text",
+          value: `TOTAL AMOUNT: ₦${data.totalAmount.toLocaleString()}`,
+          style: { fontWeight: 700, fontSize: 14, marginTop: 5 }
+        },
+        {
+          type: "text",
+          value: `Amount Paid: ₦${data.amountPaid.toLocaleString()}`,
+          style: { fontSize: 13 }
+        },
+        {
+          type: "text",
+          value: `Balance Due: ₦${data.balance.toLocaleString()}`,
+          style: { 
+            fontSize: 13, 
+            fontWeight: data.balance > 0 ? 700 : 400, 
+            color: data.balance > 0 ? '#d32f2f' : '#2e7d32', 
+            marginBottom: 10 
+          }
+        }
+      )
+
+      // Add notes if present
+      if (data.notes) {
+        receiptData.push(
+          {
+            type: "text",
+            value: "--------------------------------",
+            style: { textAlign: 'center' }
+          },
+          {
+            type: "text",
+            value: "NOTES:",
+            style: { fontWeight: 600, fontSize: 12, marginTop: 5 }
+          },
+          {
+            type: "text",
+            value: data.notes,
+            style: { fontSize: 11, marginBottom: 10 }
+          }
+        )
+      }
+
+      // Add footer
+      receiptData.push(
+        {
+          type: "text",
+          value: "================================",
+          style: { textAlign: 'center', marginTop: 10 }
+        },
+        {
+          type: "text",
+          value: data.footerMessage || "Thank you for your business!",
+          style: { textAlign: 'center', fontSize: 12, marginTop: 10 }
+        },
+        {
+          type: "text",
+          value: "Please keep this receipt for collection",
+          style: { textAlign: 'center', fontSize: 11, fontStyle: 'italic', marginBottom: 20 }
+        }
+      )
+
+      return await this.printWithBrowserFallback(receiptData, options);
+    } catch (error: any) {
+      console.error("Error creating order receipt for browser fallback:", error);
+      return { 
+        success: false, 
+        error: error.message || "Failed to create receipt preview" 
+      };
+    }
+  }
+
+  /**
+   * Browser fallback for payment receipts
+   */
+  private async printPaymentReceiptWithBrowserFallback(
+    data: PaymentReceiptData,
+    options: PrinterOptions = {}
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const receiptData: any[] = [
+        {
+          type: "text",
+          value: data.shopName,
+          style: { fontWeight: 700, textAlign: 'center', fontSize: 18, marginTop: 10 }
+        },
+        {
+          type: "text",
+          value: data.shopAddress,
+          style: { textAlign: 'center', fontSize: 12 }
+        },
+        {
+          type: "text",
+          value: `Tel: ${data.shopPhone}`,
+          style: { textAlign: 'center', fontSize: 12, marginBottom: 10 }
+        },
+        {
+          type: "text",
+          value: "================================",
+          style: { textAlign: 'center' }
+        },
+        {
+          type: "text",
+          value: "PAYMENT RECEIPT",
+          style: { fontWeight: 700, textAlign: 'center', fontSize: 16, marginTop: 10, marginBottom: 10 }
+        },
+        {
+          type: "text",
+          value: `Order #: ${data.orderNumber}`,
+          style: { fontWeight: 600, fontSize: 14 }
+        },
+        {
+          type: "text",
+          value: `Customer: ${data.customerName}`,
+          style: { fontSize: 12 }
+        },
+        {
+          type: "text",
+          value: `Date: ${data.paymentDate}`,
+          style: { fontSize: 12, marginBottom: 10 }
+        },
+        {
+          type: "text",
+          value: "--------------------------------",
+          style: { textAlign: 'center' }
+        },
+        {
+          type: "text",
+          value: "PAYMENT DETAILS",
+          style: { fontWeight: 600, fontSize: 13, marginTop: 10 }
+        },
+        {
+          type: "text",
+          value: `Payment Method: ${data.paymentMethod}`,
+          style: { fontSize: 12 }
+        },
+        {
+          type: "text",
+          value: `Amount Paid: ₦${data.paymentAmount.toLocaleString()}`,
+          style: { fontSize: 13, fontWeight: 700, marginTop: 5 }
+        },
+        {
+          type: "text",
+          value: "--------------------------------",
+          style: { textAlign: 'center', marginTop: 10 }
+        },
+        {
+          type: "text",
+          value: `Previous Balance: ₦${data.previousBalance.toLocaleString()}`,
+          style: { fontSize: 12 }
+        },
+        {
+          type: "text",
+          value: `New Balance: ₦${data.newBalance.toLocaleString()}`,
+          style: { 
+            fontSize: 13, 
+            fontWeight: 700, 
+            color: data.newBalance > 0 ? '#d32f2f' : '#2e7d32', 
+            marginBottom: 10 
+          }
+        },
+        {
+          type: "text",
+          value: "================================",
+          style: { textAlign: 'center', marginTop: 10 }
+        },
+        {
+          type: "text",
+          value: data.footerMessage || "Thank you for your payment!",
+          style: { textAlign: 'center', fontSize: 12, marginTop: 10, marginBottom: 20 }
+        }
+      ]
+
+      return await this.printWithBrowserFallback(receiptData, options);
+    } catch (error: any) {
+      console.error("Error creating payment receipt for browser fallback:", error);
+      return { 
+        success: false, 
+        error: error.message || "Failed to create receipt preview" 
+      };
+    }
+  }
 
   /**
    * Get list of available printers
@@ -105,7 +529,6 @@ export class ReceiptPrinter {
   getDefaultPrinter(): string | null {
     return this.defaultPrinter
   }
-
   /**
    * Print order receipt
    */
@@ -113,11 +536,10 @@ export class ReceiptPrinter {
     data: ReceiptData,
     options: PrinterOptions = {}
   ): Promise<{ success: boolean; error?: string }> {
+    // Always try to print, even if PosPrinter is not available (use browser fallback)
     if (!printerAvailable || !PosPrinter) {
-      return { 
-        success: false, 
-        error: "Printer system not available. Please check if electron-pos-printer is properly installed." 
-      }
+      console.warn("PosPrinter not available, using browser fallback for order receipt");
+      return await this.printOrderReceiptWithBrowserFallback(data, options);
     }
 
     try {
@@ -127,72 +549,72 @@ export class ReceiptPrinter {
         {
           type: "text",
           value: data.shopName,
-          style: `font-weight: 700; text-align: center; font-size: 18px; margin-top: 10px;`
+          style: { fontWeight: 700, textAlign: 'center', fontSize: 18, marginTop: 10 }
         },
         {
           type: "text",
           value: data.shopAddress,
-          style: `text-align: center; font-size: 12px;`
+          style: { textAlign: 'center', fontSize: 12 }
         },
         {
           type: "text",
           value: `Tel: ${data.shopPhone}`,
-          style: `text-align: center; font-size: 12px; margin-bottom: 10px;`
+          style: { textAlign: 'center', fontSize: 12, marginBottom: 10 }
         },
         {
           type: "text",
           value: "================================",
-          style: `text-align: center;`
+          style: { textAlign: 'center' }
         },
         {
           type: "text",
           value: "ORDER RECEIPT",
-          style: `font-weight: 700; text-align: center; font-size: 16px; margin-top: 10px; margin-bottom: 10px;`
+          style: { fontWeight: 700, textAlign: 'center', fontSize: 16, marginTop: 10, marginBottom: 10 }
         },
         {
           type: "text",
           value: `Order #: ${data.orderNumber}`,
-          style: `font-weight: 600; font-size: 14px;`
+          style: { fontWeight: 600, fontSize: 14 }
         },
         {
           type: "text",
           value: `Date: ${data.orderDate}`,
-          style: `font-size: 12px;`
+          style: { fontSize: 12 }
         },
         {
           type: "text",
           value: `Pickup Date: ${data.pickupDate}`,
-          style: `font-size: 12px; margin-bottom: 10px;`
+          style: { fontSize: 12, marginBottom: 10 }
         },
         {
           type: "text",
           value: "--------------------------------",
-          style: `text-align: center;`
+          style: { textAlign: 'center' }
         },
         {
           type: "text",
           value: "CUSTOMER DETAILS",
-          style: `font-weight: 600; font-size: 13px; margin-top: 10px;`
+          style: { fontWeight: 600, fontSize: 13, marginTop: 10 }
         },
         {
           type: "text",
           value: `Name: ${data.customerName}`,
-          style: `font-size: 12px;`
+          style: { fontSize: 12 }
         },
         {
           type: "text",
           value: `Phone: ${data.customerPhone}`,
-          style: `font-size: 12px; margin-bottom: 10px;`
+          style: { fontSize: 12, marginBottom: 10 }
         },
         {
           type: "text",
           value: "--------------------------------",
-          style: `text-align: center;`
+          style: { textAlign: 'center' }
         },
         {
           type: "text",
           value: "ITEMS",
-          style: `font-weight: 600; font-size: 13px; margin-top: 10px; margin-bottom: 5px;`
+          style: { fontWeight: 600, fontSize: 13, marginTop: 10, marginBottom: 5 }
         }
       ]
 
@@ -201,12 +623,12 @@ export class ReceiptPrinter {
         receiptData.push({
           type: "text",
           value: `${item.service_name} x ${item.quantity}`,
-          style: `font-size: 12px;`
+          style: { fontSize: 12 }
         })
         receiptData.push({
           type: "text",
           value: `  ₦${item.price.toLocaleString()} x ${item.quantity} = ₦${item.subtotal.toLocaleString()}`,
-          style: `font-size: 11px; margin-bottom: 5px;`
+          style: { fontSize: 11, marginBottom: 5 }
         })
       })
 
@@ -215,22 +637,27 @@ export class ReceiptPrinter {
         {
           type: "text",
           value: "================================",
-          style: `text-align: center; margin-top: 10px;`
+          style: { textAlign: 'center', marginTop: 10 }
         },
         {
           type: "text",
           value: `TOTAL AMOUNT: ₦${data.totalAmount.toLocaleString()}`,
-          style: `font-weight: 700; font-size: 14px; margin-top: 5px;`
+          style: { fontWeight: 700, fontSize: 14, marginTop: 5 }
         },
         {
           type: "text",
           value: `Amount Paid: ₦${data.amountPaid.toLocaleString()}`,
-          style: `font-size: 13px;`
+          style: { fontSize: 13 }
         },
         {
           type: "text",
           value: `Balance Due: ₦${data.balance.toLocaleString()}`,
-          style: `font-size: 13px; font-weight: ${data.balance > 0 ? '700' : '400'}; color: ${data.balance > 0 ? '#d32f2f' : '#2e7d32'}; margin-bottom: 10px;`
+          style: { 
+            fontSize: 13, 
+            fontWeight: data.balance > 0 ? 700 : 400, 
+            color: data.balance > 0 ? '#d32f2f' : '#2e7d32', 
+            marginBottom: 10 
+          }
         }
       )
 
@@ -240,17 +667,17 @@ export class ReceiptPrinter {
           {
             type: "text",
             value: "--------------------------------",
-            style: `text-align: center;`
+            style: { textAlign: 'center' }
           },
           {
             type: "text",
             value: "NOTES:",
-            style: `font-weight: 600; font-size: 12px; margin-top: 5px;`
+            style: { fontWeight: 600, fontSize: 12, marginTop: 5 }
           },
           {
             type: "text",
             value: data.notes,
-            style: `font-size: 11px; margin-bottom: 10px;`
+            style: { fontSize: 11, marginBottom: 10 }
           }
         )
       }
@@ -260,17 +687,17 @@ export class ReceiptPrinter {
         {
           type: "text",
           value: "================================",
-          style: `text-align: center; margin-top: 10px;`
+          style: { textAlign: 'center', marginTop: 10 }
         },
         {
           type: "text",
           value: data.footerMessage || "Thank you for your business!",
-          style: `text-align: center; font-size: 12px; margin-top: 10px;`
+          style: { textAlign: 'center', fontSize: 12, marginTop: 10 }
         },
         {
           type: "text",
           value: "Please keep this receipt for collection",
-          style: `text-align: center; font-size: 11px; font-style: italic; margin-bottom: 20px;`
+          style: { textAlign: 'center', fontSize: 11, fontStyle: 'italic', marginBottom: 20 }
         }
       )
 
@@ -284,7 +711,7 @@ export class ReceiptPrinter {
         silent: options.silent !== undefined ? options.silent : true
       }
 
-      await PosPrinter.print(receiptData, printOptions)
+      await this.safePrint(receiptData, printOptions)
 
       return { success: true }
     } catch (error: any) {
@@ -295,7 +722,6 @@ export class ReceiptPrinter {
       }
     }
   }
-
   /**
    * Print payment receipt
    */
@@ -303,11 +729,10 @@ export class ReceiptPrinter {
     data: PaymentReceiptData,
     options: PrinterOptions = {}
   ): Promise<{ success: boolean; error?: string }> {
+    // Always try to print, even if PosPrinter is not available (use browser fallback)
     if (!printerAvailable || !PosPrinter) {
-      return { 
-        success: false, 
-        error: "Printer system not available. Please check if electron-pos-printer is properly installed." 
-      }
+      console.warn("PosPrinter not available, using browser fallback for payment receipt");
+      return await this.printPaymentReceiptWithBrowserFallback(data, options);
     }
 
     try {
@@ -317,87 +742,92 @@ export class ReceiptPrinter {
         {
           type: "text",
           value: data.shopName,
-          style: `font-weight: 700; text-align: center; font-size: 18px; margin-top: 10px;`
+          style: { fontWeight: 700, textAlign: 'center', fontSize: 18, marginTop: 10 }
         },
         {
           type: "text",
           value: data.shopAddress,
-          style: `text-align: center; font-size: 12px;`
+          style: { textAlign: 'center', fontSize: 12 }
         },
         {
           type: "text",
           value: `Tel: ${data.shopPhone}`,
-          style: `text-align: center; font-size: 12px; margin-bottom: 10px;`
+          style: { textAlign: 'center', fontSize: 12, marginBottom: 10 }
         },
         {
           type: "text",
           value: "================================",
-          style: `text-align: center;`
+          style: { textAlign: 'center' }
         },
         {
           type: "text",
           value: "PAYMENT RECEIPT",
-          style: `font-weight: 700; text-align: center; font-size: 16px; margin-top: 10px; margin-bottom: 10px;`
+          style: { fontWeight: 700, textAlign: 'center', fontSize: 16, marginTop: 10, marginBottom: 10 }
         },
         {
           type: "text",
           value: `Order #: ${data.orderNumber}`,
-          style: `font-weight: 600; font-size: 14px;`
+          style: { fontWeight: 600, fontSize: 14 }
         },
         {
           type: "text",
           value: `Customer: ${data.customerName}`,
-          style: `font-size: 12px;`
+          style: { fontSize: 12 }
         },
         {
           type: "text",
           value: `Date: ${data.paymentDate}`,
-          style: `font-size: 12px; margin-bottom: 10px;`
+          style: { fontSize: 12, marginBottom: 10 }
         },
         {
           type: "text",
           value: "--------------------------------",
-          style: `text-align: center;`
+          style: { textAlign: 'center' }
         },
         {
           type: "text",
           value: "PAYMENT DETAILS",
-          style: `font-weight: 600; font-size: 13px; margin-top: 10px;`
+          style: { fontWeight: 600, fontSize: 13, marginTop: 10 }
         },
         {
           type: "text",
           value: `Payment Method: ${data.paymentMethod}`,
-          style: `font-size: 12px;`
+          style: { fontSize: 12 }
         },
         {
           type: "text",
           value: `Amount Paid: ₦${data.paymentAmount.toLocaleString()}`,
-          style: `font-size: 13px; font-weight: 700; margin-top: 5px;`
+          style: { fontSize: 13, fontWeight: 700, marginTop: 5 }
         },
         {
           type: "text",
           value: "--------------------------------",
-          style: `text-align: center; margin-top: 10px;`
+          style: { textAlign: 'center', marginTop: 10 }
         },
         {
           type: "text",
           value: `Previous Balance: ₦${data.previousBalance.toLocaleString()}`,
-          style: `font-size: 12px;`
+          style: { fontSize: 12 }
         },
         {
           type: "text",
           value: `New Balance: ₦${data.newBalance.toLocaleString()}`,
-          style: `font-size: 13px; font-weight: 700; color: ${data.newBalance > 0 ? '#d32f2f' : '#2e7d32'}; margin-bottom: 10px;`
+          style: { 
+            fontSize: 13, 
+            fontWeight: 700, 
+            color: data.newBalance > 0 ? '#d32f2f' : '#2e7d32', 
+            marginBottom: 10 
+          }
         },
         {
           type: "text",
           value: "================================",
-          style: `text-align: center; margin-top: 10px;`
+          style: { textAlign: 'center', marginTop: 10 }
         },
         {
           type: "text",
           value: data.footerMessage || "Thank you for your payment!",
-          style: `text-align: center; font-size: 12px; margin-top: 10px; margin-bottom: 20px;`
+          style: { textAlign: 'center', fontSize: 12, marginTop: 10, marginBottom: 20 }
         }
       ]
 
@@ -411,7 +841,7 @@ export class ReceiptPrinter {
         silent: options.silent !== undefined ? options.silent : true
       }
 
-      await PosPrinter.print(receiptData, printOptions)
+      await this.safePrint(receiptData, printOptions)
 
       return { success: true }
     } catch (error: any) {
