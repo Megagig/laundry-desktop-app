@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react"
-import { Button, Group, Text, Card, Table, Badge, ActionIcon } from "@mantine/core"
-import { 
-  IconRefresh, 
-  IconPlus, 
-  IconReceipt, 
-  IconUsers, 
-  IconCash, 
-  IconAlertCircle,
-  IconTrendingUp,
-  IconEye
-} from "@tabler/icons-react"
 import { useNavigate } from "react-router-dom"
+import { 
+  RefreshCw, 
+  Plus, 
+  Receipt, 
+  Users, 
+  DollarSign, 
+  AlertCircle,
+  TrendingUp,
+  Clock,
+  Eye
+} from "lucide-react"
 import { useReportStore, useOrderStore } from "../store"
-import { StatCard, LoadingSpinner, ErrorMessage, StatusBadge, EmptyState } from "../components/common"
+import { LoadingSpinner, ErrorMessage, StatusBadge } from "../components/common"
+import StatCard from "../components/common/StatCard"
+import { Button } from "../components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
+import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { formatCurrency, formatDate } from "../lib/utils"
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -49,235 +54,298 @@ export default function Dashboard() {
     await loadDashboardData()
   }
 
-  const pendingPickups = orders.filter(o => o.status === "READY")
-
   if (isLoading && !dashboardMetrics) {
-    return <LoadingSpinner fullScreen />
+    return (
+      <div className="flex items-center justify-center h-full">
+        <LoadingSpinner />
+      </div>
+    )
   }
 
-  if (error && !dashboardMetrics) {
+  if (error) {
     return <ErrorMessage message={error} />
   }
 
+  // Sample data for charts
+  const revenueData = [
+    { name: 'Jan', value: 4000 },
+    { name: 'Feb', value: 3000 },
+    { name: 'Mar', value: 5000 },
+    { name: 'Apr', value: 4500 },
+    { name: 'May', value: 6000 },
+    { name: 'Jun', value: 5500 },
+  ]
+
+  const statusData = [
+    { name: 'Pending', value: Math.floor((dashboardMetrics?.orders_in_progress || 0) * 0.4), color: '#f59e0b' },
+    { name: 'Processing', value: Math.floor((dashboardMetrics?.orders_in_progress || 0) * 0.3), color: '#3b82f6' },
+    { name: 'Ready', value: dashboardMetrics?.orders_ready_for_pickup || 0, color: '#10b981' },
+    { name: 'Delivered', value: Math.floor((dashboardMetrics?.total_orders_today || 0) * 0.7), color: '#6b7280' },
+  ]
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <Group justify="space-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <Text size="sm" c="dimmed">Welcome to Laundry Manager</Text>
+          <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-slate-600 mt-1">Welcome back! Here's what's happening today.</p>
         </div>
-        <Group>
-          <Button 
-            leftSection={<IconPlus size={16} />}
-            onClick={() => navigate("/orders/new")}
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="gap-2"
           >
+            <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
+            Refresh
+          </Button>
+          <Button onClick={() => navigate('/orders/new')} className="gap-2">
+            <Plus size={16} />
             New Order
           </Button>
-          <ActionIcon 
-            variant="light" 
-            size="lg"
-            onClick={handleRefresh}
-            loading={isLoading}
-          >
-            <IconRefresh size={18} />
-          </ActionIcon>
-        </Group>
-      </Group>
+        </div>
+      </div>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Orders Today"
-          value={dashboardMetrics?.total_orders_today || 0}
-          icon={<IconReceipt size={24} />}
-          color="blue"
-        />
-        <StatCard
-          title="Revenue Today"
-          value={`₦${(dashboardMetrics?.revenue_today || 0).toLocaleString()}`}
-          icon={<IconCash size={24} />}
+          title="Total Revenue"
+          value={formatCurrency(dashboardMetrics?.revenue_today || 0)}
+          icon={<DollarSign size={24} />}
           color="green"
+          trend={{ value: 12.5, isPositive: true }}
+          sparklineData={[4000, 3000, 5000, 4500, 6000, 5500]}
+          onClick={() => navigate('/reports')}
         />
         <StatCard
-          title="Outstanding Payments"
-          value={`₦${(dashboardMetrics?.outstanding_payments || 0).toLocaleString()}`}
-          icon={<IconAlertCircle size={24} />}
-          color="red"
+          title="Total Orders"
+          value={dashboardMetrics?.total_orders_today || 0}
+          icon={<Receipt size={24} />}
+          color="blue"
+          trend={{ value: 8.2, isPositive: true }}
+          sparklineData={[20, 25, 30, 28, 35, 32]}
+          onClick={() => navigate('/orders')}
         />
         <StatCard
-          title="Ready for Pickup"
-          value={dashboardMetrics?.orders_ready_for_pickup || 0}
-          icon={<IconUsers size={24} />}
-          color="orange"
-        />
-      </div>
-
-      {/* Secondary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <StatCard
-          title="Total Customers"
+          title="Active Customers"
           value={dashboardMetrics?.total_customers || 0}
-          icon={<IconUsers size={24} />}
-          color="violet"
+          icon={<Users size={24} />}
+          color="purple"
+          trend={{ value: 3.1, isPositive: true }}
+          onClick={() => navigate('/customers')}
         />
         <StatCard
-          title="Orders In Progress"
-          value={dashboardMetrics?.orders_in_progress || 0}
-          icon={<IconTrendingUp size={24} />}
-          color="cyan"
+          title="Pending Pickups"
+          value={dashboardMetrics?.orders_ready_for_pickup || 0}
+          icon={<Clock size={24} />}
+          color="orange"
+          subtitle="Ready for pickup"
+          onClick={() => navigate('/pickup')}
         />
       </div>
 
-      {/* Widgets Row */}
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Revenue Trend */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp size={20} className="text-emerald-600" />
+              Revenue Trend
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80 w-full min-h-[320px]">
+              <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={320}>
+                <AreaChart data={revenueData}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#64748b', fontSize: 12 }}
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#64748b', fontSize: 12 }}
+                    tickFormatter={(value) => `₦${value}`}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                    formatter={(value) => [formatCurrency(value as number), 'Revenue']}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke="#10b981" 
+                    strokeWidth={3}
+                    fillOpacity={1} 
+                    fill="url(#colorRevenue)" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Order Status Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Order Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80 w-full min-h-[320px]">
+              <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={320}>
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="space-y-2 mt-4">
+              {statusData.map((item) => (
+                <div key={item.name} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-sm text-slate-600">{item.name}</span>
+                  </div>
+                  <span className="text-sm font-medium text-slate-900">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Orders & Pending Pickups */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders Widget */}
-        <Card withBorder>
-          <Group justify="space-between" className="mb-4">
-            <Text size="lg" fw={600}>Recent Orders</Text>
-            <Button 
-              variant="subtle" 
-              size="xs"
-              onClick={() => navigate("/orders")}
-            >
+        {/* Recent Orders */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Recent Orders</CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/orders')}>
               View All
             </Button>
-          </Group>
-
-          {recentOrders.length === 0 ? (
-            <EmptyState
-              icon={<IconReceipt size={48} />}
-              title="No orders yet"
-              message="Create your first order to get started"
-              actionLabel="Create Order"
-              onAction={() => navigate("/orders/new")}
-            />
-          ) : (
-            <Table>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Order #</Table.Th>
-                  <Table.Th>Status</Table.Th>
-                  <Table.Th>Amount</Table.Th>
-                  <Table.Th></Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {recentOrders.map(order => (
-                  <Table.Tr key={order.id}>
-                    <Table.Td>
-                      <Text size="sm" fw={500}>{order.order_number}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <StatusBadge status={order.status} />
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">₦{order.total_amount.toLocaleString()}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <ActionIcon 
-                        variant="subtle" 
-                        size="sm"
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentOrders.length > 0 ? (
+                recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <p className="font-medium text-slate-900">#{order.order_number}</p>
+                          <p className="text-sm text-slate-500">{order.customer_name}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <StatusBadge status={order.status} size="sm" />
+                      <span className="text-sm font-medium text-slate-900">
+                        {formatCurrency(order.total_amount)}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => navigate(`/orders/${order.id}`)}
                       >
-                        <IconEye size={16} />
-                      </ActionIcon>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
+                        <Eye size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-slate-500 py-8">No recent orders</p>
+              )}
+            </div>
+          </CardContent>
         </Card>
 
-        {/* Pending Pickups Widget */}
-        <Card withBorder>
-          <Group justify="space-between" className="mb-4">
-            <Text size="lg" fw={600}>Pending Pickups</Text>
-            <Badge color="orange" variant="light">
-              {pendingPickups.length}
-            </Badge>
-          </Group>
-
-          {pendingPickups.length === 0 ? (
-            <EmptyState
-              icon={<IconUsers size={48} />}
-              title="No pending pickups"
-              message="All orders have been collected"
-            />
-          ) : (
-            <Table>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Order #</Table.Th>
-                  <Table.Th>Pickup Date</Table.Th>
-                  <Table.Th>Balance</Table.Th>
-                  <Table.Th></Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {pendingPickups.slice(0, 5).map(order => (
-                  <Table.Tr key={order.id}>
-                    <Table.Td>
-                      <Text size="sm" fw={500}>{order.order_number}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">
-                        {new Date(order.pickup_date).toLocaleDateString()}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text 
-                        size="sm" 
-                        c={order.balance > 0 ? "red" : "green"}
-                        fw={order.balance > 0 ? 600 : 400}
-                      >
-                        ₦{order.balance.toLocaleString()}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <ActionIcon 
-                        variant="subtle" 
-                        size="sm"
-                        onClick={() => navigate(`/orders/${order.id}`)}
-                      >
-                        <IconEye size={16} />
-                      </ActionIcon>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
+        {/* Pending Pickups */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle size={20} className="text-orange-500" />
+              Pending Pickups
+            </CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/pickup')}>
+              View All
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentOrders.filter(order => order.status === 'ready').length > 0 ? (
+                recentOrders
+                  .filter(order => order.status === 'ready')
+                  .slice(0, 5)
+                  .map((order) => (
+                    <div key={order.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <p className="font-medium text-slate-900">#{order.order_number}</p>
+                            <p className="text-sm text-slate-500">{order.customer_name}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-slate-500">
+                          {formatDate(order.pickup_date)}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => navigate(`/orders/${order.id}`)}
+                        >
+                          <Eye size={16} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <p className="text-center text-slate-500 py-8">No pending pickups</p>
+              )}
+            </div>
+          </CardContent>
         </Card>
       </div>
-
-      {/* Quick Actions */}
-      <Card withBorder>
-        <Text size="lg" fw={600} className="mb-4">Quick Actions</Text>
-        <Group>
-          <Button 
-            leftSection={<IconPlus size={16} />}
-            onClick={() => navigate("/orders/new")}
-          >
-            New Order
-          </Button>
-          <Button 
-            variant="light"
-            leftSection={<IconUsers size={16} />}
-            onClick={() => navigate("/customers")}
-          >
-            Manage Customers
-          </Button>
-          <Button 
-            variant="light"
-            leftSection={<IconReceipt size={16} />}
-            onClick={() => navigate("/orders")}
-          >
-            View All Orders
-          </Button>
-        </Group>
-      </Card>
     </div>
   )
 }

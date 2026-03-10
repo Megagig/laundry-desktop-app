@@ -4,7 +4,7 @@ import { useServiceStore } from "../../store"
 import { InlineError } from "../common/ErrorMessage"
 
 interface ServiceFormProps {
-  serviceId?: number
+  service?: any
   onSuccess?: () => void
   onCancel?: () => void
 }
@@ -17,8 +17,8 @@ const SERVICE_CATEGORIES = [
   { value: "Special Care", label: "Special Care" }
 ]
 
-export default function ServiceForm({ serviceId, onSuccess, onCancel }: ServiceFormProps) {
-  const { createService, updateService, fetchServiceById, selectedService, isLoading } = useServiceStore()
+export default function ServiceForm({ service, onSuccess, onCancel }: ServiceFormProps) {
+  const { createService, updateService, isLoading } = useServiceStore()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -31,21 +31,22 @@ export default function ServiceForm({ serviceId, onSuccess, onCancel }: ServiceF
 
   // Load service data if editing
   useEffect(() => {
-    if (serviceId) {
-      fetchServiceById(serviceId)
-    }
-  }, [serviceId])
-
-  useEffect(() => {
-    if (selectedService && serviceId) {
+    if (service) {
       setFormData({
-        name: selectedService.name,
-        price: selectedService.price,
-        category: selectedService.category || "",
-        description: selectedService.description || ""
+        name: service.name,
+        price: service.price,
+        category: service.category || "",
+        description: service.description || ""
+      })
+    } else {
+      setFormData({
+        name: "",
+        price: 0,
+        category: "",
+        description: ""
       })
     }
-  }, [selectedService, serviceId])
+  }, [service])
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
@@ -68,8 +69,8 @@ export default function ServiceForm({ serviceId, onSuccess, onCancel }: ServiceF
     if (!validate()) return
 
     try {
-      if (serviceId) {
-        await updateService(serviceId, formData)
+      if (service) {
+        await updateService(service.id, formData)
       } else {
         await createService(formData)
       }
@@ -148,7 +149,7 @@ export default function ServiceForm({ serviceId, onSuccess, onCancel }: ServiceF
           </Button>
         )}
         <Button type="submit" loading={isLoading}>
-          {serviceId ? "Update Service" : "Add Service"}
+          {service ? "Update Service" : "Add Service"}
         </Button>
       </Group>
     </form>

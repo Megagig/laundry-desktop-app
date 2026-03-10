@@ -139,13 +139,24 @@ export default function OrderForm({ onSuccess, onCancel }: OrderFormProps) {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, shouldPrint = false) => {
     e.preventDefault()
 
     if (!validate()) return
 
     try {
       const order = await createOrder()
+      
+      // Print receipt if requested
+      if (shouldPrint && order) {
+        try {
+          await window.api.printer.printOrderReceipt(order.id, { preview: false })
+        } catch (printError) {
+          console.error("Print error:", printError)
+          // Don't fail the order creation if printing fails
+        }
+      }
+      
       onSuccess?.(order)
     } catch (error: any) {
       setErrors({ submit: error.message })
@@ -368,8 +379,22 @@ export default function OrderForm({ onSuccess, onCancel }: OrderFormProps) {
             Cancel
           </Button>
         )}
-        <Button type="submit" loading={isLoading} size="lg">
-          Create Order
+        <Button 
+          type="submit" 
+          loading={isLoading} 
+          size="lg"
+          onClick={(e) => handleSubmit(e, false)}
+        >
+          Save Order
+        </Button>
+        <Button 
+          type="button"
+          loading={isLoading} 
+          size="lg"
+          color="green"
+          onClick={(e) => handleSubmit(e, true)}
+        >
+          Save & Print Receipt
         </Button>
       </Group>
     </form>

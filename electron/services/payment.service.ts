@@ -95,11 +95,13 @@ export class PaymentService {
       },
       orderBy: { pickup_date: "asc" }
     }).then(orders => orders.map(o => ({
+      id: o.id,
       order_id: o.id,
       order_number: o.order_number,
       total_amount: o.total_amount,
       amount_paid: o.amount_paid,
       balance: o.balance,
+      status: o.status,
       pickup_date: o.pickup_date,
       customer_name: o.customer.name,
       customer_phone: o.customer.phone

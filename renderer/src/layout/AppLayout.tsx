@@ -1,12 +1,17 @@
 import Sidebar from "../components/Sidebar"
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts"
 
 export default function AppLayout({ children }: any) {
+  useKeyboardShortcuts()
+
   return (
-    <div className="flex">
+    <div className="flex h-screen bg-slate-50">
       <Sidebar />
 
-      <main className="flex-1 p-6 bg-gray-100 min-h-screen">
-        {children}
+      <main className="flex-1 overflow-auto">
+        <div className="w-full h-full p-8">
+          {children}
+        </div>
       </main>
     </div>
   )

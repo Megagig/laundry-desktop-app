@@ -8,6 +8,8 @@ import { registerServiceHandlers } from "./ipc/services.ipc.js";
 import { registerPaymentHandlers } from "./ipc/payments.ipc.js";
 import { registerExpenseHandlers } from "./ipc/expenses.ipc.js";
 import { registerReportHandlers } from "./ipc/reports.ipc.js";
+import "./ipc/settings.ipc.js";
+import "./ipc/backup.ipc.js";
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,11 +22,21 @@ registerServiceHandlers();
 registerPaymentHandlers();
 registerExpenseHandlers();
 registerReportHandlers();
+// Initialize printer handlers with error handling
+async function initializePrinterHandlers() {
+    try {
+        await import("./ipc/printer.ipc.js");
+        console.log("✓ Printer handlers initialized");
+    }
+    catch (error) {
+        console.warn("⚠ Printer system unavailable:", error.message);
+    }
+}
 let mainWindow;
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 1400,
-        height: 900,
+        width: 1920,
+        height: 1080,
         webPreferences: {
             preload: path.join(__dirname, "preload.cjs"),
             contextIsolation: true,
@@ -32,6 +44,8 @@ function createWindow() {
             sandbox: false // Disable sandbox to allow ES modules in preload
         }
     });
+    // Maximize window on startup
+    mainWindow.maximize();
     // Always load from Vite dev server in development
     // Check if running from dist folder (development mode)
     const isDev = !app.isPackaged;
@@ -48,7 +62,11 @@ function createWindow() {
         console.error("Failed to load:", errorCode, errorDescription);
     });
 }
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+    createWindow();
+    // Initialize printer handlers after app is ready
+    await initializePrinterHandlers();
+});
 app.on("window-all-closed", async () => {
     await prisma.$disconnect();
     if (process.platform !== "darwin") {

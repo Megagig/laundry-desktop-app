@@ -152,11 +152,13 @@ export class OrderService {
         return orders.map(order => this.formatOrderWithDetails(order));
     }
     async getOrdersByDateRange(startDate, endDate) {
+        // Include the full end date by adding time
+        const endDateTime = endDate + 'T23:59:59.999Z';
         const orders = await prisma.order.findMany({
             where: {
                 created_at: {
                     gte: new Date(startDate),
-                    lte: new Date(endDate)
+                    lte: new Date(endDateTime)
                 }
             },
             include: {

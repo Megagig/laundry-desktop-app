@@ -81,4 +81,35 @@ contextBridge.exposeInMainWorld("api", {
     getPopularServices: (startDate: string, endDate: string, limit?: number) => 
       ipcRenderer.invoke("report:getPopularServices", startDate, endDate, limit),
   },
+
+  // Printer APIs
+  printer: {
+    getPrinters: () => ipcRenderer.invoke("printer:get-printers"),
+    setDefault: (printerName: string) => ipcRenderer.invoke("printer:set-default", printerName),
+    getDefault: () => ipcRenderer.invoke("printer:get-default"),
+    printOrderReceipt: (orderId: number, options?: any) => 
+      ipcRenderer.invoke("printer:print-order-receipt", orderId, options),
+    printPaymentReceipt: (data: any, options?: any) => 
+      ipcRenderer.invoke("printer:print-payment-receipt", data, options),
+    testPrint: (printerName?: string) => ipcRenderer.invoke("printer:test-print", printerName),
+  },
+
+  // Settings APIs
+  settings: {
+    getAll: () => ipcRenderer.invoke("settings:get-all"),
+    get: (key: string) => ipcRenderer.invoke("settings:get", key),
+    upsert: (key: string, value: string) => ipcRenderer.invoke("settings:upsert", key, value),
+    updateMultiple: (settings: Record<string, string>) => 
+      ipcRenderer.invoke("settings:update-multiple", settings),
+  },
+
+  // Backup APIs
+  backup: {
+    create: (customPath?: string) => ipcRenderer.invoke("backup:create", customPath),
+    restore: () => ipcRenderer.invoke("backup:restore"),
+    list: () => ipcRenderer.invoke("backup:list"),
+    delete: (backupPath: string) => ipcRenderer.invoke("backup:delete", backupPath),
+    exportCSV: (tableName: string) => ipcRenderer.invoke("backup:export-csv", tableName),
+    getStats: () => ipcRenderer.invoke("backup:get-stats"),
+  },
 })
