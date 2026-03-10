@@ -1,39 +1,36 @@
 import { useEffect, useState } from "react"
-import { Button, Text, Modal, ActionIcon, Badge } from "@mantine/core"
 import { 
-  IconPlus, 
-  IconSearch, 
-  IconEdit, 
-  IconTrash, 
-  IconEye
-} from "@tabler/icons-react"
+  Plus, 
+  Search, 
+  Edit, 
+  Eye,
+  Phone,
+  MapPin
+} from "lucide-react"
 import { useCustomerStore } from "../store"
 import { 
   DataTable, 
-  SearchInput, 
-  LoadingSpinner, 
-  ErrorMessage, 
-  EmptyState,
-  ConfirmDialog 
+  ErrorMessage
 } from "../components/common"
 import { CustomerForm } from "../components/forms"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
+import { Card, CardContent } from "../components/ui/card"
+import { Badge } from "../components/ui/badge"
+import { formatDate } from "../lib/utils"
+import type { Customer } from "../../../shared/types/customer.types"
 
 export default function Customers() {
   const {
     customers,
     isLoading,
     error,
-    fetchCustomers,
-    deleteCustomer
+    fetchCustomers
   } = useCustomerStore()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [isDetailOpen, setIsDetailOpen] = useState(false)
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
-  const [customerOrders, setCustomerOrders] = useState<any[]>([])
-  const [loadingOrders, setLoadingOrders] = useState(false)
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | undefined>(undefined)
 
   useEffect(() => {
     fetchCustomers()
@@ -48,106 +45,123 @@ export default function Customers() {
     customer.phone.includes(searchQuery)
   )
 
-  const handleAddCustomer = () => {
-    setSelectedCustomer(null)
+  const handleEdit = (customer: Customer) => {
+    setSelectedCustomerId(customer.id)
     setIsFormOpen(true)
   }
 
-  const handleEditCustomer = (customer: any) => {
-    setSelectedCustomer(customer)
-    setIsFormOpen(true)
-  }
-
-  const handleViewCustomer = async (customer: any) => {
-    setSelectedCustomer(customer)
-    setIsDetailOpen(true)
-    setLoadingOrders(true)
-    
-    // Fetch customer order history
-    const result = await window.api.customer.getOrderHistory(customer.id, 10)
-    if (result.success) {
-      setCustomerOrders(result.data)
-    }
-    setLoadingOrders(false)
-  }
-
-  const handleDeleteClick = (customer: any) => {
-    setSelectedCustomer(customer)
-    setIsDeleteOpen(true)
-  }
-
-  const handleDeleteConfirm = async () => {
-    if (selectedCustomer) {
-      await deleteCustomer(selectedCustomer.id)
-      setIsDeleteOpen(false)
-      setSelectedCustomer(null)
-    }
-  }
-
-  const handleFormSuccess = () => {
-    setIsFormOpen(false)
-    setSelectedCustomer(null)
-    fetchCustomers()
+  const handleView = (customer: Customer) => {
+    // Handle view customer details
+    console.log('View customer:', customer)
   }
 
   const columns = [
     {
       key: "name",
-      label: "Name",
-      render: (customer: any) => (
-        <Text size="md" fw={600} className="text-gray-900">{customer.name}</Text>
+      label: "Customer",
+      render: (customer: Customer) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+            {customer.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div className="font-medium text-slate-900">{customer.name}</div>
+            <div className="text-sm text-slate-500 flex items-center gap-1">
+              <Phone size={12} />
+              {customer.phone}
+            </div>
+          </div>
+        </div>
       )
     },
     {
-      key: "phone",
-      label: "Phone",
-      render: (customer: any) => (
-        <Text size="md" className="text-gray-700 font-medium">{customer.phone}</Text>
+      key: "contact",
+      label: "Contact",
+      render: (customer: Customer) => (
+        <div className="space-y-1">
+          <div className="text-sm text-slate-600 flex items-center gap-1">
+            <Phone size={12} />
+            {customer.phone}
+          </div>
+          {customer.address && (
+            <div className="text-sm text-slate-500 flex items-center gap-1">
+              <MapPin size={12} />
+              {customer.address}
+            </div>
+          )}
+        </div>
       )
     },
     {
-      key: "address",
-      label: "Address",
+      key: "total_orders",
+      label: "Orders",
       render: (customer: any) => (
-        <Text size="md" className="text-gray-600">{customer.address || "—"}</Text>
+        <div className="text-center">
+          <div className="text-lg font-semibold text-slate-900">
+            {customer.total_orders || 0}
+          </div>
+          <div className="text-xs text-slate-500">Total</div>
+        </div>
+      )
+    },
+    {
+      key: "total_spent",
+      label: "Total Spent",
+      render: (customer: any) => (
+        <div className="text-right">
+          <div className="font-medium text-slate-900">
+            ₦{(customer.total_spent || 0).toFixed(2)}
+          </div>
+          <div className="text-xs text-slate-500">Lifetime</div>
+        </div>
       )
     },
     {
       key: "created_at",
-      label: "Registered",
-      render: (customer: any) => (
-        <Text size="md" className="text-gray-600">{new Date(customer.created_at).toLocaleDateString()}</Text>
+      label: "Joined",
+      render: (customer: Customer) => (
+        <div className="text-sm text-slate-600">
+          {formatDate(customer.created_at)}
+        </div>
+      )
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: () => (
+        <Badge 
+          variant="success"
+          className="bg-emerald-100 text-emerald-800"
+        >
+          Active
+        </Badge>
       )
     },
     {
       key: "actions",
       label: "Actions",
-      render: (customer: any) => (
-        <div className="flex items-center gap-2">
-          <ActionIcon
-            variant="subtle"
-            color="blue"
-            size="lg"
-            onClick={() => handleViewCustomer(customer)}
+      render: (customer: Customer) => (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleView(customer)
+            }}
           >
-            <IconEye size={20} />
-          </ActionIcon>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="lg"
-            onClick={() => handleEditCustomer(customer)}
+            <Eye size={16} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleEdit(customer)
+            }}
           >
-            <IconEdit size={20} />
-          </ActionIcon>
-          <ActionIcon
-            variant="subtle"
-            color="red"
-            size="lg"
-            onClick={() => handleDeleteClick(customer)}
-          >
-            <IconTrash size={20} />
-          </ActionIcon>
+            <Edit size={16} />
+          </Button>
         </div>
       )
     }
@@ -158,188 +172,143 @@ export default function Customers() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Customers</h1>
-          <Text className="text-lg text-gray-600">Manage your customer database</Text>
+          <h1 className="text-3xl font-bold text-slate-900">Customers</h1>
+          <p className="text-slate-600 mt-1">Manage your customer database</p>
         </div>
         <Button 
-          size="lg"
-          leftSection={<IconPlus size={20} />}
-          onClick={handleAddCustomer}
-          className="shadow-md"
+          onClick={() => {
+            setSelectedCustomerId(undefined)
+            setIsFormOpen(true)
+          }} 
+          className="gap-2"
         >
+          <Plus size={16} />
           Add Customer
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-md">
-        <SearchInput
-          placeholder="Search by name or phone..."
-          onSearch={handleSearch}
-        />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-600">Total Customers</p>
+                <p className="text-2xl font-bold text-slate-900">{customers.length}</p>
+              </div>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                All Time
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-600">Active</p>
+                <p className="text-2xl font-bold text-slate-900">
+                  {customers.length}
+                </p>
+              </div>
+              <Badge variant="success" className="bg-emerald-100 text-emerald-800">
+                Active
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-600">New This Month</p>
+                <p className="text-2xl font-bold text-slate-900">
+                  {customers.filter(c => {
+                    const created = new Date(c.created_at)
+                    const now = new Date()
+                    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear()
+                  }).length}
+                </p>
+              </div>
+              <Badge variant="info" className="bg-blue-100 text-blue-800">
+                Recent
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-600">Avg. Orders</p>
+                <p className="text-2xl font-bold text-slate-900">
+                  {customers.length > 0 
+                    ? ((customers as any[]).reduce((sum, c) => sum + (c.total_orders || 0), 0) / customers.length).toFixed(1)
+                    : '0'
+                  }
+                </p>
+              </div>
+              <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                Per Customer
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Customer Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-        {isLoading ? (
-          <div className="p-12">
-            <LoadingSpinner />
-          </div>
-        ) : filteredCustomers.length === 0 ? (
-          <div className="p-12">
-            <EmptyState
-              icon={<IconSearch size={64} />}
-              title={searchQuery ? "No customers found" : "No customers yet"}
-              message={searchQuery ? "Try a different search term" : "Add your first customer to get started"}
-              actionLabel={searchQuery ? undefined : "Add Customer"}
-              onAction={searchQuery ? undefined : handleAddCustomer}
+      {/* Search */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="relative max-w-md">
+            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Search customers..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10"
             />
           </div>
-        ) : (
-          <DataTable
-            columns={columns}
-            data={filteredCustomers}
-            itemsPerPage={10}
-            keyExtractor={(customer: any) => customer.id}
-          />
-        )}
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Add/Edit Customer Modal */}
-      <Modal
-        opened={isFormOpen}
-        onClose={() => {
-          setIsFormOpen(false)
-          setSelectedCustomer(null)
-        }}
-        title={
-          <Text className="text-2xl font-bold text-gray-900">
-            {selectedCustomer ? "Edit Customer" : "Add New Customer"}
-          </Text>
-        }
-        size="lg"
-        padding="xl"
-      >
-        <CustomerForm
-          customerId={selectedCustomer?.id}
-          onSuccess={handleFormSuccess}
-          onCancel={() => {
-            setIsFormOpen(false)
-            setSelectedCustomer(null)
-          }}
-        />
-      </Modal>
-
-      {/* Customer Detail Modal */}
-      <Modal
-        opened={isDetailOpen}
-        onClose={() => {
-          setIsDetailOpen(false)
-          setSelectedCustomer(null)
-          setCustomerOrders([])
-        }}
-        title={
-          <Text className="text-2xl font-bold text-gray-900">Customer Details</Text>
-        }
-        size="xl"
-        padding="xl"
-      >
-        {selectedCustomer && (
-          <div className="space-y-6">
-            {/* Customer Info */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
-              <Text className="text-2xl font-bold text-gray-900 mb-4">{selectedCustomer.name}</Text>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Text className="text-base font-semibold text-gray-700">Phone:</Text>
-                  <Text className="text-base text-gray-900">{selectedCustomer.phone}</Text>
-                </div>
-                {selectedCustomer.address && (
-                  <div className="flex items-center gap-2">
-                    <Text className="text-base font-semibold text-gray-700">Address:</Text>
-                    <Text className="text-base text-gray-900">{selectedCustomer.address}</Text>
-                  </div>
-                )}
-                {selectedCustomer.notes && (
-                  <div className="mt-3">
-                    <Text className="text-base font-semibold text-gray-700 mb-1">Notes:</Text>
-                    <Text className="text-base text-gray-700">{selectedCustomer.notes}</Text>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 mt-4">
-                  <Text className="text-sm font-medium text-gray-600">Registered:</Text>
-                  <Badge variant="light" size="lg">
-                    {new Date(selectedCustomer.created_at).toLocaleDateString()}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            {/* Order History */}
-            <div>
-              <Text className="text-xl font-bold text-gray-900 mb-4">Recent Orders</Text>
-              {loadingOrders ? (
-                <LoadingSpinner />
-              ) : customerOrders.length === 0 ? (
-                <Text className="text-base text-gray-600">No orders yet</Text>
-              ) : (
-                <div className="space-y-3">
-                  {customerOrders.map((order: any) => (
-                    <div key={order.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Text className="text-lg font-semibold text-gray-900">{order.order_number}</Text>
-                          <Text className="text-sm text-gray-600 mt-1">
-                            {new Date(order.created_at).toLocaleDateString()}
-                          </Text>
-                        </div>
-                        <div className="text-right">
-                          <Text className="text-lg font-bold text-gray-900">₦{order.total_amount.toLocaleString()}</Text>
-                          <Text className={`text-sm font-semibold mt-1 ${order.balance > 0 ? "text-red-600" : "text-green-600"}`}>
-                            {order.balance > 0 ? `Balance: ₦${order.balance.toLocaleString()}` : "Paid"}
-                          </Text>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
-              <Button
-                size="lg"
-                variant="light"
-                onClick={() => {
-                  setIsDetailOpen(false)
-                  handleEditCustomer(selectedCustomer)
-                }}
-              >
-                Edit Customer
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
-
-      {/* Delete Confirmation */}
-      <ConfirmDialog
-        isOpen={isDeleteOpen}
-        onCancel={() => {
-          setIsDeleteOpen(false)
-          setSelectedCustomer(null)
-        }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Customer"
-        message={`Are you sure you want to delete ${selectedCustomer?.name}? This action cannot be undone.`}
-        confirmText="Delete"
-        confirmColor="red"
+      {/* Customers Table */}
+      <DataTable
+        data={filteredCustomers}
+        columns={columns}
+        isLoading={isLoading}
+        emptyMessage="No customers found"
+        keyExtractor={(customer) => customer.id}
       />
+
+      {/* Customer Form Modal */}
+      {isFormOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-semibold mb-4">
+              {selectedCustomerId ? 'Edit Customer' : 'Add New Customer'}
+            </h2>
+            <CustomerForm
+              customerId={selectedCustomerId}
+              onSuccess={() => {
+                setIsFormOpen(false)
+                setSelectedCustomerId(undefined)
+                fetchCustomers()
+              }}
+              onCancel={() => {
+                setIsFormOpen(false)
+                setSelectedCustomerId(undefined)
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,5 +1,8 @@
-import { Table, Pagination, Text } from "@mantine/core"
 import { useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "../ui/button"
+import { Card } from "../ui/card"
+import { cn } from "../../lib/utils"
 import LoadingSpinner from "./LoadingSpinner"
 import EmptyState from "./EmptyState"
 
@@ -8,6 +11,7 @@ interface Column<T> {
   label: string
   render?: (item: T) => React.ReactNode
   width?: string
+  className?: string
 }
 
 interface DataTableProps<T> {
@@ -38,61 +42,115 @@ export default function DataTable<T>({
   const currentData = data.slice(startIndex, endIndex)
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <Card className="p-8">
+        <LoadingSpinner />
+      </Card>
+    )
   }
 
   if (data.length === 0) {
-    return <EmptyState message={emptyMessage} />
+    return (
+      <Card className="p-8">
+        <EmptyState message={emptyMessage} />
+      </Card>
+    )
   }
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
-        <Table highlightOnHover={!!onRowClick} striped>
-          <Table.Thead>
-            <Table.Tr>
-              {columns.map((column) => (
-                <Table.Th 
-                  key={column.key}
-                  style={{ width: column.width }}
-                >
-                  {column.label}
-                </Table.Th>
-              ))}
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {currentData.map((item) => (
-              <Table.Tr
-                key={keyExtractor(item)}
-                onClick={() => onRowClick?.(item)}
-                className={onRowClick ? "cursor-pointer" : ""}
-              >
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50/50">
                 {columns.map((column) => (
-                  <Table.Td key={column.key}>
-                    {column.render 
-                      ? column.render(item) 
-                      : String((item as any)[column.key] || "-")
-                    }
-                  </Table.Td>
+                  <th
+                    key={column.key}
+                    className={cn(
+                      "px-6 py-4 text-left text-sm font-semibold text-slate-700 uppercase tracking-wide",
+                      column.className
+                    )}
+                    style={{ width: column.width }}
+                  >
+                    {column.label}
+                  </th>
                 ))}
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      </div>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {currentData.map((item) => (
+                <tr
+                  key={keyExtractor(item)}
+                  className={cn(
+                    "transition-colors hover:bg-slate-50/50",
+                    onRowClick && "cursor-pointer"
+                  )}
+                  onClick={() => onRowClick?.(item)}
+                >
+                  {columns.map((column) => (
+                    <td
+                      key={column.key}
+                      className={cn(
+                        "px-6 py-4 text-sm text-slate-900",
+                        column.className
+                      )}
+                    >
+                      {column.render 
+                        ? column.render(item) 
+                        : (item as any)[column.key]
+                      }
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <Text size="sm" c="dimmed">
-            Showing {startIndex + 1} to {Math.min(endIndex, data.length)} of {data.length} entries
-          </Text>
-          <Pagination
-            total={totalPages}
-            value={currentPage}
-            onChange={setCurrentPage}
-            size="sm"
-          />
+          <p className="text-sm text-slate-600">
+            Showing {startIndex + 1} to {Math.min(endIndex, data.length)} of {data.length} results
+          </p>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft size={16} />
+              Previous
+            </Button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className="w-8 h-8 p-0"
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+              <ChevronRight size={16} />
+            </Button>
+          </div>
         </div>
       )}
     </div>

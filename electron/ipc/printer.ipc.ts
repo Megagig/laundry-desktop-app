@@ -3,11 +3,42 @@ import { receiptPrinter } from "../printers/receiptPrinter.js"
 import { orderService } from "../services/order.service.js"
 import { getSettingByKey } from "../services/settings.service.js"
 
+// Flag to prevent repeated printer initialization attempts
+let printerInitialized = false
+let printerError: string | null = null
+
+/**
+ * Initialize printer with error handling
+ */
+async function initializePrinter() {
+  if (printerInitialized) {
+    return { success: !printerError, error: printerError }
+  }
+
+  try {
+    const printers = await receiptPrinter.getAvailablePrinters()
+    printerInitialized = true
+    printerError = null
+    console.log(`✓ Printer system initialized. Found ${printers.length} printer(s)`)
+    return { success: true, printers }
+  } catch (error: any) {
+    printerError = error.message
+    printerInitialized = true
+    console.warn(`⚠ Printer system unavailable: ${error.message}`)
+    return { success: false, error: error.message }
+  }
+}
+
 /**
  * Get available printers
  */
 ipcMain.handle("printer:get-printers", async () => {
   try {
+    const initResult = await initializePrinter()
+    if (!initResult.success) {
+      return { success: false, error: initResult.error || "Printer system unavailable" }
+    }
+
     const printers = await receiptPrinter.getAvailablePrinters()
     return { success: true, data: printers }
   } catch (error: any) {

@@ -8,7 +8,6 @@ import { registerServiceHandlers } from "./ipc/services.ipc.js";
 import { registerPaymentHandlers } from "./ipc/payments.ipc.js";
 import { registerExpenseHandlers } from "./ipc/expenses.ipc.js";
 import { registerReportHandlers } from "./ipc/reports.ipc.js";
-import "./ipc/printer.ipc.js";
 import "./ipc/settings.ipc.js";
 import "./ipc/backup.ipc.js";
 // ES module equivalent of __dirname
@@ -23,7 +22,16 @@ registerServiceHandlers();
 registerPaymentHandlers();
 registerExpenseHandlers();
 registerReportHandlers();
-// Printer and settings handlers are auto-registered via import
+// Initialize printer handlers with error handling
+async function initializePrinterHandlers() {
+    try {
+        await import("./ipc/printer.ipc.js");
+        console.log("✓ Printer handlers initialized");
+    }
+    catch (error) {
+        console.warn("⚠ Printer system unavailable:", error.message);
+    }
+}
 let mainWindow;
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -54,7 +62,11 @@ function createWindow() {
         console.error("Failed to load:", errorCode, errorDescription);
     });
 }
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+    createWindow();
+    // Initialize printer handlers after app is ready
+    await initializePrinterHandlers();
+});
 app.on("window-all-closed", async () => {
     await prisma.$disconnect();
     if (process.platform !== "darwin") {

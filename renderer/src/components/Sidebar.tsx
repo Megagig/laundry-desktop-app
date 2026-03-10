@@ -1,130 +1,169 @@
 import { Link, useLocation } from "react-router-dom"
 import { useState } from "react"
 import { 
-  IconDashboard, 
-  IconUsers, 
-  IconShirt, 
-  IconReportAnalytics,
-  IconReceipt,
-  IconSettings,
-  IconCash,
-  IconTags,
-  IconAlertCircle,
-  IconFileInvoice,
-  IconKeyboard
-} from "@tabler/icons-react"
+  LayoutDashboard, 
+  Users, 
+  ShirtIcon, 
+  BarChart3,
+  Receipt,
+  Settings,
+  DollarSign,
+  Tags,
+  AlertCircle,
+  FileText,
+  Keyboard,
+  ChevronDown,
+  ChevronRight
+} from "lucide-react"
+import { cn } from "../lib/utils"
 import KeyboardShortcutsHelp from "./common/KeyboardShortcutsHelp"
 
 const navigation = [
-  { path: "/", label: "Dashboard", icon: IconDashboard },
-  { path: "/orders", label: "Orders", icon: IconShirt },
-  { path: "/customers", label: "Customers", icon: IconUsers },
-  { path: "/pickup", label: "Pickup", icon: IconReceipt },
-  { path: "/services", label: "Services", icon: IconTags },
+  { path: "/", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/orders", label: "Orders", icon: ShirtIcon },
+  { path: "/customers", label: "Customers", icon: Users },
+  { path: "/pickup", label: "Pickup", icon: Receipt },
+  { path: "/services", label: "Services", icon: Tags },
   { 
     path: "/payments", 
     label: "Payments", 
-    icon: IconCash,
+    icon: DollarSign,
     subItems: [
       { path: "/payments", label: "All Payments" },
-      { path: "/payments/outstanding", label: "Outstanding", icon: IconAlertCircle }
+      { path: "/payments/outstanding", label: "Outstanding", icon: AlertCircle }
     ]
   },
-  { path: "/expenses", label: "Expenses", icon: IconFileInvoice },
-  { path: "/reports", label: "Reports", icon: IconReportAnalytics },
-  { path: "/settings", label: "Settings", icon: IconSettings }
+  { path: "/expenses", label: "Expenses", icon: FileText },
+  { path: "/reports", label: "Reports", icon: BarChart3 },
+  { path: "/settings", label: "Settings", icon: Settings }
 ]
 
 export default function Sidebar() {
   const location = useLocation()
   const [shortcutsOpened, setShortcutsOpened] = useState(false)
+  const [expandedItems, setExpandedItems] = useState<string[]>(["/payments"])
+
+  const toggleExpanded = (path: string) => {
+    setExpandedItems(prev => 
+      prev.includes(path) 
+        ? prev.filter(p => p !== path)
+        : [...prev, path]
+    )
+  }
+
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/"
+    return location.pathname.startsWith(path)
+  }
 
   return (
-    <div className="w-72 bg-white border-r border-gray-200 h-screen flex flex-col">
+    <div className="w-72 bg-white border-r border-slate-200 h-screen flex flex-col">
       {/* Logo/Brand */}
-      <div className="p-6 border-b border-gray-100">
+      <div className="p-6 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
-            <IconShirt size={22} className="text-white" />
+          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <ShirtIcon size={20} className="text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-gray-900">FreshFold</h1>
-            <p className="text-xs text-gray-500">Laundry & Dry Clean</p>
+            <h1 className="text-xl font-bold text-slate-900">FreshFold</h1>
+            <p className="text-sm text-slate-500 font-medium">Laundry Management</p>
           </div>
         </div>
       </div>
-
-      {/* Navigation - Spread items evenly across available space */}
-      <nav className="flex-1 px-3 py-8 flex flex-col justify-evenly overflow-y-auto">
-        {navigation.map((item) => {
-          const Icon = item.icon
-          const isActive = location.pathname === item.path
-          const hasSubItems = item.subItems && item.subItems.length > 0
-          const isSubItemActive = hasSubItems && item.subItems.some(sub => location.pathname === sub.path)
-
-          return (
-            <div key={item.path}>
-              <Link
-                to={item.path}
-                className={`
-                  flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200
-                  ${isActive || isSubItemActive
-                    ? "bg-blue-50 text-blue-600 font-semibold shadow-sm" 
-                    : "text-gray-700 hover:bg-gray-50 font-medium"
-                  }
-                `}
-              >
-                <Icon size={24} className={isActive || isSubItemActive ? "text-blue-600" : "text-gray-500"} />
-                <span className="text-base">{item.label}</span>
-              </Link>
-              
-              {hasSubItems && (isActive || isSubItemActive) && (
-                <div className="ml-12 mt-2 space-y-2">
-                  {item.subItems.map((subItem) => {
-                    const SubIcon = subItem.icon
-                    const isSubActive = location.pathname === subItem.path
-                    
-                    return (
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-6 space-y-1">
+        {navigation.map((item) => (
+          <div key={item.path}>
+            {item.subItems ? (
+              <div>
+                <button
+                  onClick={() => toggleExpanded(item.path)}
+                  className={cn(
+                    "w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
+                    isActive(item.path)
+                      ? "bg-indigo-50 text-indigo-700 border-r-2 border-indigo-500"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <item.icon size={18} className={cn(
+                      "transition-colors",
+                      isActive(item.path) ? "text-indigo-600" : "text-slate-500"
+                    )} />
+                    <span>{item.label}</span>
+                  </div>
+                  {expandedItems.includes(item.path) ? (
+                    <ChevronDown size={16} className="text-slate-400" />
+                  ) : (
+                    <ChevronRight size={16} className="text-slate-400" />
+                  )}
+                </button>
+                
+                {expandedItems.includes(item.path) && (
+                  <div className="ml-6 mt-1 space-y-1">
+                    {item.subItems.map((subItem) => (
                       <Link
                         key={subItem.path}
                         to={subItem.path}
-                        className={`
-                          flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base
-                          ${isSubActive
-                            ? "bg-blue-100 text-blue-700 font-semibold" 
-                            : "text-gray-600 hover:bg-gray-50"
-                          }
-                        `}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                          isActive(subItem.path)
+                            ? "bg-indigo-50 text-indigo-700 border-r-2 border-indigo-500"
+                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        )}
                       >
-                        {SubIcon && <SubIcon size={20} />}
+                        {subItem.icon && (
+                          <subItem.icon size={16} className={cn(
+                            "transition-colors",
+                            isActive(subItem.path) ? "text-indigo-600" : "text-slate-400"
+                          )} />
+                        )}
                         <span>{subItem.label}</span>
                       </Link>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )
-        })}
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to={item.path}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
+                  isActive(item.path)
+                    ? "bg-indigo-50 text-indigo-700 border-r-2 border-indigo-500"
+                    : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                )}
+              >
+                <item.icon size={18} className={cn(
+                  "transition-colors",
+                  isActive(item.path) ? "text-indigo-600" : "text-slate-500"
+                )} />
+                <span>{item.label}</span>
+              </Link>
+            )}
+          </div>
+        ))}
       </nav>
 
-      {/* Footer */}
-      <div className="p-5 border-t border-gray-100 space-y-3">
+      {/* Bottom Section */}
+      <div className="p-4 border-t border-slate-100 space-y-3">
         <button
           onClick={() => setShortcutsOpened(true)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-all duration-200 text-base font-medium"
+          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-all duration-200"
         >
-          <IconKeyboard size={20} />
+          <Keyboard size={18} className="text-slate-500" />
           <span>Shortcuts</span>
         </button>
         
-        <div className="text-center py-3">
-          <p className="font-bold text-gray-800 text-base">CleanWave Laundry</p>
-          <p className="text-xs text-gray-500 mt-1">v1.0.0</p>
+        <div className="px-3 py-2">
+          <p className="text-xs text-slate-400 font-medium">Version 1.0.0</p>
         </div>
       </div>
 
-      <KeyboardShortcutsHelp opened={shortcutsOpened} onClose={() => setShortcutsOpened(false)} />
+      <KeyboardShortcutsHelp 
+        opened={shortcutsOpened} 
+        onClose={() => setShortcutsOpened(false)} 
+      />
     </div>
   )
 }

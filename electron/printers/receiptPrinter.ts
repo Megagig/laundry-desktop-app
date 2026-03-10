@@ -2,7 +2,18 @@ import { BrowserWindow } from "electron"
 import { createRequire } from "module"
 
 const require = createRequire(import.meta.url)
-const PosPrinter = require("electron-pos-printer")
+
+// Try to load the printer module with error handling
+let PosPrinter: any = null
+let printerAvailable = false
+
+try {
+  PosPrinter = require("electron-pos-printer")
+  printerAvailable = true
+} catch (error) {
+  console.warn("⚠ electron-pos-printer not available:", (error as Error).message)
+  printerAvailable = false
+}
 
 interface PrinterOptions {
   preview?: boolean
@@ -53,13 +64,31 @@ export class ReceiptPrinter {
    * Get list of available printers
    */
   async getAvailablePrinters(): Promise<string[]> {
-    try {
-      const { getPrinters } = PosPrinter
-      const printers = await getPrinters()
-      return printers.map((p: any) => p.name)
-    } catch (error) {
-      console.error("Error getting printers:", error)
+    if (!printerAvailable || !PosPrinter) {
+      console.warn("Printer system not available")
       return []
+    }
+
+    try {
+      // Try different ways to access getPrinters function
+      let getPrinters;
+      
+      if (typeof PosPrinter.getPrinters === 'function') {
+        getPrinters = PosPrinter.getPrinters;
+      } else if (PosPrinter.default && typeof PosPrinter.default.getPrinters === 'function') {
+        getPrinters = PosPrinter.default.getPrinters;
+      } else {
+        // Fallback: return default system printer names
+        console.warn("getPrinters function not available, using fallback");
+        return ["Default Printer", "Microsoft Print to PDF"];
+      }
+      
+      const printers = await getPrinters();
+      return Array.isArray(printers) ? printers.map((p: any) => p.name || p) : [];
+    } catch (error) {
+      console.warn("Error getting printers, using fallback:", (error as Error).message);
+      // Return fallback printer options
+      return ["Default Printer", "Microsoft Print to PDF"];
     }
   }
 
@@ -84,6 +113,13 @@ export class ReceiptPrinter {
     data: ReceiptData,
     options: PrinterOptions = {}
   ): Promise<{ success: boolean; error?: string }> {
+    if (!printerAvailable || !PosPrinter) {
+      return { 
+        success: false, 
+        error: "Printer system not available. Please check if electron-pos-printer is properly installed." 
+      }
+    }
+
     try {
       const printerName = options.printerName || this.defaultPrinter
       
@@ -267,6 +303,13 @@ export class ReceiptPrinter {
     data: PaymentReceiptData,
     options: PrinterOptions = {}
   ): Promise<{ success: boolean; error?: string }> {
+    if (!printerAvailable || !PosPrinter) {
+      return { 
+        success: false, 
+        error: "Printer system not available. Please check if electron-pos-printer is properly installed." 
+      }
+    }
+
     try {
       const printerName = options.printerName || this.defaultPrinter
       
