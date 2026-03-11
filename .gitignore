@@ -22,3 +22,6 @@ dist
 shared/types/*.js
 shared/types/*.d.ts
 shared/types/*.map
+
+# RSA Keys (NEVER commit these)
+keys/

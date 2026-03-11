@@ -14,24 +14,17 @@ export class LicenseService {
       // Get machine ID if not provided
       const currentMachineId = machineId || await machineIdService.getMachineId()
       
-      // Decode and parse license key
-      const licenseData = this.parseLicenseKey(licenseKey)
-      if (!licenseData) {
-        return { valid: false, error: 'Invalid license key format' }
+      // Verify cryptographic signature using crypto service
+      const verification = await cryptoService.verifyLicenseKey(licenseKey)
+      
+      if (!verification.valid) {
+        return { 
+          valid: false, 
+          error: verification.error || 'Invalid license signature'
+        }
       }
       
-      // Verify cryptographic signature
-      const signatureValid = await cryptoService.verifySignature(
-        licenseData.payload,
-        licenseData.signature
-      )
-      
-      if (!signatureValid) {
-        return { valid: false, error: 'Invalid license signature' }
-      }
-      
-      // Parse license payload
-      const payload: LicensePayload = JSON.parse(licenseData.payload)
+      const payload: LicensePayload = verification.payload
       
       // Validate machine ID match
       if (payload.machineId !== currentMachineId) {
@@ -74,7 +67,12 @@ export class LicenseService {
           maxUsers: payload.maxUsers || 1,
           issuedAt: new Date(payload.issuedAt),
           expiresAt: payload.expiresAt ? new Date(payload.expiresAt) : null,
-          signature: licenseData.signature,
+          signature: verification.payload ? 
+            Buffer.from(JSON.stringify({
+              payload: JSON.stringify(verification.payload),
+              signature: 'verified'
+            })).toString('base64').substring(0, 100) : 
+            'unknown',
           isActive: true
         }
       }
