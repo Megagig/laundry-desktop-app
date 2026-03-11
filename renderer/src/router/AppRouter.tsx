@@ -18,6 +18,7 @@ import Expenses from "../pages/Expenses"
 import Reports from "../pages/Reports"
 import Settings from "../pages/Settings"
 import UserManagement from "../pages/UserManagement"
+import RoleManagement from "../pages/RoleManagement"
 
 export default function AppRouter() {
   return (
@@ -47,6 +48,7 @@ export default function AppRouter() {
                     <Route path="/expenses" element={<Expenses />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/users" element={<UserManagement />} />
+                    <Route path="/roles" element={<RoleManagement />} />
                     <Route path="/settings" element={<Settings />} />
                   </Routes>
                 </AppLayout>

@@ -103,3 +103,27 @@ ipcMain.handle('rbac:get-user-role', async (event, sessionToken: string) => {
     return { success: false, error: 'Failed to get role' }
   }
 })
+
+/**
+ * Update role permissions
+ */
+ipcMain.handle('rbac:update-role-permissions', async (event, sessionToken: string, roleId: number, permissionIds: number[]) => {
+  try {
+    const session = await authService.validateSession(sessionToken)
+    if (!session) {
+      return { success: false, error: 'Invalid session' }
+    }
+
+    // Check if user has permission to manage roles
+    const hasPermission = await rbacService.hasPermission(session.userId, 'manage_roles')
+    if (!hasPermission) {
+      return { success: false, error: 'Insufficient permissions' }
+    }
+
+    await rbacService.updateRolePermissions(roleId, permissionIds)
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating role permissions:', error)
+    return { success: false, error: 'Failed to update role permissions' }
+  }
+})

@@ -128,6 +128,46 @@ export class RBACService {
       return []
     }
   }
+
+  /**
+   * Update role permissions
+   */
+  async updateRolePermissions(roleId: number, permissionIds: number[]): Promise<boolean> {
+    try {
+      // Check if role exists and is not a system role
+      const role = await prisma.role.findUnique({
+        where: { id: roleId }
+      })
+
+      if (!role) {
+        throw new Error('Role not found')
+      }
+
+      if (role.isSystem) {
+        throw new Error('Cannot modify system role permissions')
+      }
+
+      // Remove all existing permissions for this role
+      await prisma.rolePermission.deleteMany({
+        where: { roleId }
+      })
+
+      // Add new permissions
+      if (permissionIds.length > 0) {
+        await prisma.rolePermission.createMany({
+          data: permissionIds.map(permissionId => ({
+            roleId,
+            permissionId
+          }))
+        })
+      }
+
+      return true
+    } catch (error) {
+      console.error('Error updating role permissions:', error)
+      return false
+    }
+  }
 }
 
 export const rbacService = new RBACService()

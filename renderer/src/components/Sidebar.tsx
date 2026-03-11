@@ -42,7 +42,16 @@ const navigation = [
   },
   { path: "/expenses", label: "Expenses", icon: FileText, permission: PERMISSIONS.VIEW_EXPENSE },
   { path: "/reports", label: "Reports", icon: BarChart3, permission: PERMISSIONS.VIEW_REPORTS },
-  { path: "/users", label: "User Management", icon: Shield, permission: PERMISSIONS.VIEW_USERS },
+  { 
+    path: "/users", 
+    label: "User Management", 
+    icon: Shield,
+    permission: PERMISSIONS.VIEW_USERS,
+    subItems: [
+      { path: "/users", label: "Users", icon: Users, permission: PERMISSIONS.VIEW_USERS },
+      { path: "/roles", label: "Roles & Permissions", icon: Settings, permission: PERMISSIONS.MANAGE_ROLES }
+    ]
+  },
   { path: "/settings", label: "Settings", icon: Settings, permission: PERMISSIONS.VIEW_SETTINGS }
 ]
 
@@ -51,7 +60,7 @@ export default function Sidebar() {
   const { user, logout } = useAuth()
   const { permissions } = useAuthStore()
   const [shortcutsOpened, setShortcutsOpened] = useState(false)
-  const [expandedItems, setExpandedItems] = useState<string[]>(["/payments"])
+  const [expandedItems, setExpandedItems] = useState<string[]>(["/payments", "/users"])
 
   const hasPermissionForItem = (item: any): boolean => {
     if (!item.permission) return true

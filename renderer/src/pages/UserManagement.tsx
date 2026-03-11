@@ -12,12 +12,19 @@ export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [showEditForm, setShowEditForm] = useState(false)
+  const [editingUser, setEditingUser] = useState<User | null>(null)
   const [createFormData, setCreateFormData] = useState({
     username: '',
     fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
+    roleId: 1
+  })
+  const [editFormData, setEditFormData] = useState({
+    fullName: '',
+    email: '',
     roleId: 1
   })
   const [roles, setRoles] = useState<any[]>([])
@@ -59,7 +66,17 @@ export default function UserManagement() {
     })
   }
 
-  const handleCreateUser = async (e: React.FormEvent) => {
+  const handleEditUser = (user: User) => {
+    setEditingUser(user)
+    setEditFormData({
+      fullName: user.fullName,
+      email: user.email,
+      roleId: user.roleId
+    })
+    setShowEditForm(true)
+  }
+
+  const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
     if (!sessionToken) return
@@ -112,6 +129,43 @@ export default function UserManagement() {
         type: "error",
         title: "Error",
         message: "Failed to create user"
+      })
+    }
+  }
+
+  const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    
+    if (!sessionToken || !editingUser) return
+
+    try {
+      const result = await window.api.user.update(sessionToken, editingUser.id, {
+        fullName: editFormData.fullName,
+        email: editFormData.email,
+        roleId: editFormData.roleId
+      })
+
+      if (result.success) {
+        showNotification({
+          type: "success",
+          title: "Success",
+          message: "User updated successfully"
+        })
+        setShowEditForm(false)
+        setEditingUser(null)
+        loadUsers()
+      } else {
+        showNotification({
+          type: "error",
+          title: "Error",
+          message: result.error || "Failed to update user"
+        })
+      }
+    } catch (error) {
+      showNotification({
+        type: "error",
+        title: "Error",
+        message: "Failed to update user"
       })
     }
   }
@@ -185,6 +239,45 @@ export default function UserManagement() {
         type: "error",
         title: "Error",
         message: "Failed to update user"
+      })
+    }
+  }
+
+  const handleResetPassword = async (userId: number, userName: string) => {
+    const newPassword = prompt(`Enter new password for ${userName}:`)
+    if (!newPassword) return
+    
+    if (newPassword.length < 8) {
+      showNotification({
+        type: "error",
+        title: "Validation Error",
+        message: "Password must be at least 8 characters long"
+      })
+      return
+    }
+
+    if (!sessionToken) return
+
+    try {
+      const result = await window.api.user.resetPassword(sessionToken, userId, newPassword)
+      if (result.success) {
+        showNotification({
+          type: "success",
+          title: "Success",
+          message: "Password reset successfully"
+        })
+      } else {
+        showNotification({
+          type: "error",
+          title: "Error",
+          message: result.error || "Failed to reset password"
+        })
+      }
+    } catch (error) {
+      showNotification({
+        type: "error",
+        title: "Error",
+        message: "Failed to reset password"
       })
     }
   }
@@ -308,6 +401,7 @@ export default function UserManagement() {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-1"
+                      onClick={() => handleResetPassword(user.id, user.fullName)}
                     >
                       <Lock size={14} />
                       Reset Password
@@ -318,6 +412,7 @@ export default function UserManagement() {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-1"
+                      onClick={() => handleEditUser(user)}
                     >
                       <Edit size={14} />
                       Edit
@@ -455,6 +550,94 @@ export default function UserManagement() {
                   className="flex-1"
                 >
                   Create User
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditForm && editingUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-semibold mb-4">Edit User: {editingUser.fullName}</h2>
+            <form onSubmit={handleUpdateUser} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={editingUser.username}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Username cannot be changed</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.fullName}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter email address"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role
+                </label>
+                <select
+                  value={editFormData.roleId}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, roleId: parseInt(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {roles.map(role => (
+                    <option key={role.id} value={role.id}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowEditForm(false)
+                    setEditingUser(null)
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                >
+                  Update User
                 </Button>
               </div>
             </form>

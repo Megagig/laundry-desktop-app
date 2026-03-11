@@ -30,6 +30,8 @@ contextBridge.exposeInMainWorld("api", {
     getRoles: (sessionToken: string) => ipcRenderer.invoke("rbac:get-roles", sessionToken),
     getPermissions: (sessionToken: string) => ipcRenderer.invoke("rbac:get-permissions", sessionToken),
     getUserRole: (sessionToken: string) => ipcRenderer.invoke("rbac:get-user-role", sessionToken),
+    updateRolePermissions: (sessionToken: string, roleId: number, permissionIds: number[]) => 
+      ipcRenderer.invoke("rbac:update-role-permissions", sessionToken, roleId, permissionIds),
   },
 
   // Customer APIs
