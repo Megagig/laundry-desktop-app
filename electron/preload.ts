@@ -32,6 +32,14 @@ contextBridge.exposeInMainWorld("api", {
     getUserRole: (sessionToken: string) => ipcRenderer.invoke("rbac:get-user-role", sessionToken),
     updateRolePermissions: (sessionToken: string, roleId: number, permissionIds: number[]) => 
       ipcRenderer.invoke("rbac:update-role-permissions", sessionToken, roleId, permissionIds),
+    createRole: (sessionToken: string, roleData: { name: string, description: string }) =>
+      ipcRenderer.invoke("rbac:create-role", sessionToken, roleData),
+    deleteRole: (sessionToken: string, roleId: number) =>
+      ipcRenderer.invoke("rbac:delete-role", sessionToken, roleId),
+    createPermission: (sessionToken: string, permissionData: { name: string, description: string, module: string }) =>
+      ipcRenderer.invoke("rbac:create-permission", sessionToken, permissionData),
+    deletePermission: (sessionToken: string, permissionId: number) =>
+      ipcRenderer.invoke("rbac:delete-permission", sessionToken, permissionId),
   },
 
   // Customer APIs

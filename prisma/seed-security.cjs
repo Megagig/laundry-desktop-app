@@ -188,7 +188,7 @@ async function main() {
   console.log('\n📊 Summary:')
   console.log(`  - Permissions: ${PERMISSIONS.length}`)
   console.log(`  - Roles: ${ROLES.length}`)
-  console.log(`  - Default Admin: admin / admin123`)
+  console.log(`  - Default Admin: admin / AdminPass@247`)
   console.log('\n⚠️  Remember to change the default admin password!')
 }
 

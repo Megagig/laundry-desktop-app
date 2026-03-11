@@ -27,6 +27,12 @@ export default function UserManagement() {
     email: '',
     roleId: 1
   })
+  const [showResetPassword, setShowResetPassword] = useState(false)
+  const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null)
+  const [resetPasswordData, setResetPasswordData] = useState({
+    newPassword: '',
+    confirmPassword: ''
+  })
   const [roles, setRoles] = useState<any[]>([])
 
   const canCreateUser = usePermission(PERMISSIONS.CREATE_USER)
@@ -243,11 +249,31 @@ export default function UserManagement() {
     }
   }
 
-  const handleResetPassword = async (userId: number, userName: string) => {
-    const newPassword = prompt(`Enter new password for ${userName}:`)
-    if (!newPassword) return
+  const handleResetPassword = (user: User) => {
+    setResetPasswordUser(user)
+    setResetPasswordData({
+      newPassword: '',
+      confirmPassword: ''
+    })
+    setShowResetPassword(true)
+  }
+
+  const handleResetPasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     
-    if (newPassword.length < 8) {
+    if (!sessionToken || !resetPasswordUser) return
+
+    // Validation
+    if (resetPasswordData.newPassword !== resetPasswordData.confirmPassword) {
+      showNotification({
+        type: "error",
+        title: "Validation Error",
+        message: "Passwords do not match"
+      })
+      return
+    }
+
+    if (resetPasswordData.newPassword.length < 8) {
       showNotification({
         type: "error",
         title: "Validation Error",
@@ -256,16 +282,17 @@ export default function UserManagement() {
       return
     }
 
-    if (!sessionToken) return
-
     try {
-      const result = await window.api.user.resetPassword(sessionToken, userId, newPassword)
+      const result = await window.api.user.resetPassword(sessionToken, resetPasswordUser.id, resetPasswordData.newPassword)
       if (result.success) {
         showNotification({
           type: "success",
           title: "Success",
           message: "Password reset successfully"
         })
+        setShowResetPassword(false)
+        setResetPasswordUser(null)
+        setResetPasswordData({ newPassword: '', confirmPassword: '' })
       } else {
         showNotification({
           type: "error",
@@ -401,7 +428,7 @@ export default function UserManagement() {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-1"
-                      onClick={() => handleResetPassword(user.id, user.fullName)}
+                      onClick={() => handleResetPassword(user)}
                     >
                       <Lock size={14} />
                       Reset Password
@@ -638,6 +665,73 @@ export default function UserManagement() {
                   className="flex-1"
                 >
                   Update User
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetPassword && resetPasswordUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-semibold mb-4">Reset Password: {resetPasswordUser.fullName}</h2>
+            <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={resetPasswordData.newPassword}
+                  onChange={(e) => setResetPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter new password (min 8 characters)"
+                  minLength={8}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={resetPasswordData.confirmPassword}
+                  onChange={(e) => setResetPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Confirm new password"
+                  minLength={8}
+                />
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>Note:</strong> The user will need to use this new password for their next login.
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowResetPassword(false)
+                    setResetPasswordUser(null)
+                    setResetPasswordData({ newPassword: '', confirmPassword: '' })
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                >
+                  Reset Password
                 </Button>
               </div>
             </form>

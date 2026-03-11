@@ -154,6 +154,7 @@ model Permission {
   name        String           @unique
   description String?
   module      String
+  isSystem    Boolean          @default(false)
   createdAt   DateTime         @default(now())
   
   roles       RolePermission[]

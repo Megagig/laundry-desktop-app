@@ -127,3 +127,99 @@ ipcMain.handle('rbac:update-role-permissions', async (event, sessionToken: strin
     return { success: false, error: 'Failed to update role permissions' }
   }
 })
+
+/**
+ * Create new role
+ */
+ipcMain.handle('rbac:create-role', async (event, sessionToken: string, roleData: { name: string, description: string }) => {
+  try {
+    const session = await authService.validateSession(sessionToken)
+    if (!session) {
+      return { success: false, error: 'Invalid session' }
+    }
+
+    // Check if user has permission to manage roles
+    const hasPermission = await rbacService.hasPermission(session.userId, 'manage_roles')
+    if (!hasPermission) {
+      return { success: false, error: 'Insufficient permissions' }
+    }
+
+    const role = await rbacService.createRole(roleData)
+    return { success: true, role }
+  } catch (error) {
+    console.error('Error creating role:', error)
+    return { success: false, error: 'Failed to create role' }
+  }
+})
+
+/**
+ * Delete role
+ */
+ipcMain.handle('rbac:delete-role', async (event, sessionToken: string, roleId: number) => {
+  try {
+    const session = await authService.validateSession(sessionToken)
+    if (!session) {
+      return { success: false, error: 'Invalid session' }
+    }
+
+    // Check if user has permission to manage roles
+    const hasPermission = await rbacService.hasPermission(session.userId, 'manage_roles')
+    if (!hasPermission) {
+      return { success: false, error: 'Insufficient permissions' }
+    }
+
+    await rbacService.deleteRole(roleId)
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting role:', error)
+    return { success: false, error: 'Failed to delete role' }
+  }
+})
+
+/**
+ * Create new permission
+ */
+ipcMain.handle('rbac:create-permission', async (event, sessionToken: string, permissionData: { name: string, description: string, module: string }) => {
+  try {
+    const session = await authService.validateSession(sessionToken)
+    if (!session) {
+      return { success: false, error: 'Invalid session' }
+    }
+
+    // Check if user has permission to manage roles
+    const hasPermission = await rbacService.hasPermission(session.userId, 'manage_roles')
+    if (!hasPermission) {
+      return { success: false, error: 'Insufficient permissions' }
+    }
+
+    const permission = await rbacService.createPermission(permissionData)
+    return { success: true, permission }
+  } catch (error) {
+    console.error('Error creating permission:', error)
+    return { success: false, error: 'Failed to create permission' }
+  }
+})
+
+/**
+ * Delete permission
+ */
+ipcMain.handle('rbac:delete-permission', async (event, sessionToken: string, permissionId: number) => {
+  try {
+    const session = await authService.validateSession(sessionToken)
+    if (!session) {
+      return { success: false, error: 'Invalid session' }
+    }
+
+    // Check if user has permission to manage roles
+    const hasPermission = await rbacService.hasPermission(session.userId, 'manage_roles')
+    if (!hasPermission) {
+      return { success: false, error: 'Insufficient permissions' }
+    }
+
+    await rbacService.deletePermission(permissionId)
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting permission:', error)
+    return { success: false, error: 'Failed to delete permission' }
+  }
+})

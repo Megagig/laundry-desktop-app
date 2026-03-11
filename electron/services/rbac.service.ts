@@ -168,6 +168,144 @@ export class RBACService {
       return false
     }
   }
+
+  /**
+   * Create new role
+   */
+  async createRole(roleData: { name: string, description: string }) {
+    try {
+      // Check if role name already exists
+      const existingRole = await prisma.role.findUnique({
+        where: { name: roleData.name }
+      })
+
+      if (existingRole) {
+        throw new Error('Role name already exists')
+      }
+
+      const role = await prisma.role.create({
+        data: {
+          name: roleData.name.toUpperCase(),
+          description: roleData.description,
+          isSystem: false
+        }
+      })
+
+      return role
+    } catch (error) {
+      console.error('Error creating role:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Delete role
+   */
+  async deleteRole(roleId: number): Promise<boolean> {
+    try {
+      // Check if role exists and is not a system role
+      const role = await prisma.role.findUnique({
+        where: { id: roleId }
+      })
+
+      if (!role) {
+        throw new Error('Role not found')
+      }
+
+      if (role.isSystem) {
+        throw new Error('Cannot delete system role')
+      }
+
+      // Check if any users are assigned to this role
+      const usersWithRole = await prisma.user.count({
+        where: { roleId }
+      })
+
+      if (usersWithRole > 0) {
+        throw new Error('Cannot delete role that is assigned to users')
+      }
+
+      // Delete role permissions first
+      await prisma.rolePermission.deleteMany({
+        where: { roleId }
+      })
+
+      // Delete the role
+      await prisma.role.delete({
+        where: { id: roleId }
+      })
+
+      return true
+    } catch (error) {
+      console.error('Error deleting role:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Create new permission
+   */
+  async createPermission(permissionData: { name: string, description: string, module: string }) {
+    try {
+      // Check if permission name already exists
+      const existingPermission = await prisma.permission.findUnique({
+        where: { name: permissionData.name }
+      })
+
+      if (existingPermission) {
+        throw new Error('Permission name already exists')
+      }
+
+      const permission = await prisma.permission.create({
+        data: {
+          name: permissionData.name.toLowerCase(),
+          description: permissionData.description,
+          module: permissionData.module.toUpperCase(),
+          isSystem: false
+        }
+      })
+
+      return permission
+    } catch (error) {
+      console.error('Error creating permission:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Delete permission
+   */
+  async deletePermission(permissionId: number): Promise<boolean> {
+    try {
+      // Check if permission exists and is not a system permission
+      const permission = await prisma.permission.findUnique({
+        where: { id: permissionId }
+      })
+
+      if (!permission) {
+        throw new Error('Permission not found')
+      }
+
+      if (permission.isSystem) {
+        throw new Error('Cannot delete system permission')
+      }
+
+      // Delete role permissions first
+      await prisma.rolePermission.deleteMany({
+        where: { permissionId }
+      })
+
+      // Delete the permission
+      await prisma.permission.delete({
+        where: { id: permissionId }
+      })
+
+      return true
+    } catch (error) {
+      console.error('Error deleting permission:', error)
+      throw error
+    }
+  }
 }
 
 export const rbacService = new RBACService()
