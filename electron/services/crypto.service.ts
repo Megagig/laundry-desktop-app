@@ -85,7 +85,7 @@ Ne+mc+yrb/RfcTm9Vp666wrt1xMc3x+EY82U0zjo6z8atz5oiDrIBpWyrYJfhOsE
     } catch (error) {
       return {
         valid: false,
-        error: `License key verification failed: ${error.message}`
+        error: `License key verification failed: ${error instanceof Error ? error.message : String(error)}`
       }
     }
   }
@@ -143,7 +143,7 @@ Ne+mc+yrb/RfcTm9Vp666wrt1xMc3x+EY82U0zjo6z8atz5oiDrIBpWyrYJfhOsE
       
       return Buffer.from(JSON.stringify(encrypted)).toString('base64')
     } catch (error) {
-      throw new Error(`Encryption failed: ${error.message}`)
+      throw new Error(`Encryption failed: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -181,9 +181,9 @@ Ne+mc+yrb/RfcTm9Vp666wrt1xMc3x+EY82U0zjo6z8atz5oiDrIBpWyrYJfhOsE
         throw new Error('Authentication failed')
       }
       
-      return decipher.output.toString('utf8')
+      return decipher.output.toString()
     } catch (error) {
-      throw new Error(`Decryption failed: ${error.message}`)
+      throw new Error(`Decryption failed: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 }

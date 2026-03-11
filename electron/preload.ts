@@ -159,6 +159,7 @@ contextBridge.exposeInMainWorld("api", {
     check: () => ipcRenderer.invoke('startup:check'),
     isLicenseValid: () => ipcRenderer.invoke('startup:is-license-valid'),
     getTrialStatus: () => ipcRenderer.invoke('startup:get-trial-status'),
+    shouldBlock: () => ipcRenderer.invoke('startup:should-block'),
   },
 
   // License APIs
@@ -203,5 +204,22 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("license:archive", sessionToken, licenseId),
     delete: (sessionToken: string, licenseId: number) => 
       ipcRenderer.invoke("license:delete", sessionToken, licenseId),
+  },
+
+  // Trial APIs
+  trial: {
+    start: () => ipcRenderer.invoke("trial:start"),
+    getStatus: () => ipcRenderer.invoke("trial:getStatus"),
+    isExpired: () => ipcRenderer.invoke("trial:isExpired"),
+    isActive: () => ipcRenderer.invoke("trial:isActive"),
+    getDaysRemaining: () => ipcRenderer.invoke("trial:getDaysRemaining"),
+    getWarning: () => ipcRenderer.invoke("trial:getWarning"),
+    canStart: () => ipcRenderer.invoke("trial:canStart"),
+    getInfo: () => ipcRenderer.invoke("trial:getInfo"),
+    shouldBlock: () => ipcRenderer.invoke("trial:shouldBlock"),
+    
+    // Admin-only APIs
+    reset: (sessionToken: string) => ipcRenderer.invoke("trial:reset", sessionToken),
+    getStats: (sessionToken: string) => ipcRenderer.invoke("trial:getStats", sessionToken),
   },
 })

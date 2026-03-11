@@ -16,6 +16,11 @@ export function registerStartupHandlers() {
   ipcMain.handle('startup:get-trial-status', async () => {
     return await startupService.getTrialStatus()
   })
+
+  // Check if application should be blocked
+  ipcMain.handle('startup:should-block', async () => {
+    return await startupService.shouldBlockApplication()
+  })
 }
 
 // Auto-register handlers

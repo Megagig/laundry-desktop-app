@@ -1,11 +1,14 @@
 import { licenseService } from './license.service.js'
+import { trialService } from './trial.service.js'
 import { prisma } from '../database/prisma.js'
 
 export interface StartupCheckResult {
   canProceed: boolean
   requiresActivation: boolean
   requiresLogin: boolean
+  requiresTrial: boolean
   error?: string
+  trialInfo?: any
 }
 
 class StartupService {
@@ -14,52 +17,87 @@ class StartupService {
    */
   async performStartupChecks(): Promise<StartupCheckResult> {
     try {
-      // Check license status
+      // First check if license is valid
       const licenseStatus = await licenseService.checkLicenseStatus()
       
-      if (!licenseStatus.isActivated) {
+      if (licenseStatus.isActivated && licenseStatus.isValid && !licenseStatus.isExpired) {
+        // Valid license - check if we have users
+        const userCount = await prisma.user.count()
+        
+        if (userCount === 0) {
+          return {
+            canProceed: false,
+            requiresActivation: false,
+            requiresLogin: false,
+            requiresTrial: false,
+            error: 'No users found in database'
+          }
+        }
+
         return {
-          canProceed: false,
-          requiresActivation: true,
-          requiresLogin: false
+          canProceed: true,
+          requiresActivation: false,
+          requiresLogin: true,
+          requiresTrial: false
         }
       }
 
-      if (licenseStatus.isExpired) {
-        return {
-          canProceed: false,
-          requiresActivation: true,
-          requiresLogin: false,
-          error: 'License has expired'
-        }
-      }
-
-      if (!licenseStatus.isValid) {
-        return {
-          canProceed: false,
-          requiresActivation: true,
-          requiresLogin: false,
-          error: 'License is invalid'
-        }
-      }
-
-      // License is valid, check if we have any users
-      const userCount = await prisma.user.count()
+      // No valid license - check trial status
+      const trialStatus = await trialService.getTrialStatus()
       
-      if (userCount === 0) {
+      if (!trialStatus.hasTrialStarted && trialStatus.canStartTrial) {
+        // Can start trial
         return {
-          canProceed: false,
+          canProceed: true,
           requiresActivation: false,
           requiresLogin: false,
-          error: 'No users found in database'
+          requiresTrial: true,
+          trialInfo: trialStatus
         }
       }
 
-      // All checks passed
+      if (trialStatus.isTrialActive) {
+        // Trial is active - check if we have users
+        const userCount = await prisma.user.count()
+        
+        if (userCount === 0) {
+          return {
+            canProceed: false,
+            requiresActivation: false,
+            requiresLogin: false,
+            requiresTrial: false,
+            error: 'No users found in database'
+          }
+        }
+
+        return {
+          canProceed: true,
+          requiresActivation: false,
+          requiresLogin: true,
+          requiresTrial: false,
+          trialInfo: trialStatus
+        }
+      }
+
+      if (trialStatus.isTrialExpired) {
+        // Trial expired - require activation
+        return {
+          canProceed: false,
+          requiresActivation: true,
+          requiresLogin: false,
+          requiresTrial: false,
+          error: 'Trial period has expired. Please activate a license.',
+          trialInfo: trialStatus
+        }
+      }
+
+      // Fallback - require activation
       return {
-        canProceed: true,
-        requiresActivation: false,
-        requiresLogin: true
+        canProceed: false,
+        requiresActivation: true,
+        requiresLogin: false,
+        requiresTrial: false,
+        error: 'License activation required'
       }
     } catch (error) {
       console.error('Startup check failed:', error)
@@ -67,6 +105,7 @@ class StartupService {
         canProceed: false,
         requiresActivation: true,
         requiresLogin: false,
+        requiresTrial: false,
         error: 'Startup check failed'
       }
     }
@@ -86,58 +125,35 @@ class StartupService {
   }
 
   /**
-   * Get trial status if no license is activated
+   * Get trial status using the trial service
    */
   async getTrialStatus() {
     try {
-      // Check if trial has been started
-      const trialSetting = await prisma.setting.findUnique({
-        where: { key: 'trial_start_date' }
-      })
-
-      if (!trialSetting) {
-        // Start trial
-        const startDate = new Date()
-        const endDate = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000) // 14 days
-
-        await prisma.setting.create({
-          data: {
-            key: 'trial_start_date',
-            value: startDate.toISOString()
-          }
-        })
-
-        return {
-          isTrialActive: true,
-          startDate,
-          endDate,
-          daysRemaining: 14,
-          isExpired: false
-        }
-      }
-
-      const startDate = new Date(trialSetting.value)
-      const endDate = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000)
-      const now = new Date()
-      const daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)))
-      const isExpired = now > endDate
-
-      return {
-        isTrialActive: !isExpired,
-        startDate,
-        endDate,
-        daysRemaining,
-        isExpired
-      }
+      return await trialService.getTrialStatus()
     } catch (error) {
       console.error('Trial status check failed:', error)
       return {
+        hasTrialStarted: false,
         isTrialActive: false,
-        startDate: new Date(),
-        endDate: new Date(),
+        isTrialExpired: true,
         daysRemaining: 0,
-        isExpired: true
+        startDate: null,
+        endDate: null,
+        canStartTrial: false,
+        machineId: ''
       }
+    }
+  }
+
+  /**
+   * Check if application should be blocked
+   */
+  async shouldBlockApplication(): Promise<boolean> {
+    try {
+      return await trialService.shouldBlockApplication()
+    } catch (error) {
+      console.error('Block check failed:', error)
+      return true // Block on error for security
     }
   }
 }
