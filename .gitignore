@@ -6,6 +6,12 @@ dist
 *.js.map
 *.d.ts.map
 
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
 # But keep config files
 !*.config.js
 !eslint.config.js
