@@ -13,9 +13,12 @@ import {
   FileText,
   Keyboard,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  LogOut,
+  User as UserIcon
 } from "lucide-react"
 import { cn } from "../lib/utils"
+import { useAuth } from "../contexts/AuthContext"
 import KeyboardShortcutsHelp from "./common/KeyboardShortcutsHelp"
 
 const navigation = [
@@ -40,8 +43,15 @@ const navigation = [
 
 export default function Sidebar() {
   const location = useLocation()
+  const { user, logout } = useAuth()
   const [shortcutsOpened, setShortcutsOpened] = useState(false)
   const [expandedItems, setExpandedItems] = useState<string[]>(["/payments"])
+
+  const handleLogout = async () => {
+    if (confirm("Are you sure you want to logout?")) {
+      await logout()
+    }
+  }
 
   const toggleExpanded = (path: string) => {
     setExpandedItems(prev => 
@@ -147,6 +157,31 @@ export default function Sidebar() {
 
       {/* Bottom Section */}
       <div className="p-4 border-t border-slate-100 space-y-3">
+        {/* User Info */}
+        {user && (
+          <div className="px-3 py-2 bg-slate-50 rounded-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
+                <UserIcon size={16} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-900 truncate">{user.fullName}</p>
+                <p className="text-xs text-slate-500 truncate">{user.role?.name || "User"}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+        >
+          <LogOut size={18} />
+          <span>Logout</span>
+        </button>
+
+        {/* Keyboard Shortcuts */}
         <button
           onClick={() => setShortcutsOpened(true)}
           className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-all duration-200"

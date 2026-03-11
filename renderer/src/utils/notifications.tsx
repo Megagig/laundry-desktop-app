@@ -68,3 +68,26 @@ export const updateNotification = (
     autoClose: 3000,
   })
 }
+
+// Unified notification function
+export const showNotification = (params: {
+  type: "success" | "error" | "warning" | "info"
+  title: string
+  message: string
+}) => {
+  const { type, title, message } = params
+  
+  const config = {
+    success: { color: "green", icon: <IconCheck size={18} />, autoClose: 3000 },
+    error: { color: "red", icon: <IconX size={18} />, autoClose: 5000 },
+    warning: { color: "yellow", icon: <IconAlertTriangle size={18} />, autoClose: 4000 },
+    info: { color: "blue", icon: <IconInfoCircle size={18} />, autoClose: 3000 },
+  }
+  
+  notifications.show({
+    title,
+    message,
+    ...config[type],
+  })
+}
+

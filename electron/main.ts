@@ -2,6 +2,8 @@ import { app, BrowserWindow } from "electron"
 import path from "path"
 import { fileURLToPath } from "url"
 import { prisma, seedDatabase } from "./database/prisma.js"
+import { registerAuthHandlers } from "./ipc/auth.ipc.js"
+import { registerUserHandlers } from "./ipc/user.ipc.js"
 import { registerCustomerHandlers } from "./ipc/customers.ipc.js"
 import { registerOrderHandlers } from "./ipc/orders.ipc.js"
 import { registerServiceHandlers } from "./ipc/services.ipc.js"
@@ -19,6 +21,8 @@ const __dirname = path.dirname(__filename)
 seedDatabase()
 
 // Register all IPC handlers
+registerAuthHandlers()
+registerUserHandlers()
 registerCustomerHandlers()
 registerOrderHandlers()
 registerServiceHandlers()

@@ -3,6 +3,25 @@ export {}
 declare global {
   interface Window {
     api: {
+      // Auth APIs
+      auth: {
+        login: (credentials: any) => Promise<any>
+        logout: (sessionToken: string) => Promise<any>
+        validateSession: (sessionToken: string) => Promise<any>
+        getCurrentUser: (sessionToken: string) => Promise<any>
+        changePassword: (sessionToken: string, data: any) => Promise<any>
+        refreshSession: (sessionToken: string) => Promise<any>
+      }
+      // User Management APIs
+      user: {
+        create: (sessionToken: string, data: any) => Promise<any>
+        getAll: (sessionToken: string) => Promise<any>
+        getById: (sessionToken: string, userId: number) => Promise<any>
+        update: (sessionToken: string, userId: number, data: any) => Promise<any>
+        delete: (sessionToken: string, userId: number) => Promise<any>
+        toggleActive: (sessionToken: string, userId: number) => Promise<any>
+        resetPassword: (sessionToken: string, userId: number, newPassword: string) => Promise<any>
+      }
       customer: {
         create: (data: any) => Promise<any>
         getAll: () => Promise<any>

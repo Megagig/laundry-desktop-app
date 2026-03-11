@@ -1,6 +1,28 @@
 import { contextBridge, ipcRenderer } from "electron"
 
 contextBridge.exposeInMainWorld("api", {
+  // Auth APIs
+  auth: {
+    login: (credentials: any) => ipcRenderer.invoke("auth:login", credentials),
+    logout: (sessionToken: string) => ipcRenderer.invoke("auth:logout", sessionToken),
+    validateSession: (sessionToken: string) => ipcRenderer.invoke("auth:validate-session", sessionToken),
+    getCurrentUser: (sessionToken: string) => ipcRenderer.invoke("auth:get-current-user", sessionToken),
+    changePassword: (sessionToken: string, data: any) => ipcRenderer.invoke("auth:change-password", sessionToken, data),
+    refreshSession: (sessionToken: string) => ipcRenderer.invoke("auth:refresh-session", sessionToken),
+  },
+
+  // User Management APIs
+  user: {
+    create: (sessionToken: string, data: any) => ipcRenderer.invoke("user:create", sessionToken, data),
+    getAll: (sessionToken: string) => ipcRenderer.invoke("user:getAll", sessionToken),
+    getById: (sessionToken: string, userId: number) => ipcRenderer.invoke("user:getById", sessionToken, userId),
+    update: (sessionToken: string, userId: number, data: any) => ipcRenderer.invoke("user:update", sessionToken, userId, data),
+    delete: (sessionToken: string, userId: number) => ipcRenderer.invoke("user:delete", sessionToken, userId),
+    toggleActive: (sessionToken: string, userId: number) => ipcRenderer.invoke("user:toggle-active", sessionToken, userId),
+    resetPassword: (sessionToken: string, userId: number, newPassword: string) => 
+      ipcRenderer.invoke("user:reset-password", sessionToken, userId, newPassword),
+  },
+
   // Customer APIs
   customer: {
     create: (data: any) => ipcRenderer.invoke("customer:create", data),
