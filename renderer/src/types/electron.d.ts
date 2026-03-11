@@ -22,6 +22,14 @@ declare global {
         toggleActive: (sessionToken: string, userId: number) => Promise<any>
         resetPassword: (sessionToken: string, userId: number, newPassword: string) => Promise<any>
       }
+      // RBAC APIs
+      rbac: {
+        getUserPermissions: (sessionToken: string) => Promise<any>
+        hasPermission: (sessionToken: string, permission: string) => Promise<any>
+        getRoles: (sessionToken: string) => Promise<any>
+        getPermissions: (sessionToken: string) => Promise<any>
+        getUserRole: (sessionToken: string) => Promise<any>
+      }
       customer: {
         create: (data: any) => Promise<any>
         getAll: () => Promise<any>

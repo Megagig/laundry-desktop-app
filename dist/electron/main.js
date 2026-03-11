@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { prisma, seedDatabase } from "./database/prisma.js";
 import { registerAuthHandlers } from "./ipc/auth.ipc.js";
 import { registerUserHandlers } from "./ipc/user.ipc.js";
+import "./ipc/rbac.ipc.js";
 import { registerCustomerHandlers } from "./ipc/customers.ipc.js";
 import { registerOrderHandlers } from "./ipc/orders.ipc.js";
 import { registerServiceHandlers } from "./ipc/services.ipc.js";

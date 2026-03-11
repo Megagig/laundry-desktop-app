@@ -23,6 +23,15 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("user:reset-password", sessionToken, userId, newPassword),
   },
 
+  // RBAC APIs
+  rbac: {
+    getUserPermissions: (sessionToken: string) => ipcRenderer.invoke("rbac:get-user-permissions", sessionToken),
+    hasPermission: (sessionToken: string, permission: string) => ipcRenderer.invoke("rbac:has-permission", sessionToken, permission),
+    getRoles: (sessionToken: string) => ipcRenderer.invoke("rbac:get-roles", sessionToken),
+    getPermissions: (sessionToken: string) => ipcRenderer.invoke("rbac:get-permissions", sessionToken),
+    getUserRole: (sessionToken: string) => ipcRenderer.invoke("rbac:get-user-role", sessionToken),
+  },
+
   // Customer APIs
   customer: {
     create: (data: any) => ipcRenderer.invoke("customer:create", data),

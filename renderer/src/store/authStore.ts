@@ -7,13 +7,15 @@ interface AuthState {
   sessionToken: string | null
   isAuthenticated: boolean
   isLoading: boolean
+  permissions: string[] | null
   
   // Actions
   setUser: (user: User | null) => void
   setSessionToken: (token: string | null) => void
   setAuthenticated: (isAuthenticated: boolean) => void
   setLoading: (isLoading: boolean) => void
-  login: (user: User, sessionToken: string) => void
+  setPermissions: (permissions: string[] | null) => void
+  login: (user: User, sessionToken: string, permissions: string[]) => void
   logout: () => void
   clearAuth: () => void
 }
@@ -25,6 +27,7 @@ export const useAuthStore = create<AuthState>()(
       sessionToken: null,
       isAuthenticated: false,
       isLoading: false,
+      permissions: null,
 
       setUser: (user) => set({ user }),
       
@@ -34,9 +37,12 @@ export const useAuthStore = create<AuthState>()(
       
       setLoading: (isLoading) => set({ isLoading }),
       
-      login: (user, sessionToken) => set({
+      setPermissions: (permissions) => set({ permissions }),
+      
+      login: (user, sessionToken, permissions) => set({
         user,
         sessionToken,
+        permissions,
         isAuthenticated: true,
         isLoading: false
       }),
@@ -44,6 +50,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({
         user: null,
         sessionToken: null,
+        permissions: null,
         isAuthenticated: false,
         isLoading: false
       }),
@@ -51,6 +58,7 @@ export const useAuthStore = create<AuthState>()(
       clearAuth: () => set({
         user: null,
         sessionToken: null,
+        permissions: null,
         isAuthenticated: false,
         isLoading: false
       })
@@ -60,7 +68,8 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         sessionToken: state.sessionToken,
         user: state.user,
-        isAuthenticated: state.isAuthenticated
+        isAuthenticated: state.isAuthenticated,
+        permissions: state.permissions
       })
     }
   )

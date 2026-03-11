@@ -36,11 +36,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await window.api.auth.validateSession(sessionToken)
       
       if (result.valid && result.session) {
-        // Session is valid, get current user
+        // Session is valid, get current user and permissions
         const currentUser = await window.api.auth.getCurrentUser(sessionToken)
         
+        let permissions: string[] = []
+        try {
+          if (window.api?.rbac?.getUserPermissions) {
+            const permissionsResult = await window.api.rbac.getUserPermissions(sessionToken)
+            permissions = permissionsResult.success ? permissionsResult.permissions : []
+          } else {
+            console.warn('Session validation - RBAC API not available')
+          }
+        } catch (error) {
+          console.warn('Failed to load permissions during session validation:', error)
+          permissions = []
+        }
+        
         if (currentUser) {
-          setLogin(currentUser, sessionToken)
+          setLogin(currentUser, sessionToken, permissions)
           setIsLoading(false)
           return true
         }
@@ -65,7 +78,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await window.api.auth.login(credentials)
 
       if (result.success && result.user && result.sessionToken) {
-        setLogin(result.user, result.sessionToken)
+        // Get user permissions (with fallback for compatibility)
+        let permissions: string[] = []
+        try {
+          if (window.api?.rbac?.getUserPermissions) {
+            const permissionsResult = await window.api.rbac.getUserPermissions(result.sessionToken)
+            permissions = permissionsResult.success ? permissionsResult.permissions : []
+          } else {
+            console.warn('RBAC API not available - window.api.rbac is undefined')
+          }
+        } catch (error) {
+          console.error('Failed to load permissions:', error)
+          permissions = []
+        }
+        
+        setLogin(result.user, result.sessionToken, permissions)
         setIsLoading(false)
         return { success: true }
       }

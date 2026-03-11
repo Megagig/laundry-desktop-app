@@ -17,6 +17,7 @@ import OutstandingPayments from "../pages/OutstandingPayments"
 import Expenses from "../pages/Expenses"
 import Reports from "../pages/Reports"
 import Settings from "../pages/Settings"
+import UserManagement from "../pages/UserManagement"
 
 export default function AppRouter() {
   return (
@@ -45,6 +46,7 @@ export default function AppRouter() {
                     <Route path="/payments/outstanding" element={<OutstandingPayments />} />
                     <Route path="/expenses" element={<Expenses />} />
                     <Route path="/reports" element={<Reports />} />
+                    <Route path="/users" element={<UserManagement />} />
                     <Route path="/settings" element={<Settings />} />
                   </Routes>
                 </AppLayout>
