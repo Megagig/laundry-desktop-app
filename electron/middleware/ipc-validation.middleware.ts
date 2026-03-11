@@ -162,8 +162,8 @@ function validateSessionToken(token: any): string {
     throw new Error('Invalid session token format')
   }
   
-  // Check for basic token format (alphanumeric + some special chars)
-  if (!/^[a-zA-Z0-9._-]+$/.test(token)) {
+  // Check for base64 token format (alphanumeric + base64 chars)
+  if (!/^[a-zA-Z0-9+/=._-]+$/.test(token)) {
     throw new Error('Session token contains invalid characters')
   }
   

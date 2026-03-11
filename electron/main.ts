@@ -14,6 +14,8 @@ import { registerExpenseHandlers } from "./ipc/expenses.ipc.js"
 import { registerReportHandlers } from "./ipc/reports.ipc.js"
 import "./ipc/settings.ipc.js"
 import "./ipc/backup.ipc.js"
+import "./ipc/license.ipc.js"
+import "./ipc/startup.ipc.js"
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url)
@@ -122,10 +124,11 @@ function createWindow() {
         'Content-Security-Policy': [
           "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; " +
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-          "style-src 'self' 'unsafe-inline'; " +
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
           "img-src 'self' data: blob:; " +
-          "font-src 'self' data:; " +
+          "font-src 'self' data: https://fonts.gstatic.com; " +
           "connect-src 'self' ws://localhost:* http://localhost:*; " +
+          "worker-src 'self' blob:; " +
           "media-src 'none'; " +
           "object-src 'none'; " +
           "frame-src 'none';"

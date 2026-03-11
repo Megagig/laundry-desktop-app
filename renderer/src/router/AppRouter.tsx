@@ -1,9 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider } from "../contexts/AuthContext"
+import { ToastProvider } from "../components/ui/toast"
 import ProtectedRoute from "../components/auth/ProtectedRoute"
 import AppLayout from "../layout/AppLayout"
 
 import Login from "../pages/Login"
+import Activation from "../pages/Activation"
 import Dashboard from "../pages/Dashboard"
 import Customers from "../pages/Customers"
 import CustomerDetail from "../pages/CustomerDetail"
@@ -23,40 +25,179 @@ import RoleManagement from "../pages/RoleManagement"
 export default function AppRouter() {
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
         <Routes>
-          {/* Public Route */}
+          {/* Default route - redirect to login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
 
           {/* Protected Routes */}
           <Route
-            path="/*"
+            path="/activation"
             element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/customers" element={<Customers />} />
-                    <Route path="/customers/:id" element={<CustomerDetail />} />
-                    <Route path="/orders" element={<Orders />} />
-                    <Route path="/orders/:id" element={<OrderDetail />} />
-                    <Route path="/orders/new" element={<CreateOrder />} />
-                    <Route path="/pickup" element={<Pickup />} />
-                    <Route path="/services" element={<Services />} />
-                    <Route path="/payments" element={<Payments />} />
-                    <Route path="/payments/outstanding" element={<OutstandingPayments />} />
-                    <Route path="/expenses" element={<Expenses />} />
-                    <Route path="/reports" element={<Reports />} />
-                    <Route path="/users" element={<UserManagement />} />
-                    <Route path="/roles" element={<RoleManagement />} />
-                    <Route path="/settings" element={<Settings />} />
-                  </Routes>
+                  <Activation />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Dashboard />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customers"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Customers />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customers/:id"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <CustomerDetail />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Orders />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/:id"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <OrderDetail />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/new"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <CreateOrder />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pickup"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Pickup />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/services"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Services />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payments"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Payments />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payments/outstanding"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <OutstandingPayments />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/expenses"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Expenses />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Reports />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <UserManagement />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/roles"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <RoleManagement />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Settings />
                 </AppLayout>
               </ProtectedRoute>
             }
           />
         </Routes>
       </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   )
 }

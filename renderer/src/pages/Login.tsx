@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
+import { useToast } from "../components/ui/toast"
 import { Button, Input, Checkbox } from "../components/ui"
-import { showNotification } from "../utils/notifications"
 import { Eye, EyeOff, Lock, User, Loader2 } from "lucide-react"
 
 export default function Login() {
   const navigate = useNavigate()
   const { login, isAuthenticated } = useAuth()
+  const { showSuccess, showError } = useToast()
   
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -18,7 +19,7 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/")
+      navigate("/dashboard")
     }
   }, [isAuthenticated, navigate])
 
@@ -26,35 +27,30 @@ export default function Login() {
     e.preventDefault()
 
     if (!username || !password) {
-      showNotification({
-        type: "error",
-        title: "Validation Error",
-        message: "Please enter both username and password"
-      })
+      showError("Validation Error", "Please enter both username and password")
       return
     }
 
     setIsLoading(true)
 
-    const result = await login({
-      username,
-      password,
-      rememberMe
-    })
+    try {
+      const result = await login({
+        username,
+        password,
+        rememberMe
+      })
 
-    if (result.success) {
-      showNotification({
-        type: "success",
-        title: "Login Successful",
-        message: "Welcome back!"
-      })
-      navigate("/")
-    } else {
-      showNotification({
-        type: "error",
-        title: "Login Failed",
-        message: result.error || "Invalid credentials"
-      })
+      if (result.success) {
+        showSuccess("Login Successful", "Welcome back!")
+        console.log("Login successful, navigating to dashboard...")
+        navigate("/dashboard", { replace: true })
+      } else {
+        showError("Login Failed", result.error || "Invalid credentials")
+        setPassword("")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      showError("Login Error", "An error occurred during login. Please try again.")
       setPassword("")
     }
 

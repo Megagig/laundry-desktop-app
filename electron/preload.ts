@@ -153,4 +153,31 @@ contextBridge.exposeInMainWorld("api", {
     exportCSV: (tableName: string) => ipcRenderer.invoke("backup:export-csv", tableName),
     getStats: () => ipcRenderer.invoke("backup:get-stats"),
   },
+
+  // Startup APIs
+  startup: {
+    check: () => ipcRenderer.invoke('startup:check'),
+    isLicenseValid: () => ipcRenderer.invoke('startup:is-license-valid'),
+    getTrialStatus: () => ipcRenderer.invoke('startup:get-trial-status'),
+  },
+
+  // License APIs
+  license: {
+    activate: (sessionToken: string, licenseKey: string) => 
+      ipcRenderer.invoke("license:activate", sessionToken, licenseKey),
+    deactivate: (sessionToken: string) => 
+      ipcRenderer.invoke("license:deactivate", sessionToken),
+    getInfo: (sessionToken: string) => 
+      ipcRenderer.invoke("license:getInfo", sessionToken),
+    getStatus: (sessionToken: string) => 
+      ipcRenderer.invoke("license:getStatus", sessionToken),
+    validate: (sessionToken: string, licenseKey: string) => 
+      ipcRenderer.invoke("license:validate", sessionToken, licenseKey),
+    getMachineInfo: (sessionToken: string) => 
+      ipcRenderer.invoke("license:getMachineInfo", sessionToken),
+    hasFeature: (feature: string) => 
+      ipcRenderer.invoke("license:hasFeature", feature),
+    getExpiryWarning: () => 
+      ipcRenderer.invoke("license:getExpiryWarning"),
+  },
 })

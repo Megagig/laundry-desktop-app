@@ -49,7 +49,8 @@ const navigation = [
     permission: PERMISSIONS.VIEW_USERS,
     subItems: [
       { path: "/users", label: "Users", icon: Users, permission: PERMISSIONS.VIEW_USERS },
-      { path: "/roles", label: "Roles & Permissions", icon: Settings, permission: PERMISSIONS.MANAGE_ROLES }
+      { path: "/roles", label: "Roles & Permissions", icon: Settings, permission: PERMISSIONS.MANAGE_ROLES },
+      { path: "/activation", label: "License", icon: Shield, permission: PERMISSIONS.MANAGE_LICENSE }
     ]
   },
   { path: "/settings", label: "Settings", icon: Settings, permission: PERMISSIONS.VIEW_SETTINGS }

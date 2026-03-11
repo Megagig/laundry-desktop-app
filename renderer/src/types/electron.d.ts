@@ -116,6 +116,34 @@ declare global {
         exportCSV: (tableName: string) => Promise<any>
         getStats: () => Promise<any>
       }
+      // License APIs
+      startup: {
+    check: () => Promise<{
+      canProceed: boolean
+      requiresActivation: boolean
+      requiresLogin: boolean
+      error?: string
+    }>
+    isLicenseValid: () => Promise<boolean>
+    getTrialStatus: () => Promise<{
+      isTrialActive: boolean
+      startDate: Date
+      endDate: Date
+      daysRemaining: number
+      isExpired: boolean
+    }>
+  }
+
+  license: {
+        activate: (sessionToken: string, licenseKey: string) => Promise<any>
+        deactivate: (sessionToken: string) => Promise<any>
+        getInfo: (sessionToken: string) => Promise<any>
+        getStatus: (sessionToken: string) => Promise<any>
+        validate: (sessionToken: string, licenseKey: string) => Promise<any>
+        getMachineInfo: (sessionToken: string) => Promise<any>
+        hasFeature: (feature: string) => Promise<any>
+        getExpiryWarning: () => Promise<any>
+      }
     }
   }
 }

@@ -35,8 +35,9 @@ export interface LicensePayload {
 
 export interface LicenseValidationResult {
   valid: boolean
-  license?: License
+  license?: Omit<License, 'id' | 'activatedAt'>
   error?: string
+  details?: string
 }
 
 export interface LicenseStatus {

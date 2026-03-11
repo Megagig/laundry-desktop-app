@@ -49,6 +49,46 @@
   width: 6px;
 }
 
+/* Toast animations */
+@keyframes slide-in-from-right-full {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+    scale: 0.95;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(120%);
+    scale: 0.95;
+  }
+}
+
+.animate-in {
+  animation-fill-mode: both;
+}
+
+.slide-in-from-right-full {
+  animation-name: slide-in-from-right-full;
+}
+
+.duration-300 {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
