@@ -283,6 +283,296 @@ export class LicenseService {
     
     return null
   }
+  
+  /**
+   * Get all stored licenses (including inactive ones)
+   */
+  async getAllLicenses(): Promise<any[]> {
+    const licenses = await prisma.license.findMany({
+      orderBy: { activatedAt: 'desc' }
+    })
+    
+    return licenses.map(license => ({
+      id: license.id,
+      issuedTo: license.issuedTo,
+      email: license.email,
+      licenseType: license.licenseType,
+      features: license.features?.split(',') || [],
+      maxUsers: license.maxUsers,
+      issuedAt: license.issuedAt,
+      expiresAt: license.expiresAt,
+      activatedAt: license.activatedAt,
+      isActive: license.isActive,
+      machineId: license.machineId,
+      daysRemaining: license.expiresAt ? 
+        Math.max(0, Math.ceil((license.expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : 
+        null,
+      isExpired: license.expiresAt ? new Date() > license.expiresAt : false
+    }))
+  }
+  
+  /**
+   * Get license history for audit purposes
+   */
+  async getLicenseHistory(): Promise<any[]> {
+    const licenses = await prisma.license.findMany({
+      orderBy: { activatedAt: 'desc' }
+    })
+    
+    return licenses.map(license => ({
+      id: license.id,
+      issuedTo: license.issuedTo,
+      licenseType: license.licenseType,
+      activatedAt: license.activatedAt,
+      expiresAt: license.expiresAt,
+      isActive: license.isActive,
+      status: license.isActive ? 'Active' : 
+              (license.expiresAt && new Date() > license.expiresAt) ? 'Expired' : 'Inactive'
+    }))
+  }
+  
+  /**
+   * Export license data for backup purposes
+   */
+  async exportLicenseData(): Promise<string> {
+    const licenses = await this.getAllLicenses()
+    
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      machineId: await machineIdService.getMachineId(),
+      licenses: licenses.map(license => ({
+        issuedTo: license.issuedTo,
+        email: license.email,
+        licenseType: license.licenseType,
+        features: license.features,
+        maxUsers: license.maxUsers,
+        issuedAt: license.issuedAt,
+        expiresAt: license.expiresAt,
+        activatedAt: license.activatedAt,
+        isActive: license.isActive
+        // Note: licenseKey and signature are excluded for security
+      }))
+    }
+    
+    return JSON.stringify(exportData, null, 2)
+  }
+  
+  /**
+   * Create a backup of license data
+   */
+  async createLicenseBackup(): Promise<string> {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const filename = `license-backup-${timestamp}.json`
+    const fs = await import('fs')
+    const path = await import('path')
+    
+    // Create backups directory if it doesn't exist
+    const backupsDir = path.join(process.cwd(), 'backups', 'licenses')
+    if (!fs.existsSync(backupsDir)) {
+      fs.mkdirSync(backupsDir, { recursive: true })
+    }
+    
+    const exportData = await this.exportLicenseData()
+    const filePath = path.join(backupsDir, filename)
+    
+    fs.writeFileSync(filePath, exportData)
+    
+    console.log(`License backup created: ${filePath}`)
+    return filePath
+  }
+  
+  /**
+   * Clean up expired licenses (optional maintenance)
+   */
+  async cleanupExpiredLicenses(daysOld: number = 365): Promise<number> {
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - daysOld)
+    
+    const result = await prisma.license.deleteMany({
+      where: {
+        AND: [
+          { isActive: false },
+          { expiresAt: { lt: cutoffDate } }
+        ]
+      }
+    })
+    
+    console.log(`Cleaned up ${result.count} expired licenses older than ${daysOld} days`)
+    return result.count
+  }
+  
+  /**
+   * Get license storage statistics
+   */
+  async getLicenseStats(): Promise<{
+    total: number
+    active: number
+    expired: number
+    inactive: number
+    byType: Record<string, number>
+  }> {
+    const licenses = await prisma.license.findMany()
+    const now = new Date()
+    
+    const stats = {
+      total: licenses.length,
+      active: 0,
+      expired: 0,
+      inactive: 0,
+      byType: {} as Record<string, number>
+    }
+    
+    licenses.forEach(license => {
+      // Count by status
+      if (license.isActive) {
+        stats.active++
+      } else if (license.expiresAt && now > license.expiresAt) {
+        stats.expired++
+      } else {
+        stats.inactive++
+      }
+      
+      // Count by type
+      stats.byType[license.licenseType] = (stats.byType[license.licenseType] || 0) + 1
+    })
+    
+    return stats
+  }
+  
+  /**
+   * Validate stored license integrity
+   */
+  async validateStoredLicenses(): Promise<{
+    valid: number
+    invalid: number
+    details: Array<{ id: number; issuedTo: string; error: string }>
+  }> {
+    const licenses = await prisma.license.findMany()
+    const results = {
+      valid: 0,
+      invalid: 0,
+      details: [] as Array<{ id: number; issuedTo: string; error: string }>
+    }
+    
+    for (const license of licenses) {
+      try {
+        const validation = await this.validateLicense(license.licenseKey)
+        
+        if (validation.valid) {
+          results.valid++
+        } else {
+          results.invalid++
+          results.details.push({
+            id: license.id,
+            issuedTo: license.issuedTo,
+            error: validation.error || 'Unknown validation error'
+          })
+        }
+      } catch (error) {
+        results.invalid++
+        results.details.push({
+          id: license.id,
+          issuedTo: license.issuedTo,
+          error: error instanceof Error ? error.message : 'Validation failed'
+        })
+      }
+    }
+    
+    return results
+  }
+  
+  /**
+   * Migrate license data (for version updates)
+   */
+  async migrateLicenseData(): Promise<void> {
+    console.log('Starting license data migration...')
+    
+    const licenses = await prisma.license.findMany()
+    
+    for (const license of licenses) {
+      try {
+        // Re-validate and update license data if needed
+        const validation = await this.validateLicense(license.licenseKey)
+        
+        if (validation.valid && validation.license) {
+          // Update license data with latest validation results
+          await prisma.license.update({
+            where: { id: license.id },
+            data: {
+              // Update any fields that might have changed
+              features: validation.license.features,
+              maxUsers: validation.license.maxUsers
+            }
+          })
+        }
+      } catch (error) {
+        console.error(`Migration failed for license ${license.id}:`, error)
+      }
+    }
+    
+    console.log('License data migration complete')
+  }
+  
+  /**
+   * Update license metadata (for renewals or changes)
+   */
+  async updateLicenseMetadata(licenseId: number, updates: {
+    expiresAt?: Date | null
+    maxUsers?: number
+    features?: string[]
+    isActive?: boolean
+  }): Promise<void> {
+    const license = await prisma.license.findUnique({
+      where: { id: licenseId }
+    })
+    
+    if (!license) {
+      throw new Error('License not found')
+    }
+    
+    await prisma.license.update({
+      where: { id: licenseId },
+      data: {
+        expiresAt: updates.expiresAt,
+        maxUsers: updates.maxUsers,
+        features: updates.features?.join(','),
+        isActive: updates.isActive
+      }
+    })
+    
+    console.log(`License metadata updated for: ${license.issuedTo}`)
+  }
+  
+  /**
+   * Archive old license (soft delete)
+   */
+  async archiveLicense(licenseId: number): Promise<void> {
+    await prisma.license.update({
+      where: { id: licenseId },
+      data: { isActive: false }
+    })
+    
+    console.log(`License ${licenseId} archived`)
+  }
+  
+  /**
+   * Permanently delete license (hard delete)
+   */
+  async deleteLicense(licenseId: number): Promise<void> {
+    const license = await prisma.license.findUnique({
+      where: { id: licenseId }
+    })
+    
+    if (!license) {
+      throw new Error('License not found')
+    }
+    
+    await prisma.license.delete({
+      where: { id: licenseId }
+    })
+    
+    console.log(`License permanently deleted for: ${license.issuedTo}`)
+  }
 }
 
 export const licenseService = new LicenseService()

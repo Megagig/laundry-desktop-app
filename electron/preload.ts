@@ -179,5 +179,29 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("license:hasFeature", feature),
     getExpiryWarning: () => 
       ipcRenderer.invoke("license:getExpiryWarning"),
+    
+    // License Storage & Management APIs (Admin only)
+    getAll: (sessionToken: string) => 
+      ipcRenderer.invoke("license:getAll", sessionToken),
+    getHistory: (sessionToken: string) => 
+      ipcRenderer.invoke("license:getHistory", sessionToken),
+    exportData: (sessionToken: string) => 
+      ipcRenderer.invoke("license:exportData", sessionToken),
+    createBackup: (sessionToken: string) => 
+      ipcRenderer.invoke("license:createBackup", sessionToken),
+    getStats: (sessionToken: string) => 
+      ipcRenderer.invoke("license:getStats", sessionToken),
+    validateStored: (sessionToken: string) => 
+      ipcRenderer.invoke("license:validateStored", sessionToken),
+    cleanupExpired: (sessionToken: string, daysOld: number) => 
+      ipcRenderer.invoke("license:cleanupExpired", sessionToken, daysOld),
+    migrateData: (sessionToken: string) => 
+      ipcRenderer.invoke("license:migrateData", sessionToken),
+    updateMetadata: (sessionToken: string, licenseId: number, updates: any) => 
+      ipcRenderer.invoke("license:updateMetadata", sessionToken, licenseId, updates),
+    archive: (sessionToken: string, licenseId: number) => 
+      ipcRenderer.invoke("license:archive", sessionToken, licenseId),
+    delete: (sessionToken: string, licenseId: number) => 
+      ipcRenderer.invoke("license:delete", sessionToken, licenseId),
   },
 })

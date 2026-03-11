@@ -1,0 +1,52 @@
+{
+  "exportDate": "2026-03-11T20:04:55.757Z",
+  "machineId": "LND-TEST-EXPORT",
+  "licenses": [
+    {
+      "issuedTo": "ABC Laundry Services",
+      "email": "contact@abclaundry.com",
+      "licenseType": "ANNUAL",
+      "features": [
+        "basic",
+        "reports",
+        "backup"
+      ],
+      "maxUsers": 10,
+      "issuedAt": "2026-03-11T19:18:06.531Z",
+      "expiresAt": "2027-03-11T19:18:06.531Z",
+      "activatedAt": "2026-03-11T20:00:01.946Z",
+      "isActive": false
+    },
+    {
+      "issuedTo": "Premium Customer",
+      "email": "premium@example.com",
+      "licenseType": "LIFETIME",
+      "features": [
+        "basic",
+        "reports",
+        "backup",
+        "multi-user",
+        "premium"
+      ],
+      "maxUsers": 10,
+      "issuedAt": "2026-03-11T19:18:06.531Z",
+      "expiresAt": null,
+      "activatedAt": "2026-03-11T20:00:01.984Z",
+      "isActive": false
+    },
+    {
+      "issuedTo": "Test User",
+      "email": "test@example.com",
+      "licenseType": "TRIAL",
+      "features": [
+        "basic",
+        "reports"
+      ],
+      "maxUsers": 1,
+      "issuedAt": "2026-03-11T19:18:06.531Z",
+      "expiresAt": "2026-03-25T19:18:06.531Z",
+      "activatedAt": "2026-03-11T20:00:01.992Z",
+      "isActive": true
+    }
+  ]
+}
