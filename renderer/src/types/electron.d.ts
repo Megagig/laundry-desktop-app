@@ -29,6 +29,11 @@ declare global {
         getRoles: (sessionToken: string) => Promise<any>
         getPermissions: (sessionToken: string) => Promise<any>
         getUserRole: (sessionToken: string) => Promise<any>
+        updateRolePermissions: (sessionToken: string, roleId: number, permissionIds: number[]) => Promise<any>
+        createRole: (sessionToken: string, roleData: { name: string, description: string }) => Promise<any>
+        deleteRole: (sessionToken: string, roleId: number) => Promise<any>
+        createPermission: (sessionToken: string, permissionData: { name: string, description: string, module: string }) => Promise<any>
+        deletePermission: (sessionToken: string, permissionId: number) => Promise<any>
       }
       customer: {
         create: (data: any) => Promise<any>
