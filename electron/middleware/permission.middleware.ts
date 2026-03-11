@@ -1,6 +1,7 @@
 import type { IpcMainInvokeEvent } from 'electron'
 import { rbacService } from '../services/rbac.service.js'
 import { authService } from '../services/auth.service.js'
+import { auditService } from '../services/audit.service.js'
 import type { PermissionName } from '../../shared/types/permissions.js'
 
 /**
@@ -27,9 +28,26 @@ export function requirePermission(permission: PermissionName) {
       }
     }
 
+    // Get user info
+    const user = await authService.getCurrentUser(sessionToken)
+    if (!user) {
+      return {
+        success: false,
+        error: 'User not found'
+      }
+    }
+
     // Check permission
     const hasPermission = await rbacService.hasPermission(session.userId, permission)
     if (!hasPermission) {
+      // Log permission denied
+      await auditService.logPermissionDenied(
+        session.userId,
+        user.username,
+        permission,
+        'UNKNOWN'
+      )
+      
       return {
         success: false,
         error: 'Insufficient permissions'
@@ -39,7 +57,8 @@ export function requirePermission(permission: PermissionName) {
     // Permission granted
     return {
       success: true,
-      userId: session.userId
+      userId: session.userId,
+      user
     }
   }
 }
@@ -66,8 +85,24 @@ export function requireAnyPermission(permissions: PermissionName[]) {
       }
     }
 
+    const user = await authService.getCurrentUser(sessionToken)
+    if (!user) {
+      return {
+        success: false,
+        error: 'User not found'
+      }
+    }
+
     const hasAnyPermission = await rbacService.hasAnyPermission(session.userId, permissions)
     if (!hasAnyPermission) {
+      // Log permission denied
+      await auditService.logPermissionDenied(
+        session.userId,
+        user.username,
+        permissions.join(', '),
+        'UNKNOWN'
+      )
+      
       return {
         success: false,
         error: 'Insufficient permissions'
@@ -76,7 +111,8 @@ export function requireAnyPermission(permissions: PermissionName[]) {
 
     return {
       success: true,
-      userId: session.userId
+      userId: session.userId,
+      user
     }
   }
 }
@@ -103,8 +139,24 @@ export function requireAllPermissions(permissions: PermissionName[]) {
       }
     }
 
+    const user = await authService.getCurrentUser(sessionToken)
+    if (!user) {
+      return {
+        success: false,
+        error: 'User not found'
+      }
+    }
+
     const hasAllPermissions = await rbacService.hasAllPermissions(session.userId, permissions)
     if (!hasAllPermissions) {
+      // Log permission denied
+      await auditService.logPermissionDenied(
+        session.userId,
+        user.username,
+        permissions.join(', '),
+        'UNKNOWN'
+      )
+      
       return {
         success: false,
         error: 'Insufficient permissions'
@@ -113,7 +165,8 @@ export function requireAllPermissions(permissions: PermissionName[]) {
 
     return {
       success: true,
-      userId: session.userId
+      userId: session.userId,
+      user
     }
   }
 }
@@ -124,7 +177,7 @@ export function requireAllPermissions(permissions: PermissionName[]) {
 export async function checkPermission(
   sessionToken: string,
   permission: PermissionName
-): Promise<{ success: boolean; userId?: number; error?: string }> {
+): Promise<{ success: boolean; userId?: number; user?: any; error?: string }> {
   if (!sessionToken) {
     return { success: false, error: 'Authentication required' }
   }
@@ -134,10 +187,23 @@ export async function checkPermission(
     return { success: false, error: 'Invalid or expired session' }
   }
 
+  const user = await authService.getCurrentUser(sessionToken)
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
   const hasPermission = await rbacService.hasPermission(session.userId, permission)
   if (!hasPermission) {
+    // Log permission denied
+    await auditService.logPermissionDenied(
+      session.userId,
+      user.username,
+      permission,
+      'UNKNOWN'
+    )
+    
     return { success: false, error: 'Insufficient permissions' }
   }
 
-  return { success: true, userId: session.userId }
+  return { success: true, userId: session.userId, user }
 }

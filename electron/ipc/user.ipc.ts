@@ -1,13 +1,31 @@
 import { ipcMain } from "electron"
 import { userService } from "../services/user.service.js"
-import type { CreateUserDTO, UpdateUserDTO, ResetPasswordDTO } from "../../shared/types/index.js"
+import { auditService } from "../services/audit.service.js"
+import { checkPermission } from "../middleware/permission.middleware.js"
+import { PERMISSIONS } from "../../shared/types/permissions.js"
+import type { CreateUserDTO, UpdateUserDTO } from "../../shared/types/index.js"
 
 export function registerUserHandlers() {
   // Create User
-  ipcMain.handle("user:create", async (event, sessionToken: string, data: CreateUserDTO) => {
+  ipcMain.handle("user:create", async (_event, sessionToken: string, data: CreateUserDTO) => {
     try {
-      // TODO: Add permission check in Phase 3
+      const permissionCheck = await checkPermission(sessionToken, PERMISSIONS.CREATE_USER)
+      if (!permissionCheck.success) {
+        return { success: false, error: permissionCheck.error }
+      }
+
       const user = await userService.createUser(data)
+      
+      // Log user creation
+      await auditService.logUserManagement(
+        'CREATE',
+        permissionCheck.userId!,
+        permissionCheck.user.username,
+        user.id,
+        user.username,
+        { fullName: user.fullName, email: user.email, roleId: user.roleId }
+      )
+      
       return { success: true, data: user }
     } catch (error) {
       console.error("Create user error:", error)
@@ -19,9 +37,13 @@ export function registerUserHandlers() {
   })
 
   // Get All Users
-  ipcMain.handle("user:getAll", async (event, sessionToken: string) => {
+  ipcMain.handle("user:getAll", async (_event, sessionToken: string) => {
     try {
-      // TODO: Add permission check in Phase 3
+      const permissionCheck = await checkPermission(sessionToken, PERMISSIONS.VIEW_USERS)
+      if (!permissionCheck.success) {
+        return { success: false, error: permissionCheck.error }
+      }
+
       const users = await userService.getAllUsers()
       return { success: true, data: users }
     } catch (error) {
@@ -34,9 +56,13 @@ export function registerUserHandlers() {
   })
 
   // Get User By ID
-  ipcMain.handle("user:getById", async (event, sessionToken: string, userId: number) => {
+  ipcMain.handle("user:getById", async (_event, sessionToken: string, userId: number) => {
     try {
-      // TODO: Add permission check in Phase 3
+      const permissionCheck = await checkPermission(sessionToken, PERMISSIONS.VIEW_USERS)
+      if (!permissionCheck.success) {
+        return { success: false, error: permissionCheck.error }
+      }
+
       const user = await userService.getUserById(userId)
       return { success: true, data: user }
     } catch (error) {
@@ -49,10 +75,31 @@ export function registerUserHandlers() {
   })
 
   // Update User
-  ipcMain.handle("user:update", async (event, sessionToken: string, userId: number, data: Partial<UpdateUserDTO>) => {
+  ipcMain.handle("user:update", async (_event, sessionToken: string, userId: number, data: Partial<UpdateUserDTO>) => {
     try {
-      // TODO: Add permission check in Phase 3
+      const permissionCheck = await checkPermission(sessionToken, PERMISSIONS.EDIT_USER)
+      if (!permissionCheck.success) {
+        return { success: false, error: permissionCheck.error }
+      }
+
+      // Get original user data for audit log
+      const originalUser = await userService.getUserById(userId)
+      if (!originalUser) {
+        return { success: false, error: "User not found" }
+      }
+
       const user = await userService.updateUser({ id: userId, ...data })
+      
+      // Log user update
+      await auditService.logUserManagement(
+        'UPDATE',
+        permissionCheck.userId!,
+        permissionCheck.user.username,
+        userId,
+        originalUser.username,
+        data
+      )
+      
       return { success: true, data: user }
     } catch (error) {
       console.error("Update user error:", error)
@@ -64,10 +111,30 @@ export function registerUserHandlers() {
   })
 
   // Delete User
-  ipcMain.handle("user:delete", async (event, sessionToken: string, userId: number) => {
+  ipcMain.handle("user:delete", async (_event, sessionToken: string, userId: number) => {
     try {
-      // TODO: Add permission check in Phase 3
+      const permissionCheck = await checkPermission(sessionToken, PERMISSIONS.DELETE_USER)
+      if (!permissionCheck.success) {
+        return { success: false, error: permissionCheck.error }
+      }
+
+      // Get user data for audit log before deletion
+      const user = await userService.getUserById(userId)
+      if (!user) {
+        return { success: false, error: "User not found" }
+      }
+
       await userService.deleteUser(userId)
+      
+      // Log user deletion
+      await auditService.logUserManagement(
+        'DELETE',
+        permissionCheck.userId!,
+        permissionCheck.user.username,
+        userId,
+        user.username
+      )
+      
       return { success: true }
     } catch (error) {
       console.error("Delete user error:", error)
@@ -79,10 +146,30 @@ export function registerUserHandlers() {
   })
 
   // Toggle User Active Status
-  ipcMain.handle("user:toggle-active", async (event, sessionToken: string, userId: number) => {
+  ipcMain.handle("user:toggle-active", async (_event, sessionToken: string, userId: number) => {
     try {
-      // TODO: Add permission check in Phase 3
+      const permissionCheck = await checkPermission(sessionToken, PERMISSIONS.EDIT_USER)
+      if (!permissionCheck.success) {
+        return { success: false, error: permissionCheck.error }
+      }
+
+      // Get original user data for audit log
+      const originalUser = await userService.getUserById(userId)
+      if (!originalUser) {
+        return { success: false, error: "User not found" }
+      }
+
       const user = await userService.toggleActive(userId)
+      
+      // Log user activation/deactivation
+      await auditService.logUserManagement(
+        user.isActive ? 'ACTIVATE' : 'DEACTIVATE',
+        permissionCheck.userId!,
+        permissionCheck.user.username,
+        userId,
+        user.username
+      )
+      
       return { success: true, data: user }
     } catch (error) {
       console.error("Toggle user active error:", error)
@@ -94,10 +181,28 @@ export function registerUserHandlers() {
   })
 
   // Reset User Password
-  ipcMain.handle("user:reset-password", async (event, sessionToken: string, userId: number, newPassword: string) => {
+  ipcMain.handle("user:reset-password", async (_event, sessionToken: string, userId: number, newPassword: string) => {
     try {
-      // TODO: Add permission check in Phase 3
+      const permissionCheck = await checkPermission(sessionToken, PERMISSIONS.RESET_USER_PASSWORD)
+      if (!permissionCheck.success) {
+        return { success: false, error: permissionCheck.error }
+      }
+
+      // Get user data for audit log
+      const user = await userService.getUserById(userId)
+      if (!user) {
+        return { success: false, error: "User not found" }
+      }
+
       await userService.resetPassword(userId, newPassword)
+      
+      // Log password reset
+      await auditService.logPasswordChange(
+        userId,
+        user.username,
+        permissionCheck.userId!
+      )
+      
       return { success: true, message: "Password reset successfully" }
     } catch (error) {
       console.error("Reset password error:", error)

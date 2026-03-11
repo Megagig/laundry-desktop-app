@@ -222,4 +222,30 @@ contextBridge.exposeInMainWorld("api", {
     reset: (sessionToken: string) => ipcRenderer.invoke("trial:reset", sessionToken),
     getStats: (sessionToken: string) => ipcRenderer.invoke("trial:getStats", sessionToken),
   },
+
+  // Audit APIs
+  audit: {
+    getLogs: (sessionToken: string, filters: any) => 
+      ipcRenderer.invoke("audit:getLogs", sessionToken, filters),
+    getLogCount: (sessionToken: string, filters: any) => 
+      ipcRenderer.invoke("audit:getLogCount", sessionToken, filters),
+    getLogsByUser: (sessionToken: string, userId: number, limit?: number) => 
+      ipcRenderer.invoke("audit:getLogsByUser", sessionToken, userId, limit),
+    getLogsByModule: (sessionToken: string, module: string, limit?: number) => 
+      ipcRenderer.invoke("audit:getLogsByModule", sessionToken, module, limit),
+    getLogsByDateRange: (sessionToken: string, startDate: string, endDate: string, limit?: number) => 
+      ipcRenderer.invoke("audit:getLogsByDateRange", sessionToken, startDate, endDate, limit),
+    searchLogs: (sessionToken: string, searchTerm: string, filters: any) => 
+      ipcRenderer.invoke("audit:searchLogs", sessionToken, searchTerm, filters),
+    getStats: (sessionToken: string) => 
+      ipcRenderer.invoke("audit:getStats", sessionToken),
+    exportLogs: (sessionToken: string, filters: any) => 
+      ipcRenderer.invoke("audit:exportLogs", sessionToken, filters),
+    getUniqueModules: (sessionToken: string) => 
+      ipcRenderer.invoke("audit:getUniqueModules", sessionToken),
+    getUniqueActions: (sessionToken: string) => 
+      ipcRenderer.invoke("audit:getUniqueActions", sessionToken),
+    cleanupOldLogs: (sessionToken: string, daysToKeep: number) => 
+      ipcRenderer.invoke("audit:cleanupOldLogs", sessionToken, daysToKeep),
+  },
 })
