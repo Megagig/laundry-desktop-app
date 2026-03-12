@@ -28,6 +28,12 @@ export class RBACService {
         return []
       }
 
+      // If user is ADMIN, grant all permissions
+      if (user.role.name === 'ADMIN') {
+        const allPermissions = await prisma.permission.findMany()
+        return allPermissions.map(p => p.name)
+      }
+
       return user.role.permissions.map(rp => rp.permission.name)
     } catch (error) {
       console.error('Error getting user permissions:', error)
@@ -39,8 +45,28 @@ export class RBACService {
    * Check if user has a specific permission
    */
   async hasPermission(userId: number, permission: PermissionName): Promise<boolean> {
-    const permissions = await this.getUserPermissions(userId)
-    return permissions.includes(permission)
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { role: true }
+      })
+
+      if (!user || !user.role) {
+        return false
+      }
+
+      // If user is ADMIN, grant all permissions
+      if (user.role.name === 'ADMIN') {
+        return true
+      }
+
+      // For other users, check specific permissions
+      const permissions = await this.getUserPermissions(userId)
+      return permissions.includes(permission)
+    } catch (error) {
+      console.error('Error checking permission:', error)
+      return false
+    }
   }
 
   /**
