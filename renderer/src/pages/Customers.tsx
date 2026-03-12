@@ -18,6 +18,9 @@ import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Card, CardContent } from "../components/ui/card"
 import { Badge } from "../components/ui/badge"
+import { usePermission } from "../hooks/usePermission"
+import { PERMISSIONS } from "../../../shared/types/permissions"
+import ProtectedComponent from "../components/auth/ProtectedComponent"
 import { formatDate } from "../lib/utils"
 import type { Customer } from "../../../shared/types/customer.types"
 
@@ -33,6 +36,11 @@ export default function Customers() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | undefined>(undefined)
+
+  // Permission checks
+  const canCreateCustomer = usePermission(PERMISSIONS.CREATE_CUSTOMER)
+  const canEditCustomer = usePermission(PERMISSIONS.EDIT_CUSTOMER)
+  const canViewCustomer = usePermission(PERMISSIONS.VIEW_CUSTOMER)
 
   useEffect(() => {
     fetchCustomers()
@@ -143,26 +151,30 @@ export default function Customers() {
       label: "Actions",
       render: (customer: Customer) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation()
-              handleView(customer)
-            }}
-          >
-            <Eye size={16} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation()
-              handleEdit(customer)
-            }}
-          >
-            <Edit size={16} />
-          </Button>
+          <ProtectedComponent permission={PERMISSIONS.VIEW_CUSTOMER}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleView(customer)
+              }}
+            >
+              <Eye size={16} />
+            </Button>
+          </ProtectedComponent>
+          <ProtectedComponent permission={PERMISSIONS.EDIT_CUSTOMER}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleEdit(customer)
+              }}
+            >
+              <Edit size={16} />
+            </Button>
+          </ProtectedComponent>
         </div>
       )
     }
@@ -180,16 +192,18 @@ export default function Customers() {
           <h1 className="text-3xl font-bold text-slate-900">Customers</h1>
           <p className="text-slate-600 mt-1">Manage your customer database</p>
         </div>
-        <Button 
-          onClick={() => {
-            setSelectedCustomerId(undefined)
-            setIsFormOpen(true)
-          }} 
-          className="gap-2"
-        >
-          <Plus size={16} />
-          Add Customer
-        </Button>
+        <ProtectedComponent permission={PERMISSIONS.CREATE_CUSTOMER}>
+          <Button 
+            onClick={() => {
+              setSelectedCustomerId(undefined)
+              setIsFormOpen(true)
+            }} 
+            className="gap-2"
+          >
+            <Plus size={16} />
+            Add Customer
+          </Button>
+        </ProtectedComponent>
       </div>
 
       {/* Stats Cards */}

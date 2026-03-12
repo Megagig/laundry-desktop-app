@@ -3,6 +3,38 @@ export {}
 declare global {
   interface Window {
     api: {
+      // Auth APIs
+      auth: {
+        login: (credentials: any) => Promise<any>
+        logout: (sessionToken: string) => Promise<any>
+        validateSession: (sessionToken: string) => Promise<any>
+        getCurrentUser: (sessionToken: string) => Promise<any>
+        changePassword: (sessionToken: string, data: any) => Promise<any>
+        refreshSession: (sessionToken: string) => Promise<any>
+      }
+      // User Management APIs
+      user: {
+        create: (sessionToken: string, data: any) => Promise<any>
+        getAll: (sessionToken: string) => Promise<any>
+        getById: (sessionToken: string, userId: number) => Promise<any>
+        update: (sessionToken: string, userId: number, data: any) => Promise<any>
+        delete: (sessionToken: string, userId: number) => Promise<any>
+        toggleActive: (sessionToken: string, userId: number) => Promise<any>
+        resetPassword: (sessionToken: string, userId: number, newPassword: string) => Promise<any>
+      }
+      // RBAC APIs
+      rbac: {
+        getUserPermissions: (sessionToken: string) => Promise<any>
+        hasPermission: (sessionToken: string, permission: string) => Promise<any>
+        getRoles: (sessionToken: string) => Promise<any>
+        getPermissions: (sessionToken: string) => Promise<any>
+        getUserRole: (sessionToken: string) => Promise<any>
+        updateRolePermissions: (sessionToken: string, roleId: number, permissionIds: number[]) => Promise<any>
+        createRole: (sessionToken: string, roleData: { name: string, description: string }) => Promise<any>
+        deleteRole: (sessionToken: string, roleId: number) => Promise<any>
+        createPermission: (sessionToken: string, permissionData: { name: string, description: string, module: string }) => Promise<any>
+        deletePermission: (sessionToken: string, permissionId: number) => Promise<any>
+      }
       customer: {
         create: (data: any) => Promise<any>
         getAll: () => Promise<any>
@@ -83,6 +115,42 @@ declare global {
         delete: (backupPath: string) => Promise<any>
         exportCSV: (tableName: string) => Promise<any>
         getStats: () => Promise<any>
+      }
+      // License APIs
+      startup: {
+    check: () => Promise<{
+      canProceed: boolean
+      requiresActivation: boolean
+      requiresLogin: boolean
+      error?: string
+    }>
+    isLicenseValid: () => Promise<boolean>
+    getTrialStatus: () => Promise<{
+      isTrialActive: boolean
+      startDate: Date
+      endDate: Date
+      daysRemaining: number
+      isExpired: boolean
+    }>
+  }
+
+  license: {
+        // Public APIs (no authentication required)
+        activate: (licenseKey: string) => Promise<any>
+        deactivate: () => Promise<any>
+        getInfo: () => Promise<any>
+        getStatus: () => Promise<any>
+        validate: (licenseKey: string) => Promise<any>
+        getMachineInfo: () => Promise<any>
+        hasFeature: (feature: string) => Promise<any>
+        getExpiryWarning: () => Promise<any>
+        
+        // Authenticated APIs (require session token)
+        activateWithAuth: (sessionToken: string, licenseKey: string) => Promise<any>
+        deactivateWithAuth: (sessionToken: string) => Promise<any>
+        getInfoWithAuth: (sessionToken: string) => Promise<any>
+        getStatusWithAuth: (sessionToken: string) => Promise<any>
+        validateWithAuth: (sessionToken: string, licenseKey: string) => Promise<any>
       }
     }
   }

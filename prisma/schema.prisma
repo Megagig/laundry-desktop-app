@@ -109,3 +109,126 @@ model Setting {
 
   @@map("settings")
 }
+
+// ============================================
+// SECURITY MODELS
+// ============================================
+
+model User {
+  id           Int       @id @default(autoincrement())
+  fullName     String
+  email        String    @unique
+  username     String    @unique
+  passwordHash String
+  roleId       Int
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  role         Role       @relation(fields: [roleId], references: [id])
+  sessions     Session[]
+  auditLogs    AuditLog[]
+  
+  @@index([email])
+  @@index([username])
+  @@index([roleId])
+  @@map("users")
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?
+  isSystem    Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  
+  users       User[]
+  permissions RolePermission[]
+  
+  @@map("roles")
+}
+
+model Permission {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?
+  module      String
+  isSystem    Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  
+  roles       RolePermission[]
+  
+  @@index([module])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  username    String?
+  action      String
+  module      String
+  description String?
+  metadata    String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([userId])
+  @@index([module])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model License {
+  id          Int       @id @default(autoincrement())
+  licenseKey  String    @unique
+  machineId   String
+  issuedTo    String
+  email       String?
+  licenseType String
+  features    String?
+  maxUsers    Int       @default(1)
+  issuedAt    DateTime
+  expiresAt   DateTime?
+  activatedAt DateTime  @default(now())
+  signature   String
+  isActive    Boolean   @default(true)
+  
+  @@index([machineId])
+  @@index([licenseType])
+  @@index([expiresAt])
+  @@map("licenses")
+}

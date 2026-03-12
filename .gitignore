@@ -6,6 +6,12 @@ dist
 *.js.map
 *.d.ts.map
 
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
 # But keep config files
 !*.config.js
 !eslint.config.js
@@ -16,3 +22,6 @@ dist
 shared/types/*.js
 shared/types/*.d.ts
 shared/types/*.map
+
+# RSA Keys (NEVER commit these)
+keys/
