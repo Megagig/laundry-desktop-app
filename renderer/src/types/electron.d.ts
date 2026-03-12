@@ -135,14 +135,22 @@ declare global {
   }
 
   license: {
-        activate: (sessionToken: string, licenseKey: string) => Promise<any>
-        deactivate: (sessionToken: string) => Promise<any>
-        getInfo: (sessionToken: string) => Promise<any>
-        getStatus: (sessionToken: string) => Promise<any>
-        validate: (sessionToken: string, licenseKey: string) => Promise<any>
-        getMachineInfo: (sessionToken: string) => Promise<any>
+        // Public APIs (no authentication required)
+        activate: (licenseKey: string) => Promise<any>
+        deactivate: () => Promise<any>
+        getInfo: () => Promise<any>
+        getStatus: () => Promise<any>
+        validate: (licenseKey: string) => Promise<any>
+        getMachineInfo: () => Promise<any>
         hasFeature: (feature: string) => Promise<any>
         getExpiryWarning: () => Promise<any>
+        
+        // Authenticated APIs (require session token)
+        activateWithAuth: (sessionToken: string, licenseKey: string) => Promise<any>
+        deactivateWithAuth: (sessionToken: string) => Promise<any>
+        getInfoWithAuth: (sessionToken: string) => Promise<any>
+        getStatusWithAuth: (sessionToken: string) => Promise<any>
+        validateWithAuth: (sessionToken: string, licenseKey: string) => Promise<any>
       }
     }
   }

@@ -164,22 +164,35 @@ contextBridge.exposeInMainWorld("api", {
 
   // License APIs
   license: {
-    activate: (sessionToken: string, licenseKey: string) => 
-      ipcRenderer.invoke("license:activate", sessionToken, licenseKey),
-    deactivate: (sessionToken: string) => 
-      ipcRenderer.invoke("license:deactivate", sessionToken),
-    getInfo: (sessionToken: string) => 
-      ipcRenderer.invoke("license:getInfo", sessionToken),
-    getStatus: (sessionToken: string) => 
-      ipcRenderer.invoke("license:getStatus", sessionToken),
-    validate: (sessionToken: string, licenseKey: string) => 
-      ipcRenderer.invoke("license:validate", sessionToken, licenseKey),
-    getMachineInfo: (sessionToken: string) => 
-      ipcRenderer.invoke("license:getMachineInfo", sessionToken),
+    // Public APIs (no authentication required)
+    activate: (licenseKey: string) => 
+      ipcRenderer.invoke("license:activate-public", licenseKey),
+    deactivate: () => 
+      ipcRenderer.invoke("license:deactivate-public"),
+    getInfo: () => 
+      ipcRenderer.invoke("license:getInfo"),
+    getStatus: () => 
+      ipcRenderer.invoke("license:getStatus"),
+    validate: (licenseKey: string) => 
+      ipcRenderer.invoke("license:validate", licenseKey),
     hasFeature: (feature: string) => 
       ipcRenderer.invoke("license:hasFeature", feature),
     getExpiryWarning: () => 
       ipcRenderer.invoke("license:getExpiryWarning"),
+    
+    // Authenticated APIs (require session token)
+    activateWithAuth: (sessionToken: string, licenseKey: string) => 
+      ipcRenderer.invoke("license:activate", sessionToken, licenseKey),
+    deactivateWithAuth: (sessionToken: string) => 
+      ipcRenderer.invoke("license:deactivate", sessionToken),
+    getInfoWithAuth: (sessionToken: string) => 
+      ipcRenderer.invoke("license:getInfo", sessionToken),
+    getStatusWithAuth: (sessionToken: string) => 
+      ipcRenderer.invoke("license:getStatus", sessionToken),
+    validateWithAuth: (sessionToken: string, licenseKey: string) => 
+      ipcRenderer.invoke("license:validate", sessionToken, licenseKey),
+    getMachineInfo: () => 
+      ipcRenderer.invoke("license:getMachineInfo"),
     
     // License Storage & Management APIs (Admin only)
     getAll: (sessionToken: string) => 

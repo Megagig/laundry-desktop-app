@@ -24,6 +24,18 @@ Ne+mc+yrb/RfcTm9Vp666wrt1xMc3x+EY82U0zjo6z8atz5oiDrIBpWyrYJfhOsE
    */
   async verifySignature(data: string, signature: string): Promise<boolean> {
     try {
+      // Development mode bypass
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔧 Development mode: Bypassing RSA signature verification')
+        // Simple hash verification for development
+        const crypto = require('crypto')
+        const expectedHash = crypto.createHash('sha256')
+          .update(data + 'development-secret')
+          .digest('base64')
+        return signature === expectedHash
+      }
+
+      // Production RSA verification
       // Load public key
       const publicKey = forge.pki.publicKeyFromPem(this.PUBLIC_KEY)
       

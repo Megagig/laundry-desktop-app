@@ -15,11 +15,11 @@ export class MachineIdService {
     }
 
     try {
-      // Try to import node-machine-id
-      const { machineIdSync } = await import('node-machine-id')
-      const machineId = machineIdSync()
-      this.cachedMachineId = machineId
-      return machineId
+      // Try to import node-machine-id with CommonJS syntax
+      const machineId = require('node-machine-id')
+      const id = machineId.machineIdSync()
+      this.cachedMachineId = id
+      return id
     } catch (error) {
       console.error('Failed to get machine ID from node-machine-id:', error)
       // Fallback to a combination of system info

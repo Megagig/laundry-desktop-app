@@ -5,6 +5,34 @@ import { checkPermission } from '../middleware/permission.middleware.js'
 import { PERMISSIONS } from '../../shared/types/permissions.js'
 
 export function registerLicenseHandlers() {
+  // Public license activation (no authentication required)
+  ipcMain.handle('license:activate-public', async (_event, licenseKey: string) => {
+    try {
+      const result = await licenseService.activateLicense(licenseKey)
+      return { success: true, data: result }
+    } catch (error) {
+      console.error('License activation failed:', error)
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'License activation failed' 
+      }
+    }
+  })
+
+  // Public license deactivation (no authentication required)
+  ipcMain.handle('license:deactivate-public', async (_event) => {
+    try {
+      await licenseService.deactivateLicense()
+      return { success: true }
+    } catch (error) {
+      console.error('License deactivation failed:', error)
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'License deactivation failed' 
+      }
+    }
+  })
+
   // Activate license (Admin only)
   ipcMain.handle('license:activate', async (_event, sessionToken: string, licenseKey: string) => {
     try {

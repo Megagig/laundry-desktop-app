@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -15,7 +15,6 @@ import {
   Users, 
   CheckCircle, 
   XCircle, 
-  AlertTriangle,
   Loader2
 } from 'lucide-react'
 
@@ -54,7 +53,7 @@ interface MachineInfo {
 }
 
 export default function Activation() {
-  const { sessionToken } = useAuth()
+  const navigate = useNavigate()
   const [licenseKey, setLicenseKey] = useState('')
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null)
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | null>(null)
@@ -62,40 +61,43 @@ export default function Activation() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [expiryWarning, setExpiryWarning] = useState<string | null>(null)
 
   useEffect(() => {
     loadLicenseData()
-  }, [sessionToken])
+  }, [])
 
   const loadLicenseData = async () => {
-    if (!sessionToken) return
-
     try {
       setLoading(true)
       
-      // Load license status
-      const statusResult = await window.api.license.getStatus(sessionToken)
-      if (statusResult.success) {
-        setLicenseStatus(statusResult.data)
+      // Load license status using session-free API
+      try {
+        const statusResult = await window.api.license.getStatus()
+        if (statusResult && statusResult.success) {
+          setLicenseStatus(statusResult.data)
+        }
+      } catch (error) {
+        console.warn('Failed to load license status:', error)
       }
 
-      // Load license info if activated
-      const infoResult = await window.api.license.getInfo(sessionToken)
-      if (infoResult.success && infoResult.data) {
-        setLicenseInfo(infoResult.data)
+      // Load license info if activated using session-free API
+      try {
+        const infoResult = await window.api.license.getInfo()
+        if (infoResult && infoResult.success && infoResult.data) {
+          setLicenseInfo(infoResult.data)
+        }
+      } catch (error) {
+        console.warn('Failed to load license info:', error)
       }
 
-      // Load machine info
-      const machineResult = await window.api.license.getMachineInfo(sessionToken)
-      if (machineResult.success) {
-        setMachineInfo(machineResult.data)
-      }
-
-      // Load expiry warning
-      const warningResult = await window.api.license.getExpiryWarning()
-      if (warningResult.success && warningResult.data) {
-        setExpiryWarning(warningResult.data)
+      // Load machine info using session-free API
+      try {
+        const machineResult = await window.api.license.getMachineInfo()
+        if (machineResult && machineResult.success) {
+          setMachineInfo(machineResult.data)
+        }
+      } catch (error) {
+        console.warn('Failed to load machine info:', error)
       }
 
     } catch (error) {
@@ -111,22 +113,23 @@ export default function Activation() {
       return
     }
 
-    if (!sessionToken) {
-      setError('Authentication required')
-      return
-    }
-
     try {
       setLoading(true)
       setError('')
       setSuccess('')
 
-      const result = await window.api.license.activate(sessionToken, licenseKey.trim())
+      // Use session-free license activation API
+      const result = await window.api.license.activate(licenseKey.trim())
       
       if (result.success) {
-        setSuccess('License activated successfully!')
+        setSuccess('License activated successfully! Redirecting to login...')
         setLicenseKey('')
         await loadLicenseData() // Reload license data
+        
+        // Redirect to login after successful activation
+        setTimeout(() => {
+          navigate('/login')
+        }, 2000)
       } else {
         setError(result.error || 'License activation failed')
       }
@@ -139,11 +142,6 @@ export default function Activation() {
   }
 
   const handleDeactivate = async () => {
-    if (!sessionToken) {
-      setError('Authentication required')
-      return
-    }
-
     if (!confirm('Are you sure you want to deactivate the current license?')) {
       return
     }
@@ -153,7 +151,8 @@ export default function Activation() {
       setError('')
       setSuccess('')
 
-      const result = await window.api.license.deactivate(sessionToken)
+      // Use session-free license deactivation API
+      const result = await window.api.license.deactivate()
       
       if (result.success) {
         setSuccess('License deactivated successfully')
@@ -202,16 +201,6 @@ export default function Activation() {
         <Shield className="h-6 w-6" />
         <h1 className="text-2xl font-bold">License Management</h1>
       </div>
-
-      {/* Expiry Warning */}
-      {expiryWarning && (
-        <Alert className="border-orange-200 bg-orange-50">
-          <AlertTriangle className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
-            {expiryWarning}
-          </AlertDescription>
-        </Alert>
-      )}
 
       {/* Error/Success Messages */}
       {error && (

@@ -1,55 +1,46 @@
+#!/usr/bin/env node
+
 /**
- * Get Machine ID for License Testing
- * 
- * This script displays the current machine ID that should be used
- * when creating test licenses.
+ * Get Machine ID for License Generation
+ * This script extracts the machine ID that will be used for license binding
  */
 
-const { machineIdSync } = require('node-machine-id')
-const os = require('os')
-const crypto = require('crypto')
+const { machineIdService } = require('../dist/electron/services/machine-id.service.js')
 
-function generateMachineId() {
+async function getMachineId() {
   try {
-    // Collect system identifiers (same logic as machine-id.service.ts)
-    const identifiers = [
-      machineIdSync(), // OS machine ID
-      os.hostname(),
-      os.platform(),
-      os.arch(),
-      os.cpus()[0]?.model || '',
-    ]
+    console.log('🔍 Getting Machine ID for license generation...\n')
     
-    // Create hash
-    const hash = crypto
-      .createHash('sha256')
-      .update(identifiers.join('|'))
-      .digest('hex')
+    const machineId = await machineIdService.getMachineId()
+    const machineInfo = await machineIdService.getMachineInfo()
     
-    // Format: LND-{first 16 chars of hash}
-    return `LND-${hash.substring(0, 16).toUpperCase()}`
+    console.log('📋 MACHINE INFORMATION:')
+    console.log('=' .repeat(50))
+    console.log(`Machine ID: ${machineId}`)
+    console.log(`Platform: ${machineInfo.platform} (${machineInfo.arch})`)
+    console.log(`Hostname: ${machineInfo.hostname}`)
+    console.log(`CPU: ${machineInfo.cpuModel}`)
+    console.log(`Memory: ${(machineInfo.totalMemory / (1024 * 1024 * 1024)).toFixed(1)} GB`)
+    console.log(`OS: ${machineInfo.osVersion}`)
+    console.log('=' .repeat(50))
+    
+    console.log('\n🎫 USE THIS MACHINE ID FOR LICENSE GENERATION:')
+    console.log(`\x1b[32m${machineId}\x1b[0m`)
+    console.log('\n📝 Copy the green Machine ID above and use it in the license generator.')
+    
   } catch (error) {
-    console.error('Error generating machine ID:', error)
-    return 'LND-ERROR-GENERATING-ID'
+    console.error('❌ Failed to get machine ID:', error.message)
+    
+    // Fallback method
+    console.log('\n🔄 Trying fallback method...')
+    try {
+      const fallbackId = machineIdService.generateFallbackId()
+      console.log(`\n🎫 FALLBACK MACHINE ID:`)
+      console.log(`\x1b[32m${fallbackId}\x1b[0m`)
+    } catch (fallbackError) {
+      console.error('❌ Fallback method also failed:', fallbackError.message)
+    }
   }
 }
 
-console.log('🖥️  Machine ID Information\n')
-
-const machineId = generateMachineId()
-
-console.log('Machine ID:', machineId)
-console.log('Hostname:', os.hostname())
-console.log('Platform:', os.platform())
-console.log('Architecture:', os.arch())
-console.log('CPU Model:', os.cpus()[0]?.model || 'Unknown')
-
-console.log('\n📋 Usage:')
-console.log('1. Copy the Machine ID above')
-console.log('2. Update the machineId in create-sample-license.cjs')
-console.log('3. Run the license creation script')
-console.log('4. Use the generated license keys for testing')
-
-console.log('\n💡 Note:')
-console.log('This Machine ID will be used to bind licenses to this specific machine.')
-console.log('Licenses created with this Machine ID will only work on this machine.')
+getMachineId()

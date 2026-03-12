@@ -1,8 +1,9 @@
-import { app, BrowserWindow } from "electron"
+import { app, BrowserWindow, dialog } from "electron"
 import path from "path"
 import { fileURLToPath } from "url"
 import { prisma, seedDatabase } from "./database/prisma.js"
 import { createIPCValidationMiddleware, startRateLimitCleanup } from "./middleware/ipc-validation.middleware.js"
+import { startupService } from "./services/startup.service.js"
 import { registerAuthHandlers } from "./ipc/auth.ipc.js"
 import { registerUserHandlers } from "./ipc/user.ipc.js"
 import "./ipc/rbac.ipc.js"
@@ -51,6 +52,50 @@ async function initializePrinterHandlers() {
 }
 
 let mainWindow: BrowserWindow
+
+async function performStartupSecurityChecks(): Promise<boolean> {
+  try {
+    console.log('🔐 Performing startup security checks...')
+    
+    const startupResult = await startupService.performStartupChecks()
+    
+    if (!startupResult.canProceed) {
+      console.error('❌ Startup security checks failed:', startupResult.error)
+      
+      // Show error dialog for critical security failures
+      if (startupResult.securityStatus && !startupResult.securityStatus.integrityValid) {
+        await dialog.showErrorBox(
+          'Security Error',
+          'Application integrity check failed. The application may have been tampered with.\n\nPlease reinstall the application from a trusted source.'
+        )
+        return false
+      }
+      
+      // For license/trial issues, we'll let the UI handle the flow
+      if (startupResult.requiresActivation || startupResult.requiresTrial) {
+        console.log('📄 License activation or trial setup required - proceeding to UI')
+        return true
+      }
+      
+      // For other errors, show dialog and exit
+      await dialog.showErrorBox(
+        'Startup Error',
+        startupResult.error || 'Application startup failed'
+      )
+      return false
+    }
+    
+    console.log('✅ Startup security checks passed')
+    return true
+  } catch (error) {
+    console.error('❌ Startup security check error:', error)
+    await dialog.showErrorBox(
+      'Critical Error',
+      'Failed to perform security checks. Application cannot start safely.'
+    )
+    return false
+  }
+}
 
 function createWindow() {
   // Check if running from dist folder (development mode)
@@ -165,12 +210,33 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  // Perform startup security checks before creating window
+  const securityChecksPassed = await performStartupSecurityChecks()
+  
+  if (!securityChecksPassed) {
+    console.error('❌ Security checks failed - exiting application')
+    app.quit()
+    return
+  }
+  
   createWindow()
   // Initialize printer handlers after app is ready
   await initializePrinterHandlers()
+  
+  // Start periodic security checks (every 24 hours)
+  setInterval(async () => {
+    const periodicCheckPassed = await startupService.performPeriodicSecurityCheck()
+    if (!periodicCheckPassed) {
+      console.error('🚨 Periodic security check failed - application may be compromised')
+      // In production, you might want to show a warning or force re-authentication
+    }
+  }, 24 * 60 * 60 * 1000) // 24 hours
 })
 
 app.on("window-all-closed", async () => {
+  // Shutdown security monitoring
+  startupService.shutdown()
+  
   await prisma.$disconnect()
   if (process.platform !== "darwin") {
     app.quit()

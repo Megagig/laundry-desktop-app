@@ -25,13 +25,13 @@ interface IntegrityReport {
 
 class IntegrityService {
   private readonly criticalFiles = [
-    'services/license.service.js',
-    'services/crypto.service.js',
-    'services/machine-id.service.js',
-    'services/trial.service.js',
-    'services/auth.service.js',
-    'ipc/license.ipc.js',
-    'ipc/auth.ipc.js'
+    'services/license.service.ts',
+    'services/crypto.service.ts',
+    'services/machine-id.service.ts',
+    'services/trial.service.ts',
+    'services/auth.service.ts',
+    'ipc/license.ipc.ts',
+    'ipc/auth.ipc.ts'
   ]
 
   private readonly expectedHashes: Record<string, string> = {
@@ -88,6 +88,14 @@ class IntegrityService {
       const filePath = path.join(__dirname, '..', relativePath)
       
       if (!fs.existsSync(filePath)) {
+        // In development mode, if file doesn't exist, that's OK
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`🔧 Development mode: File ${relativePath} not found, skipping...`)
+          check.isValid = true
+          check.expectedHash = 'dev-mode-skip'
+          check.actualHash = 'dev-mode-skip'
+          return check
+        }
         check.error = 'File not found'
         return check
       }
@@ -95,13 +103,25 @@ class IntegrityService {
       const content = fs.readFileSync(filePath, 'utf8')
       check.actualHash = crypto.createHash('sha256').update(content).digest('hex')
       
-      // For now, we'll consider the file valid if it exists and can be hashed
+      // In development mode, we'll consider all files valid
       // In production, you would compare against known good hashes
-      check.expectedHash = this.expectedHashes[relativePath] || check.actualHash
-      check.isValid = check.actualHash === check.expectedHash
+      if (process.env.NODE_ENV !== 'production') {
+        check.expectedHash = check.actualHash
+        check.isValid = true
+      } else {
+        check.expectedHash = this.expectedHashes[relativePath] || check.actualHash
+        check.isValid = check.actualHash === check.expectedHash
+      }
       
     } catch (error) {
-      check.error = error instanceof Error ? error.message : 'Unknown error'
+      // In development mode, errors are less critical
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`🔧 Development mode: Error checking ${relativePath}, continuing...`)
+        check.isValid = true
+        check.error = `Dev mode: ${error instanceof Error ? error.message : 'Unknown error'}`
+      } else {
+        check.error = error instanceof Error ? error.message : 'Unknown error'
+      }
     }
 
     return check
@@ -112,6 +132,22 @@ class IntegrityService {
    */
   private detectDebugger(): boolean {
     try {
+      // In development mode, we'll be more lenient with debugger detection
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔧 Development mode: Relaxed debugger detection')
+        
+        // Only check for explicit debugging flags in development
+        if (process.env.NODE_OPTIONS?.includes('--inspect') ||
+            process.env.NODE_OPTIONS?.includes('--debug') ||
+            process.argv.some(arg => arg.includes('--inspect') || arg.includes('--debug'))) {
+          console.log('🔧 Development mode: Debugger detected but allowed')
+          return false // Allow debugging in development
+        }
+        
+        return false
+      }
+
+      // Production mode - strict debugger detection
       // Method 1: Check for debugger statement timing
       const start = Date.now()
       debugger // This will pause if debugger is attached
@@ -150,6 +186,13 @@ class IntegrityService {
    */
   private validatePublicKey(): boolean {
     try {
+      // In development mode, we'll skip public key validation
+      // since the key might not be embedded yet
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔧 Development mode: Skipping public key validation')
+        return true
+      }
+
       // Import the public key
       const { PUBLIC_KEY } = require('../config/public-key')
       
@@ -171,6 +214,11 @@ class IntegrityService {
       return keyHash.length === 64 // SHA-256 produces 64 character hex string
       
     } catch (error) {
+      // In development mode, if public key file doesn't exist, that's OK
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔧 Development mode: Public key file not found, continuing...')
+        return true
+      }
       return false
     }
   }

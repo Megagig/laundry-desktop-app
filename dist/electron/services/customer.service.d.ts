@@ -10,6 +10,7 @@ export declare class CustomerService {
     getCustomerWithStats(id: number): Promise<CustomerWithStats | null>;
     getCustomerOrderHistory(customerId: number, limit?: number): Promise<{
         id: number;
+        status: string;
         notes: string | null;
         created_at: Date;
         customer_id: number;
@@ -17,7 +18,6 @@ export declare class CustomerService {
         balance: number;
         amount_paid: number;
         order_number: string;
-        status: string;
         payment_type: string;
         pickup_date: string;
     }[]>;
