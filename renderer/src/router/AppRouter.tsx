@@ -21,6 +21,7 @@ import Reports from "../pages/Reports"
 import Settings from "../pages/Settings"
 import UserManagement from "../pages/UserManagement"
 import RoleManagement from "../pages/RoleManagement"
+import AuditLogs from "../pages/AuditLogs"
 
 export default function AppRouter() {
   return (
@@ -181,6 +182,16 @@ export default function AppRouter() {
               <ProtectedRoute>
                 <AppLayout>
                   <RoleManagement />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audit-logs"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <AuditLogs />
                 </AppLayout>
               </ProtectedRoute>
             }

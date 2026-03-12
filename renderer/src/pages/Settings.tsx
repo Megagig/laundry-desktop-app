@@ -1,16 +1,26 @@
 import { useState, useEffect } from "react"
-import { Button, Text, Card, Tabs, TextInput, Textarea, Select, Table } from "@mantine/core"
-import { IconSettings, IconBuildingStore, IconPrinter, IconReceipt, IconDeviceFloppy, IconDatabase, IconDownload, IconUpload, IconFileExport, IconTrash } from "@tabler/icons-react"
+import { Button, Text, Card, Tabs, TextInput, Textarea, Select, Table, Switch, NumberInput } from "@mantine/core"
+import { IconSettings, IconBuildingStore, IconPrinter, IconReceipt, IconDeviceFloppy, IconDatabase, IconDownload, IconUpload, IconFileExport, IconTrash, IconShield, IconLock, IconClock, IconKey } from "@tabler/icons-react"
 import { LoadingSpinner } from "../components/common"
 import { showSuccessNotification, showErrorNotification } from "../utils/notifications"
+import { useAuth } from "../contexts/AuthContext"
+import { usePermission } from "../hooks/usePermission"
+import { PERMISSIONS } from "../../../shared/types/permissions"
 
 export default function Settings() {
+  const { sessionToken, user } = useAuth()
   const [activeTab, setActiveTab] = useState<string | null>("shop")
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [printers, setPrinters] = useState<string[]>([])
   const [backups, setBackups] = useState<any[]>([])
   const [dbStats, setDbStats] = useState<any>(null)
+  const [licenseInfo, setLicenseInfo] = useState<any>(null)
+
+  // Permission checks
+  const canManageSettings = usePermission(PERMISSIONS.MANAGE_SETTINGS)
+  const canViewSettings = usePermission(PERMISSIONS.VIEW_SETTINGS)
+  const canManageLicense = usePermission(PERMISSIONS.MANAGE_LICENSE)
 
   // Shop Information
   const [shopName, setShopName] = useState("")
@@ -30,19 +40,35 @@ export default function Settings() {
   const [dateFormat, setDateFormat] = useState("DD/MM/YYYY")
   const [defaultPickupDays, setDefaultPickupDays] = useState("3")
 
+  // Security Settings
+  const [sessionTimeout, setSessionTimeout] = useState(24)
+  const [passwordMinLength, setPasswordMinLength] = useState(8)
+  const [requirePasswordChange, setRequirePasswordChange] = useState(false)
+  const [passwordChangeInterval, setPasswordChangeInterval] = useState(90)
+  const [enableAuditLogging, setEnableAuditLogging] = useState(true)
+  const [maxFailedLogins, setMaxFailedLogins] = useState(5)
+  const [lockoutDuration, setLockoutDuration] = useState(15)
+
   useEffect(() => {
-    loadSettings()
-    loadPrinters()
-    if (activeTab === "data") {
-      loadBackups()
-      loadDatabaseStats()
+    if (canViewSettings) {
+      loadSettings()
+      loadPrinters()
+      if (activeTab === "data") {
+        loadBackups()
+        loadDatabaseStats()
+      }
+      if (activeTab === "security") {
+        loadLicenseInfo()
+      }
     }
-  }, [activeTab])
+  }, [activeTab, canViewSettings])
 
   const loadSettings = async () => {
+    if (!sessionToken) return
+    
     setIsLoading(true)
     try {
-      const result = await window.api.settings.getAll()
+      const result = await window.api.settings.getAll(sessionToken)
       if (result.success) {
         const settings = result.data
         setShopName(settings.shop_name || "")
@@ -55,6 +81,15 @@ export default function Settings() {
         setCurrencySymbol(settings.currency_symbol || "₦")
         setDateFormat(settings.date_format || "DD/MM/YYYY")
         setDefaultPickupDays(settings.default_pickup_days || "3")
+        
+        // Security settings
+        setSessionTimeout(parseInt(settings.session_timeout) || 24)
+        setPasswordMinLength(parseInt(settings.password_min_length) || 8)
+        setRequirePasswordChange(settings.require_password_change === 'true')
+        setPasswordChangeInterval(parseInt(settings.password_change_interval) || 90)
+        setEnableAuditLogging(settings.enable_audit_logging !== 'false')
+        setMaxFailedLogins(parseInt(settings.max_failed_logins) || 5)
+        setLockoutDuration(parseInt(settings.lockout_duration) || 15)
       }
     } catch (error) {
       console.error("Error loading settings:", error)
@@ -75,9 +110,11 @@ export default function Settings() {
   }
 
   const saveShopSettings = async () => {
+    if (!sessionToken || !canManageSettings) return
+    
     setIsSaving(true)
     try {
-      await window.api.settings.updateMultiple({
+      await window.api.settings.updateMultiple(sessionToken, {
         shop_name: shopName,
         shop_address: shopAddress,
         shop_phone: shopPhone,
@@ -93,9 +130,11 @@ export default function Settings() {
   }
 
   const savePrinterSettings = async () => {
+    if (!sessionToken || !canManageSettings) return
+    
     setIsSaving(true)
     try {
-      await window.api.settings.updateMultiple({
+      await window.api.settings.updateMultiple(sessionToken, {
         default_printer: defaultPrinter
       })
       if (defaultPrinter) {
@@ -111,9 +150,11 @@ export default function Settings() {
   }
 
   const saveReceiptSettings = async () => {
+    if (!sessionToken || !canManageSettings) return
+    
     setIsSaving(true)
     try {
-      await window.api.settings.updateMultiple({
+      await window.api.settings.updateMultiple(sessionToken, {
         receipt_footer: receiptFooter,
         receipt_header: receiptHeader
       })
@@ -127,9 +168,11 @@ export default function Settings() {
   }
 
   const saveGeneralSettings = async () => {
+    if (!sessionToken || !canManageSettings) return
+    
     setIsSaving(true)
     try {
-      await window.api.settings.updateMultiple({
+      await window.api.settings.updateMultiple(sessionToken, {
         currency_symbol: currencySymbol,
         date_format: dateFormat,
         default_pickup_days: defaultPickupDays
@@ -138,6 +181,29 @@ export default function Settings() {
     } catch (error) {
       console.error("Error saving general settings:", error)
       showErrorNotification("Failed to save general settings")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const saveSecuritySettings = async () => {
+    if (!sessionToken || !canManageSettings) return
+    
+    setIsSaving(true)
+    try {
+      await window.api.settings.updateMultiple(sessionToken, {
+        session_timeout: sessionTimeout.toString(),
+        password_min_length: passwordMinLength.toString(),
+        require_password_change: requirePasswordChange.toString(),
+        password_change_interval: passwordChangeInterval.toString(),
+        enable_audit_logging: enableAuditLogging.toString(),
+        max_failed_logins: maxFailedLogins.toString(),
+        lockout_duration: lockoutDuration.toString()
+      })
+      showSuccessNotification("Security settings saved successfully!")
+    } catch (error) {
+      console.error("Error saving security settings:", error)
+      showErrorNotification("Failed to save security settings")
     } finally {
       setIsSaving(false)
     }
@@ -168,8 +234,10 @@ export default function Settings() {
   }
 
   const loadDatabaseStats = async () => {
+    if (!sessionToken) return
+    
     try {
-      const result = await window.api.backup.getStats()
+      const result = await window.api.backup.getStats(sessionToken)
       if (result.success && result.stats) {
         setDbStats(result.stats)
       }
@@ -178,10 +246,25 @@ export default function Settings() {
     }
   }
 
+  const loadLicenseInfo = async () => {
+    if (!sessionToken) return
+    
+    try {
+      const result = await window.api.license.getStatus(sessionToken)
+      if (result.success) {
+        setLicenseInfo(result.data)
+      }
+    } catch (error) {
+      console.error("Error loading license info:", error)
+    }
+  }
+
   const handleCreateBackup = async () => {
+    if (!sessionToken) return
+    
     setIsSaving(true)
     try {
-      const result = await window.api.backup.create()
+      const result = await window.api.backup.create(sessionToken)
       if (result.success) {
         showSuccessNotification(`Backup created successfully at: ${result.path}`, "Backup Created")
         loadBackups()
@@ -196,13 +279,15 @@ export default function Settings() {
   }
 
   const handleRestoreBackup = async () => {
+    if (!sessionToken) return
+    
     if (!confirm("Are you sure you want to restore from backup? This will replace all current data!")) {
       return
     }
 
     setIsSaving(true)
     try {
-      const result = await window.api.backup.restore()
+      const result = await window.api.backup.restore(sessionToken)
       if (result.success) {
         showSuccessNotification("Database restored successfully! Please restart the application.", "Restore Complete")
       } else {
@@ -216,12 +301,14 @@ export default function Settings() {
   }
 
   const handleDeleteBackup = async (backupPath: string) => {
+    if (!sessionToken) return
+    
     if (!confirm("Are you sure you want to delete this backup?")) {
       return
     }
 
     try {
-      const result = await window.api.backup.delete(backupPath)
+      const result = await window.api.backup.delete(sessionToken, backupPath)
       if (result.success) {
         showSuccessNotification("Backup deleted successfully!")
         loadBackups()
@@ -234,9 +321,11 @@ export default function Settings() {
   }
 
   const handleExportCSV = async (tableName: string) => {
+    if (!sessionToken) return
+    
     setIsSaving(true)
     try {
-      const result = await window.api.backup.exportCSV(tableName)
+      const result = await window.api.backup.exportCSV(sessionToken, tableName)
       if (result.success) {
         showSuccessNotification(`${tableName} exported successfully!`, "Export Complete")
       } else {
@@ -286,6 +375,11 @@ export default function Settings() {
           <Tabs.Tab value="general" leftSection={<IconSettings size={16} />}>
             General Settings
           </Tabs.Tab>
+          {canManageSettings && (
+            <Tabs.Tab value="security" leftSection={<IconShield size={16} />}>
+              Security Settings
+            </Tabs.Tab>
+          )}
           <Tabs.Tab value="data" leftSection={<IconDatabase size={16} />}>
             Data Management
           </Tabs.Tab>
@@ -468,6 +562,124 @@ export default function Settings() {
             </div>
           </Card>
         </Tabs.Panel>
+
+        {/* Security Settings Tab */}
+        {canManageSettings && (
+          <Tabs.Panel value="security" pt="md">
+            <Card withBorder>
+              <Text size="lg" fw={600} className="mb-4">Security Configuration</Text>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <NumberInput
+                    label="Session Timeout (hours)"
+                    description="How long users stay logged in"
+                    value={sessionTimeout}
+                    onChange={(value) => setSessionTimeout(Number(value) || 24)}
+                    min={1}
+                    max={168}
+                  />
+
+                  <NumberInput
+                    label="Password Minimum Length"
+                    description="Minimum characters required for passwords"
+                    value={passwordMinLength}
+                    onChange={(value) => setPasswordMinLength(Number(value) || 8)}
+                    min={6}
+                    max={50}
+                  />
+
+                  <NumberInput
+                    label="Max Failed Login Attempts"
+                    description="Account lockout after this many failed attempts"
+                    value={maxFailedLogins}
+                    onChange={(value) => setMaxFailedLogins(Number(value) || 5)}
+                    min={3}
+                    max={20}
+                  />
+
+                  <NumberInput
+                    label="Lockout Duration (minutes)"
+                    description="How long accounts stay locked"
+                    value={lockoutDuration}
+                    onChange={(value) => setLockoutDuration(Number(value) || 15)}
+                    min={5}
+                    max={1440}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Switch
+                    label="Require Password Changes"
+                    description="Force users to change passwords periodically"
+                    checked={requirePasswordChange}
+                    onChange={(event) => setRequirePasswordChange(event.currentTarget.checked)}
+                  />
+
+                  {requirePasswordChange && (
+                    <NumberInput
+                      label="Password Change Interval (days)"
+                      description="How often users must change passwords"
+                      value={passwordChangeInterval}
+                      onChange={(value) => setPasswordChangeInterval(Number(value) || 90)}
+                      min={30}
+                      max={365}
+                      className="ml-6"
+                    />
+                  )}
+
+                  <Switch
+                    label="Enable Audit Logging"
+                    description="Log all user actions for security monitoring"
+                    checked={enableAuditLogging}
+                    onChange={(event) => setEnableAuditLogging(event.currentTarget.checked)}
+                  />
+                </div>
+
+                {/* License Information */}
+                {canManageLicense && licenseInfo && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <IconKey size={20} className="text-blue-600" />
+                      <Text size="md" fw={600} className="text-blue-900">License Information</Text>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <Text c="dimmed">License Type:</Text>
+                        <Text fw={500}>{licenseInfo.licenseType}</Text>
+                      </div>
+                      <div>
+                        <Text c="dimmed">Status:</Text>
+                        <Text fw={500} c={licenseInfo.isActive ? "green" : "red"}>
+                          {licenseInfo.isActive ? "Active" : "Inactive"}
+                        </Text>
+                      </div>
+                      <div>
+                        <Text c="dimmed">Issued To:</Text>
+                        <Text fw={500}>{licenseInfo.issuedTo}</Text>
+                      </div>
+                      <div>
+                        <Text c="dimmed">Expires:</Text>
+                        <Text fw={500}>
+                          {licenseInfo.expiresAt ? new Date(licenseInfo.expiresAt).toLocaleDateString() : "Never"}
+                        </Text>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end">
+                  <Button
+                    leftSection={<IconDeviceFloppy size={16} />}
+                    onClick={saveSecuritySettings}
+                    loading={isSaving}
+                  >
+                    Save Security Settings
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </Tabs.Panel>
+        )}
 
         {/* Data Management Tab */}
         <Tabs.Panel value="data" pt="md">
