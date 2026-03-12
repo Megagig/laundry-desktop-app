@@ -28,7 +28,7 @@ Ne+mc+yrb/RfcTm9Vp666wrt1xMc3x+EY82U0zjo6z8atz5oiDrIBpWyrYJfhOsE
       if (process.env.NODE_ENV !== 'production') {
         console.log('🔧 Development mode: Bypassing RSA signature verification')
         // Simple hash verification for development
-        const crypto = require('crypto')
+        const crypto = await import('crypto')
         const expectedHash = crypto.createHash('sha256')
           .update(data + 'development-secret')
           .digest('base64')

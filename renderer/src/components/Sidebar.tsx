@@ -51,7 +51,7 @@ const navigation = [
       { path: "/users", label: "Users", icon: Users, permission: PERMISSIONS.VIEW_USERS },
       { path: "/roles", label: "Roles & Permissions", icon: Settings, permission: PERMISSIONS.MANAGE_ROLES },
       { path: "/audit-logs", label: "Audit Logs", icon: FileText, permission: PERMISSIONS.VIEW_AUDIT_LOGS },
-      { path: "/activation", label: "License", icon: Shield, permission: PERMISSIONS.MANAGE_LICENSE }
+      { path: "/license", label: "License", icon: Shield, permission: PERMISSIONS.MANAGE_LICENSE }
     ]
   },
   { path: "/settings", label: "Settings", icon: Settings, permission: PERMISSIONS.VIEW_SETTINGS }

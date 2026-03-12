@@ -256,6 +256,20 @@ export default function AppRouter() {
                     </ProtectedRoute>
                   }
                 />
+                
+                {/* License Management Route (Admin Only) */}
+                <Route
+                  path="/license"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <RequirePermission permission="manage_license">
+                          <Activation />
+                        </RequirePermission>
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </AuthProvider>
           } />
